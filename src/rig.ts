@@ -1,0 +1,281 @@
+// Cho model "cứng" đi được:
+//  - Ngựa (không xương): tự gắn 5 xương (thân + 4 chân) theo hình học rồi vung chân.
+//  - Người (xương mất tên): dò đùi / gối / tay theo vị trí xương rồi vung.
+import * as THREE from 'three';
+
+export interface WalkerPose { bob: number; pitch: number; roll: number }
+export interface Walker {
+  /** t: giây, k: 0..1 mức độ đang đi, yaw: hướng nhân vật (world). Trả về nhún thân nếu walker tự lo. */
+  update(t: number, k: number, yaw: number): WalkerPose | void;
+}
+
+const Y = new THREE.Vector3(0, 1, 0);
+
+// ---------------- Ngựa: auto-rig thân + 4 chân 2 khúc + đầu + đuôi ----------------
+
+interface Frame { up: THREE.Vector3; fwd: THREE.Vector3; lat: THREE.Vector3 } // trục local đã nhân dấu
+interface Fields { h: Float32Array; f: Float32Array; l: Float32Array; hMin: number; hMax: number; fMin: number; fMax: number }
+
+function frameOf(mesh: THREE.Mesh): Frame {
+  const rot = new THREE.Matrix3().setFromMatrix4(mesh.matrixWorld);
+  const axes = [new THREE.Vector3(1, 0, 0), new THREE.Vector3(0, 1, 0), new THREE.Vector3(0, 0, 1)];
+  const pick = (target: THREE.Vector3): THREE.Vector3 => {
+    let best = axes[0], bd = -1, sign = 1;
+    for (const a of axes) {
+      const d = a.clone().applyMatrix3(rot).normalize().dot(target);
+      if (Math.abs(d) > bd) { bd = Math.abs(d); best = a; sign = d >= 0 ? 1 : -1; }
+    }
+    return best.clone().multiplyScalar(sign);
+  };
+  return { up: pick(new THREE.Vector3(0, 1, 0)), fwd: pick(new THREE.Vector3(0, 0, 1)), lat: pick(new THREE.Vector3(1, 0, 0)) };
+}
+
+function fieldsOf(geo: THREE.BufferGeometry, fr: Frame): Fields {
+  const pos = geo.attributes.position as THREE.BufferAttribute;
+  const n = pos.count;
+  const h = new Float32Array(n), f = new Float32Array(n), l = new Float32Array(n);
+  const v = new THREE.Vector3();
+  let hMin = Infinity, hMax = -Infinity, fMin = Infinity, fMax = -Infinity;
+  for (let i = 0; i < n; i++) {
+    v.fromBufferAttribute(pos, i);
+    h[i] = v.dot(fr.up); f[i] = v.dot(fr.fwd); l[i] = v.dot(fr.lat);
+    if (h[i] < hMin) hMin = h[i]; if (h[i] > hMax) hMax = h[i];
+    if (f[i] < fMin) fMin = f[i]; if (f[i] > fMax) fMax = f[i];
+  }
+  return { h, f, l, hMin, hMax, fMin, fMax };
+}
+
+const clamp01 = (x: number) => Math.min(1, Math.max(0, x));
+
+/** Thay Mesh bằng SkinnedMesh cùng geometry/material, bind vào skeleton chung. */
+function toSkinned(mesh: THREE.Mesh, idx: Uint16Array, w: Float32Array, skeleton: THREE.Skeleton): THREE.SkinnedMesh {
+  const geo = mesh.geometry as THREE.BufferGeometry;
+  geo.setAttribute('skinIndex', new THREE.BufferAttribute(idx, 4));
+  geo.setAttribute('skinWeight', new THREE.BufferAttribute(w, 4));
+  const sk = new THREE.SkinnedMesh(geo, mesh.material);
+  sk.position.copy(mesh.position); sk.quaternion.copy(mesh.quaternion); sk.scale.copy(mesh.scale);
+  sk.castShadow = mesh.castShadow; sk.receiveShadow = mesh.receiveShadow;
+  sk.frustumCulled = false;
+  const parent = mesh.parent!;
+  parent.remove(mesh);
+  parent.add(sk);
+  sk.updateMatrixWorld(true);
+  sk.bind(skeleton, sk.matrixWorld);
+  return sk;
+}
+
+export function autoRigQuadruped(model: THREE.Object3D): Walker | null {
+  model.updateMatrixWorld(true);
+  const whole = new THREE.Box3().setFromObject(model, true);
+  const meshes: THREE.Mesh[] = [];
+  model.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && m.geometry?.attributes.position) meshes.push(m); });
+  const H = whole.max.y - whole.min.y;
+  const body = meshes
+    .filter((m) => new THREE.Box3().setFromObject(m, true).min.y < whole.min.y + H * 0.05)
+    .sort((a, b) => b.geometry.attributes.position.count - a.geometry.attributes.position.count)[0];
+  if (!body) return null;
+  const fr = frameOf(body);
+  const B = fieldsOf(body.geometry as THREE.BufferGeometry, fr);
+  const height = B.hMax - B.hMin, L = B.fMax - B.fMin;
+
+  // móng: 12% thấp nhất → 4 cụm theo góc phần tư quanh tâm móng
+  const hoof: number[] = [];
+  for (let i = 0; i < B.h.length; i++) if (B.h[i] < B.hMin + height * 0.12) hoof.push(i);
+  if (hoof.length < 20) return null;
+  let fc = 0, lc = 0;
+  for (const i of hoof) { fc += B.f[i]; lc += B.l[i]; }
+  fc /= hoof.length; lc /= hoof.length;
+  const centers: { f: number; l: number; r: number }[] = [];
+  for (const sf of [1, -1]) for (const sl of [1, -1]) {
+    const pts = hoof.filter((i) => (B.f[i] - fc) * sf > 0 && (B.l[i] - lc) * sl > 0);
+    if (pts.length < 4) return null;
+    let cf = 0, cl = 0;
+    for (const i of pts) { cf += B.f[i]; cl += B.l[i]; }
+    cf /= pts.length; cl /= pts.length;
+    let r = 0;
+    for (const i of pts) r = Math.max(r, Math.hypot(B.f[i] - cf, B.l[i] - cl));
+    centers.push({ f: cf, l: cl, r });
+  }
+  // centers: [FL, FR, BL, BR] (f dương = trước, l dương = trái)
+
+  const hipH = B.hMin + height * 0.42, kneeH = B.hMin + height * 0.2, blend = height * 0.06;
+  const headF0 = fc + L * 0.2, headH0 = B.hMin + height * 0.55;
+  const toLocal = (hh: number, ff: number, ll: number) => new THREE.Vector3()
+    .addScaledVector(fr.up, hh).addScaledVector(fr.fwd, ff).addScaledVector(fr.lat, ll);
+
+  // xương: 0 thân, 1..8 = (hông, gối) × 4 chân, 9 đầu, 10 đuôi
+  const root = new THREE.Bone();
+  const bones: THREE.Bone[] = [root];
+  const hips: THREE.Bone[] = [], knees: THREE.Bone[] = [];
+  for (const c of centers) {
+    const hip = new THREE.Bone(); hip.position.copy(toLocal(hipH, c.f, c.l)); root.add(hip);
+    const knee = new THREE.Bone(); knee.position.copy(toLocal(kneeH, c.f, c.l).sub(hip.position)); hip.add(knee);
+    hips.push(hip); knees.push(knee); bones.push(hip, knee);
+  }
+  const head = new THREE.Bone(); head.position.copy(toLocal(B.hMin + height * 0.66, fc + L * 0.16, lc)); root.add(head); bones.push(head);
+  const tail = new THREE.Bone(); tail.position.copy(toLocal(B.hMin + height * 0.62, fc - L * 0.24, lc)); root.add(tail); bones.push(tail);
+  const HEAD = 9, TAIL = 10;
+
+  // trọng số thân
+  const weightsBody = (F: Fields): [Uint16Array, Float32Array] => {
+    const n = F.h.length;
+    const idx = new Uint16Array(n * 4), w = new Float32Array(n * 4);
+    for (let i = 0; i < n; i++) {
+      let leg = -1, bd = Infinity;
+      centers.forEach((c, k) => { const d = Math.hypot(F.f[i] - c.f, F.l[i] - c.l); if (d < bd) { bd = d; leg = k; } });
+      const c = centers[leg];
+      let wLeg = 0;
+      if (F.h[i] < hipH + blend && bd < c.r * 1.7) wLeg = clamp01((hipH + blend - F.h[i]) / (2 * blend));
+      const wKnee = clamp01((kneeH + blend - F.h[i]) / (2 * blend));
+      const wHead = wLeg > 0 ? 0 : clamp01((F.f[i] - headF0) / (L * 0.08)) * clamp01((F.h[i] - headH0) / (height * 0.08));
+      const o = i * 4;
+      idx[o] = 1 + leg * 2; w[o] = wLeg * (1 - wKnee);
+      idx[o + 1] = 2 + leg * 2; w[o + 1] = wLeg * wKnee;
+      idx[o + 2] = HEAD; w[o + 2] = wHead;
+      idx[o + 3] = 0; w[o + 3] = 1 - wLeg - wHead;
+    }
+    return [idx, w];
+  };
+  // trọng số bờm/đuôi (mesh tóc): sau mông → đuôi, trên đầu → đầu
+  const weightsHair = (F: Fields): [Uint16Array, Float32Array] => {
+    const n = F.h.length;
+    const idx = new Uint16Array(n * 4), w = new Float32Array(n * 4);
+    const tailF0 = fc - L * 0.14;
+    let tailTop = -Infinity;
+    for (let i = 0; i < n; i++) if (F.f[i] < tailF0 && F.h[i] > tailTop) tailTop = F.h[i];
+    for (let i = 0; i < n; i++) {
+      let wTail = 0, wHead = 0;
+      if (F.f[i] < tailF0) wTail = clamp01((tailTop - F.h[i]) / (height * 0.22));
+      else wHead = clamp01((F.f[i] - headF0) / (L * 0.08));
+      const o = i * 4;
+      idx[o] = TAIL; w[o] = wTail;
+      idx[o + 1] = HEAD; w[o + 1] = wHead;
+      idx[o + 2] = 0; w[o + 2] = 1 - wTail - wHead;
+      idx[o + 3] = 0; w[o + 3] = 0;
+    }
+    return [idx, w];
+  };
+
+  const parent = body.parent!;
+  parent.add(root);
+  parent.updateMatrixWorld(true);
+  const skeleton = new THREE.Skeleton(bones);
+  const [bi, bw] = weightsBody(B);
+  toSkinned(body, bi, bw, skeleton);
+  // các mesh anh em cùng transform (bờm/đuôi, mắt): mắt/đầu theo xương đầu, tóc theo đuôi/đầu
+  for (const m of meshes) {
+    if (m === body || m.parent !== parent || !m.matrix.equals(body.matrix)) continue;
+    const F = fieldsOf(m.geometry as THREE.BufferGeometry, fr);
+    const isHair = F.fMin < fc - L * 0.14; // có phần kéo ra sau mông → tóc
+    const [i2, w2] = isHair ? weightsHair(F) : weightsBody(F);
+    toSkinned(m, i2, w2, skeleton);
+  }
+
+  const lat = fr.lat, up = fr.up;
+  const qTmp = new THREE.Quaternion();
+  return {
+    update(t, k) {
+      // phi nước đại kiểu hoạt hình: 2 chân trước cùng pha, 2 chân sau lệch pha, thân nhún theo
+      const w = t * 13;
+      const phase = [0, 0.35, 2.6, 2.95]; // FL, FR, BL, BR
+      for (let i = 0; i < 4; i++) {
+        const s = Math.sin(w + phase[i]);
+        const hipA = -0.5 * s * k;                                   // âm = vung ra trước
+        const kneeA = (i < 2 ? 0.9 : 0.6) * Math.max(0, Math.sin(w + phase[i] + 1.0)) * k; // gập khi nhấc chân
+        hips[i].quaternion.setFromAxisAngle(lat, hipA);
+        knees[i].quaternion.setFromAxisAngle(lat, kneeA);
+      }
+      // đầu gật theo nhịp + ngó nghiêng khi đứng
+      const nod = -0.1 * Math.sin(w + 1.0) * k + 0.04 * Math.sin(t * 1.3) * (1 - k);
+      const look = 0.08 * Math.sin(t * 0.7) * (1 - k);
+      head.quaternion.setFromAxisAngle(lat, nod).multiply(qTmp.setFromAxisAngle(up, look));
+      // đuôi: dựng lên khi chạy, phất theo nhịp, ve vẩy khi đứng
+      const tailPitch = -0.35 * k + 0.3 * Math.sin(w - 1.2) * k + 0.05 * Math.sin(t * 1.7);
+      const tailSway = 0.14 * Math.sin(t * 2.1) * (1 - k) + 0.08 * Math.sin(w * 0.5) * k;
+      tail.quaternion.setFromAxisAngle(lat, tailPitch).multiply(qTmp.setFromAxisAngle(up, tailSway));
+      return {
+        bob: 0.16 * (0.5 + 0.5 * Math.sin(w + 1.0)) * k,
+        pitch: 0.07 * Math.sin(w + 0.3) * k,
+        roll: 0.02 * Math.sin(w * 0.5) * k,
+      };
+    },
+  };
+}
+
+// ---------------- Người: dò xương theo vị trí ----------------
+
+function worldAxisRotate(bone: THREE.Object3D, rest: THREE.Quaternion, axis: THREE.Vector3, angle: number, tmp: THREE.Quaternion): void {
+  const pq = bone.parent!.getWorldQuaternion(tmp);
+  const qa = new THREE.Quaternion().setFromAxisAngle(axis, angle);
+  const inv = pq.clone().invert();
+  bone.quaternion.copy(inv).multiply(qa).multiply(pq).multiply(rest);
+}
+
+export function makeHumanWalker(model: THREE.Object3D, height: number): Walker | null {
+  model.updateMatrixWorld(true);
+  // hộp bao CHỈ mesh đang hiện (đầu thừa đã ẩn không được làm lệch tâm)
+  const whole = new THREE.Box3();
+  model.traverse((o) => { const m = o as THREE.Mesh; if (m.isMesh && m.visible) whole.union(new THREE.Box3().setFromObject(m, true)); });
+  const center = whole.getCenter(new THREE.Vector3());
+  const width = whole.max.x - whole.min.x;
+  const bones: THREE.Bone[] = [];
+  model.traverse((o) => { if ((o as THREE.Bone).isBone) bones.push(o as THREE.Bone); });
+  if (!bones.length) return null;
+  const pos = new Map<THREE.Bone, THREE.Vector3>();
+  for (const b of bones) pos.set(b, b.getWorldPosition(new THREE.Vector3()));
+  // tâm ngang = trung bình x của xương (bộ xương đối xứng), chắc hơn hộp bao
+  center.x = bones.reduce((s, b) => s + pos.get(b)!.x, 0) / bones.length;
+  const rel = (b: THREE.Bone) => (pos.get(b)!.y - whole.min.y) / height;
+  const dx = (b: THREE.Bone, side: number) => (pos.get(b)!.x - center.x) * side;
+  const descend = (b: THREE.Bone, fn: (c: THREE.Bone) => void) => b.traverse((c) => { if ((c as THREE.Bone).isBone && c !== b) fn(c as THREE.Bone); });
+  const reachOut = (b: THREE.Bone) => { let r = Math.abs(pos.get(b)!.x - center.x); descend(b, (c) => { r = Math.max(r, Math.abs(pos.get(c)!.x - center.x)); }); return r; };
+  const reachDown = (b: THREE.Bone) => { let r = rel(b); descend(b, (c) => { r = Math.min(r, rel(c)); }); return r; };
+
+  const found: { bone: THREE.Bone; rest: THREE.Quaternion; amp: number; phase: number }[] = [];
+  const tmp = new THREE.Quaternion();
+  const isAncestor = (a: THREE.Object3D, b: THREE.Object3D) => { let p = b.parent; while (p) { if (p === a) return true; p = p.parent; } return false; };
+  // MMD hay có "xương D" trùng vị trí khớp điều khiển da, xương chính chỉ để animation → xoay cả cụm trùng vị trí
+  const cluster = (b: THREE.Bone): THREE.Bone[] => [b, ...bones.filter((c) => c !== b
+    && pos.get(c)!.distanceTo(pos.get(b)!) < width * 0.012 && !isAncestor(c, b) && !isAncestor(b, c))];
+  const add = (b: THREE.Bone, amp: number, phase: number) => {
+    for (const x of cluster(b)) found.push({ bone: x, rest: x.quaternion.clone(), amp, phase });
+  };
+
+  for (const side of [1, -1] as const) {
+    // tay: tầm vai, hơi lệch, vươn ra xa → hạ xuống rồi vung ngược chân
+    const arm = bones
+      .filter((b) => rel(b) > 0.68 && rel(b) < 0.86 && dx(b, side) > width * 0.06 && dx(b, side) < width * 0.2 && reachOut(b) > width * 0.34)
+      .sort((a, b) => dx(a, side) - dx(b, side))[0];
+    if (arm) {
+      // hạ tay từ T-pose: quay quanh trục world Z (trước-sau) có tính cha đã xoay
+      for (const x of cluster(arm)) worldAxisRotate(x, x.quaternion.clone(), new THREE.Vector3(0, 0, 1), -side * 1.15, tmp);
+      model.updateMatrixWorld(true);
+      add(arm, 0.22, side > 0 ? Math.PI : 0);
+    }
+    // đùi: tầm hông, lệch ngang ít, có con xuống tới bàn chân → chọn xương cao nhất
+    const thigh = bones
+      .filter((b) => rel(b) > 0.40 && rel(b) < 0.58 && dx(b, side) > width * 0.02 && dx(b, side) < width * 0.16 && reachDown(b) < 0.12)
+      .sort((a, b) => rel(b) - rel(a))[0];
+    if (thigh) {
+      add(thigh, 0.3, side > 0 ? 0 : Math.PI);
+      let knee: THREE.Bone | null = null, kd = 1;
+      descend(thigh, (c) => { const d = Math.abs(rel(c) - 0.27); if (rel(c) > 0.18 && rel(c) < 0.36 && d < kd) { kd = d; knee = c; } });
+      if (knee) add(knee, -0.4, side > 0 ? 0 : Math.PI);
+    }
+    if (import.meta.env.DEV) console.debug('[rig] side', side, 'arm', arm ? cluster(arm).length : 0, 'thigh', thigh ? cluster(thigh).length : 0);
+  }
+  if (!found.some((f) => f.amp === 0.3)) return null; // không thấy đùi → thôi
+
+  return {
+    update(t, k, yaw) {
+      const lateral = new THREE.Vector3(Math.cos(yaw), 0, -Math.sin(yaw)); // trục ngang (phải) theo hướng nhìn
+      const w = t * 9;
+      for (const f of found) {
+        let a: number;
+        if (f.amp < 0) a = Math.max(0, Math.sin(w + f.phase)) * -f.amp * k; // gối chỉ gập một chiều
+        else a = Math.sin(w + f.phase) * f.amp * k;
+        worldAxisRotate(f.bone, f.rest, lateral, a, tmp);
+      }
+    },
+  };
+}

@@ -1,0 +1,97 @@
+# key|text  (giọng Linh macOS; thay file cùng tên bằng giọng ba mẹ nếu muốn)
+# --- dẫn chuyện
+intro_mun|Hà An ơi! Mây Đen bắt mèo Mun rồi. Mình đi cứu Mun nào!
+intro_rom|Mèo Rơm cũng bị bắt rồi! Đi cứu Rơm thôi!
+hint_move|Chạm mũi tên để đi, chạm nút tròn để nhảy nhé.
+monster|Ui, quái vật chặn đường! Trả lời đúng để làm phép nào!
+ask_count|Quái vật giữ mấy viên ngọc? Chạm từng viên để đếm nhé.
+ask_pick_number|Có mấy viên ngọc? Chạm vào số đúng nhé.
+right|Đúng rồi!
+magic|Làm phép nào!
+good|Giỏi lắm!
+yay|Tuyệt vời!
+retry|Thử lại nhé!
+almost|Gần đúng rồi, thử lại nào!
+hint_last|Chạm vào cái đang nhấp nháy nhé.
+star|Được một mảnh sao rồi!
+stars3|Đủ ba mảnh sao rồi! Đi tìm bong bóng thôi!
+bubble|Bong bóng kia rồi! Chạm nút phép để cứu nhé.
+bigspell|Đại phép thuật!
+rescued_mun|Mun được cứu rồi! Cảm ơn Hà An!
+rescued_rom|Rơm được cứu rồi! Cảm ơn Hà An!
+meow|Meo meo!
+level_done|Giỏi quá! Sang màn tiếp nào!
+fall|Ối! Bay lên nào!
+gem|Ngọc!
+# --- câu hỏi + tên
+ask_meo|Con nào là con mèo?
+ask_ga|Con nào là con gà?
+ask_bo|Con nào là con bò?
+ask_cho|Con nào là con chó?
+ask_heo|Con nào là con heo?
+ask_ca|Con nào là con cá?
+ask_vit|Con nào là con vịt?
+ask_tho|Con nào là con thỏ?
+ask_voi|Con nào là con voi?
+ask_khi|Con nào là con khỉ?
+name_meo|con mèo
+name_ga|con gà
+name_bo|con bò
+name_cho|con chó
+name_heo|con heo
+name_ca|con cá
+name_vit|con vịt
+name_tho|con thỏ
+name_voi|con voi
+name_khi|con khỉ
+# --- token đánh vần
+v_e|e
+v_o|o
+v_a|a
+v_i|i
+v_eo|eo
+v_oi|oi
+v_it|it
+c_mo|mờ
+c_go|gờ
+c_bo|bờ
+c_cho|chờ
+c_ho|hờ
+c_co|cờ
+c_vo|vờ
+c_tho|thờ
+c_kho|khờ
+c_to|tờ
+s_meo|meo
+s_ga|ga
+s_bo|bo
+s_cho|cho
+s_heo|heo
+s_ca|ca
+s_vit|vit
+s_tho|tho
+s_voi|voi
+s_khi|khi
+t_huyen|huyền
+t_sac|sắc
+t_hoi|hỏi
+t_nang|nặng
+w_meo|mèo
+w_ga|gà
+w_bo|bò
+w_cho|chó
+w_ca|cá
+w_vit|vịt
+w_tho|thỏ
+w_khi|khỉ
+# --- số
+n1|một
+n2|hai
+n3|ba
+n4|bốn
+n5|năm
+n6|sáu
+n7|bảy
+n8|tám
+n9|chín
+n10|mười

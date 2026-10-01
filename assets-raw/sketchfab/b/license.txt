@@ -1,0 +1,11 @@
+Model Information:
+* title:	Twilight Sparkle 1
+* source:	https://sketchfab.com/3d-models/twilight-sparkle-1-37245ed3a876472e840763b6e034179b
+* author:	TuYunY (https://sketchfab.com/TuYunY)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Twilight Sparkle 1" (https://sketchfab.com/3d-models/twilight-sparkle-1-37245ed3a876472e840763b6e034179b) by TuYunY (https://sketchfab.com/TuYunY) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)

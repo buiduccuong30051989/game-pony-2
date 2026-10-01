@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="theme-color" content="#fff4e4" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🦄%3C/text%3E%3C/svg%3E" />
+  <title>Hà An và phép thuật Twilight</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #fff4e4; --ink: #3b3220; --accent: #ff9600; --success: #58cc02; --error: #da5e4e;
+      --blue: #1cb0f6; --magic: #a06cd5; --pink: #ff7ac8; --card: #fffaf0; --shadow: 0 6px 0 rgba(59, 50, 32, .18);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    [hidden] { display: none !important; }
+    html, body { margin: 0; height: 100%; overflow: hidden; background: var(--bg); }
+    body {
+      font-family: 'Baloo 2', 'Nunito', system-ui, sans-serif; color: var(--ink);
+      user-select: none; -webkit-user-select: none; touch-action: none; overscroll-behavior: none;
+    }
+    #app, #app canvas { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+
+    .big {
+      appearance: none; border: 5px solid var(--ink); border-radius: 999px; background: #fff;
+      width: 92px; height: 92px; font: inherit; font-size: 46px; line-height: 1; cursor: pointer;
+      box-shadow: var(--shadow); display: grid; place-items: center; color: var(--ink); touch-action: none;
+      transition: transform .1s ease, box-shadow .1s ease, background .1s ease;
+    }
+    .big:active, .big.down { transform: translateY(4px); box-shadow: 0 2px 0 rgba(59, 50, 32, .18); background: #ffe9c2; }
+
+    /* điều khiển */
+    /* D-pad chữ thập góc trái dưới, nhảy góc phải dưới */
+    #ctrl-left, #ctrl-right, #ctrl-up, #ctrl-down, #ctrl-jump { position: fixed; z-index: 5; }
+    #ctrl-left  { left: max(14px, env(safe-area-inset-left)); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 96px); }
+    #ctrl-right { left: calc(max(14px, env(safe-area-inset-left)) + 192px); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 96px); }
+    #ctrl-up    { left: calc(max(14px, env(safe-area-inset-left)) + 96px); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 192px); }
+    #ctrl-down  { left: calc(max(14px, env(safe-area-inset-left)) + 96px); bottom: max(14px, env(safe-area-inset-bottom)); }
+    #ctrl-jump { right: max(18px, env(safe-area-inset-right)); bottom: max(18px, env(safe-area-inset-bottom)); width: 132px; height: 132px; font-size: 64px; background: var(--magic); border-color: #6f3fa8; color: #fff; }
+
+    /* HUD */
+    #hud { position: fixed; top: 16px; left: 18px; right: 18px; display: flex; justify-content: space-between; align-items: center; z-index: 5; pointer-events: none; }
+    .pill { background: var(--card); border: 4px solid var(--ink); border-radius: 999px; padding: 4px 18px; font-size: 30px; font-weight: 800; box-shadow: var(--shadow); display: flex; gap: 10px; align-items: center; }
+    #stars span { opacity: .25; transition: transform .3s, opacity .3s; display: inline-block; }
+    #stars span.on { opacity: 1; animation: pop .5s ease; }
+    @keyframes pop { 0% { transform: scale(.4); } 60% { transform: scale(1.35) rotate(12deg); } 100% { transform: scale(1); } }
+
+    /* bảng thử thách */
+    #panel {
+      position: fixed; top: 84px; left: 50%; transform: translateX(-50%); z-index: 8; width: min(760px, 94vw);
+      background: rgba(255, 250, 240, .96); border: 5px solid var(--ink); border-radius: 30px; padding: 16px 20px 20px;
+      box-shadow: var(--shadow); display: flex; flex-direction: column; align-items: center; gap: 14px;
+    }
+    #panel-top { display: flex; align-items: center; gap: 14px; min-height: 60px; }
+    #repeat { width: 64px; height: 64px; font-size: 30px; }
+    #word { font-size: clamp(48px, 7vw, 84px); font-weight: 800; letter-spacing: .04em; display: flex; gap: .02em; }
+    #word span { transition: color .15s, transform .15s; display: inline-block; }
+    #word span.lit { color: var(--accent); transform: translateY(-6px) scale(1.08); }
+    #word.whole span { color: var(--success); animation: bounce .5s ease; }
+    @keyframes bounce { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-3deg); } 100% { transform: scale(1); } }
+    #counter { width: 76px; height: 76px; border-radius: 50%; background: var(--accent); border: 5px solid var(--ink); color: #fff; font-size: 44px; font-weight: 800; display: grid; place-items: center; }
+    #counter.bump { animation: bump .35s ease; }
+    @keyframes bump { 0% { transform: scale(1); } 40% { transform: scale(1.25); } 100% { transform: scale(1); } }
+    #gemrow { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; max-width: 640px; }
+    .gem { appearance: none; border: 0; background: none; font-size: 56px; line-height: 1; cursor: pointer; padding: 4px; transition: transform .2s, opacity .2s; filter: drop-shadow(0 4px 0 rgba(59,50,32,.2)); }
+    .gem.done { transform: scale(.75); opacity: .35; }
+    #options { display: flex; gap: 18px; }
+    .opt {
+      appearance: none; border: 6px solid var(--ink); border-radius: 26px; background: #fff; color: var(--ink);
+      width: 132px; height: 132px; font: inherit; font-size: 76px; font-weight: 800; box-shadow: var(--shadow); cursor: pointer;
+      display: grid; place-items: center; transition: transform .15s, opacity .25s;
+    }
+    .opt:active { transform: translateY(4px); }
+    .opt.correct { background: var(--success); color: #fff; border-color: #3f9500; }
+    .opt.gone { opacity: 0; transform: scale(.4); pointer-events: none; }
+    .opt.hint { animation: hint .7s ease-in-out infinite; border-color: var(--accent); }
+    @keyframes hint { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); box-shadow: 0 0 0 10px rgba(255,150,0,.35); } }
+    .wobble { animation: wobble .45s ease; }
+    @keyframes wobble { 0%,100% { transform: rotate(0); } 25% { transform: rotate(-6deg); } 50% { transform: rotate(6deg); } 75% { transform: rotate(-4deg); } }
+    #cast { width: 150px; height: 150px; font-size: 76px; background: var(--magic); border-color: #6f3fa8; color: #fff; animation: pulse 1.2s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+
+    #toast {
+      position: fixed; top: 38%; left: 50%; transform: translate(-50%, -50%); z-index: 9; pointer-events: none;
+      font-size: clamp(48px, 8vw, 96px); font-weight: 800; color: #fff; -webkit-text-stroke: 3px var(--ink);
+      text-shadow: 0 6px 0 rgba(59,50,32,.25); opacity: 0; transition: opacity .25s, transform .25s;
+    }
+    #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+
+    /* bản đồ + start */
+    .overlay { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(255, 244, 228, .94); transition: opacity .45s ease; }
+    .overlay.hide { opacity: 0; pointer-events: none; }
+    #start-btn { width: 180px; height: 180px; font-size: 96px; background: var(--magic); border-color: #6f3fa8; opacity: .5; }
+    #start-btn.ready { opacity: 1; animation: pulse 1.4s ease-in-out infinite; }
+    .overlay p { position: absolute; bottom: 12%; font-size: 24px; opacity: .65; }
+    #map h1 { position: absolute; top: 8%; font-size: 40px; margin: 0; }
+    #map-nodes { display: flex; flex-wrap: wrap; gap: 22px; justify-content: center; max-width: 720px; }
+    .node { width: 120px; height: 120px; border-radius: 30px; font-size: 60px; position: relative; }
+    .node.locked { opacity: .35; filter: grayscale(1); }
+    .node.done::after { content: '⭐'; position: absolute; right: -10px; top: -14px; font-size: 40px; }
+    .node small { position: absolute; bottom: -34px; left: 0; right: 0; font-size: 22px; font-weight: 800; }
+
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 20; overflow: hidden; }
+    #confetti i { position: absolute; top: -20px; width: 14px; height: 22px; border-radius: 4px; animation: fall linear forwards; }
+    @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: .6; } }
+
+    @media (max-width: 720px) {
+      .big { width: 76px; height: 76px; font-size: 38px; }
+      #ctrl-left  { bottom: calc(max(14px, env(safe-area-inset-bottom)) + 80px); }
+      #ctrl-right { left: calc(max(14px, env(safe-area-inset-left)) + 160px); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 80px); }
+      #ctrl-up    { left: calc(max(14px, env(safe-area-inset-left)) + 80px); bottom: calc(max(14px, env(safe-area-inset-bottom)) + 160px); }
+      #ctrl-down  { left: calc(max(14px, env(safe-area-inset-left)) + 80px); }
+      #ctrl-jump { width: 104px; height: 104px; }
+      .opt { width: 104px; height: 104px; font-size: 60px; }
+      .pill { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+
+  <div id="hud" hidden>
+    <div class="pill" id="stars"><span>⭐</span><span>⭐</span><span>⭐</span></div>
+    <div class="pill"><span>💎</span><span id="gems">0</span></div>
+  </div>
+
+  <button id="ctrl-up" class="big" aria-label="Đi lên" hidden>▲</button>
+  <button id="ctrl-left" class="big" aria-label="Đi trái" hidden>◀</button>
+  <button id="ctrl-right" class="big" aria-label="Đi phải" hidden>▶</button>
+  <button id="ctrl-down" class="big" aria-label="Đi xuống" hidden>▼</button>
+  <button id="ctrl-jump" class="big" aria-label="Nhảy" hidden>⬆</button>
+
+  <div id="panel" hidden>
+    <div id="panel-top">
+      <button id="repeat" class="big" aria-label="Nghe lại">🔊</button>
+      <div id="word" hidden></div>
+      <div id="counter" hidden></div>
+    </div>
+    <div id="gemrow" hidden></div>
+    <div id="options"></div>
+    <button id="cast" class="big" aria-label="Làm phép" hidden>✨</button>
+  </div>
+
+  <div id="toast"></div>
+  <div id="confetti"></div>
+
+  <div id="map" class="overlay" hidden>
+    <h1>Đi cứu cả nhà</h1>
+    <div id="map-nodes"></div>
+  </div>
+
+  <div id="start" class="overlay">
+    <button id="start-btn" class="big" aria-label="Bắt đầu">🦄</button>
+    <p>Chạm để bắt đầu</p>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>
