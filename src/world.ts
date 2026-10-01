@@ -474,23 +474,8 @@ export class World {
 
     // bong bóng pha lê mặt trăng nhốt người thân
     const R = 1.5 * bubbleScale;
-    const bubble = new THREE.Group();
-    const bubbleMesh = new THREE.Mesh(
-      new THREE.SphereGeometry(R, 32, 24),
-      new THREE.MeshPhysicalMaterial({ color: 0xe4dcff, transparent: true, opacity: 0.34, roughness: 0.1, metalness: 0, clearcoat: 1, depthWrite: false }),
-    );
-    bubbleMesh.renderOrder = 2;
-    bubble.add(bubbleMesh);
-    const holder = new THREE.Group();
-    holder.position.y = -R * 0.8;
-    bubble.add(holder);
+    const { group: bubble, mesh: bubbleMesh, holder } = this.makeBubble(R);
     let rescueSprite: THREE.Sprite | null = null;
-    const moonBadge = this.emojiSprite('🌙', 0.8 * Math.sqrt(bubbleScale));
-    moonBadge.position.set(R * 0.62, R * 0.62, R * 0.4);
-    bubble.add(moonBadge);
-    const shine = this.emojiSprite('✨', 0.7);
-    shine.position.set(-R * 0.5, R * 0.55, R * 0.5);
-    bubble.add(shine);
     bubble.position.set(def.bubble[0], R + 0.4, def.bubble[1]);
     bubble.userData.baseY = R + 0.4;
     if (rescueEmoji) {
@@ -504,6 +489,60 @@ export class World {
     this.camTarget.set(def.start[0], 0, def.start[1]);
     this.setNight(th.night);
     return this.level;
+  }
+
+  private bubbleMat: THREE.MeshPhysicalMaterial | null = null;
+  /**
+   * Bong bóng pha lê mặt trăng bán kính R: vỏ trong suốt + 🌙 + ✨, `holder` ở đáy để gắn người/pony bị nhốt.
+   * Dùng cho bong bóng người nhà cuối màn và bong bóng nhỏ cạnh mỗi quái (giữ bạn pony).
+   */
+  makeBubble(R: number): { group: THREE.Group; mesh: THREE.Mesh; holder: THREE.Group } {
+    if (!this.bubbleMat) {
+      this.bubbleMat = new THREE.MeshPhysicalMaterial({ color: 0xe4dcff, transparent: true, opacity: 0.34, roughness: 0.1, metalness: 0, clearcoat: 1, depthWrite: false });
+    }
+    const group = new THREE.Group();
+    const mesh = new THREE.Mesh(new THREE.SphereGeometry(R, 32, 24), this.bubbleMat);
+    mesh.renderOrder = 2;
+    group.add(mesh);
+    const holder = new THREE.Group();
+    holder.position.y = -R * 0.8;
+    group.add(holder);
+    const k = Math.sqrt(R / 1.5);
+    const moonBadge = this.emojiSprite('🌙', 0.8 * k);
+    moonBadge.position.set(R * 0.62, R * 0.62, R * 0.4);
+    group.add(moonBadge);
+    const shine = this.emojiSprite('✨', 0.7 * k);
+    shine.position.set(-R * 0.5, R * 0.55, R * 0.5);
+    group.add(shine);
+    return { group, mesh, holder };
+  }
+
+  /**
+   * Giải phóng 1 model đã tải (hình học, vật liệu đã đổi màu, texture) khỏi bộ nhớ GPU + cache.
+   * Gọi khi rời màn cho model bạn pony màn sau không dùng (iPad ít RAM). Lần sau cần thì tải lại.
+   */
+  async release(name: string): Promise<void> {
+    const p = this.cache.get(name);
+    if (!p) return;
+    this.cache.delete(name);
+    let gltf: GLTF;
+    try { gltf = await p; } catch { return; }
+    const textures = new Set<THREE.Texture>();
+    const disposeMat = (m: THREE.Material) => {
+      for (const v of Object.values(m)) if (v && (v as THREE.Texture).isTexture) textures.add(v as THREE.Texture);
+      m.dispose();
+    };
+    gltf.scene.traverse((o) => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      mesh.geometry.dispose();
+      for (const m of Array.isArray(mesh.material) ? mesh.material : [mesh.material]) {
+        const r = this.recolored.get(m);
+        if (r) { disposeMat(r); this.recolored.delete(m); }
+        disposeMat(m);
+      }
+    });
+    for (const t of textures) t.dispose();
   }
 
   /** Lâu đài mặt trăng (màn cuối): khối tím mềm, mái nhọn, cửa sổ vàng ấm — đẹp, không đáng sợ. */

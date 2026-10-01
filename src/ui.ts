@@ -1,5 +1,6 @@
 // Lớp UI DOM: HUD, bảng thử thách, toast, bản đồ 7 nút (mặt pony + tên), chớp sáng, màn kết, pháo giấy.
-import { avatarEl, type Speaker } from './family';
+import { avatarEl, speakerInfo, type Speaker } from './family';
+import type { FriendId } from './data';
 
 const $ = <T extends HTMLElement>(sel: string) => document.querySelector<T>(sel)!;
 
@@ -32,6 +33,11 @@ export const els = {
   ending: $('#ending'),
   endingFam: $('#ending-fam'),
   endingHome: $<HTMLButtonElement>('#ending-home'),
+  endingFriends: $('#ending-friends'),
+  mapFriends: $<HTMLButtonElement>('#map-friends'),
+  gallery: $('#gallery'),
+  galleryGrid: $('#gallery-grid'),
+  galleryClose: $<HTMLButtonElement>('#gallery-close'),
 };
 
 /** Hiện/ẩn D-pad + nút nhảy (HUD đi kèm). */
@@ -221,13 +227,74 @@ export function hideMap(): void {
   setTimeout(() => (els.map.hidden = true), 450);
 }
 
+// ------------------------------------------------------------------ nhà bạn bè (bản đồ) + bộ sưu tập
+/**
+ * Dải "Nhà của các bạn pony" dưới bản đồ: đếm đã cứu / tổng + mặt các bạn đã cứu (bạn đi theo không hết hàng thì
+ * về ở đây). Chạm → mở bộ sưu tập đủ ô, ô chưa cứu là bóng mờ "?".
+ */
+export function renderFriendsHome(all: FriendId[], rescued: FriendId[], onOpen?: () => void): void {
+  const b = els.mapFriends;
+  b.innerHTML = '';
+  const label = document.createElement('span');
+  label.className = 'mf-label';
+  label.textContent = `🏡 Bạn pony đã cứu: ${rescued.length}/${all.length}`;
+  b.appendChild(label);
+  const faces = document.createElement('span');
+  faces.className = 'mf-faces';
+  const shown = rescued.slice(-9);
+  shown.forEach((id, i) => {
+    const a = avatarEl(id, 'mf-ava');
+    a.style.animationDelay = `${i * 0.1}s`;
+    faces.appendChild(a);
+  });
+  if (rescued.length > shown.length) {
+    const more = document.createElement('b');
+    more.className = 'mf-more';
+    more.textContent = `+${rescued.length - shown.length}`;
+    faces.appendChild(more);
+  }
+  if (!rescued.length) faces.textContent = '❓❓❓';
+  b.appendChild(faces);
+  b.onclick = () => { openGallery(all, rescued); onOpen?.(); };
+}
+
+function openGallery(all: FriendId[], rescued: FriendId[]): void {
+  const g = els.galleryGrid;
+  g.innerHTML = '';
+  all.forEach((id, i) => {
+    const got = rescued.includes(id);
+    const card = document.createElement('div');
+    card.className = 'gal-card' + (got ? '' : ' locked');
+    card.style.setProperty('--c', speakerInfo(id).color);
+    card.style.animationDelay = `${(i % 6) * 0.08}s`;
+    if (got) card.appendChild(avatarEl(id, 'gal-ava'));
+    else { const q = document.createElement('div'); q.className = 'gal-ava'; q.textContent = '?'; card.appendChild(q); }
+    const name = document.createElement('small');
+    name.textContent = got ? speakerInfo(id).name : '???';
+    card.appendChild(name);
+    g.appendChild(card);
+  });
+  els.gallery.hidden = false;
+  els.gallery.classList.remove('hide');
+  els.galleryClose.onclick = () => {
+    els.gallery.classList.add('hide');
+    setTimeout(() => (els.gallery.hidden = true), 450);
+  };
+}
+
 // ------------------------------------------------------------------ màn kết
-export function showEnding(cast: Speaker[], onHome: () => void): void {
+export function showEnding(cast: Speaker[], onHome: () => void, friends: FriendId[] = []): void {
   els.endingFam.innerHTML = '';
   cast.forEach((id, i) => {
     const a = avatarEl(id, 'end-ava');
     a.style.animationDelay = `${i * 0.12}s`;
     els.endingFam.appendChild(a);
+  });
+  els.endingFriends.innerHTML = '';
+  friends.forEach((id, i) => {
+    const a = avatarEl(id, 'end-fr');
+    a.style.animationDelay = `${(cast.length + i) * 0.08}s`;
+    els.endingFriends.appendChild(a);
   });
   els.ending.hidden = false;
   els.ending.classList.remove('hide');

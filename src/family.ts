@@ -26,7 +26,8 @@ export function speakerInfo(id: Speaker): { name: string; pony: string; emoji: s
 }
 
 export function portraitUrl(id: Speaker): string | null {
-  const p = PORTRAIT[id];
+  // bạn pony: ảnh trùng tên id (chụp bằng portrait.html)
+  const p = PORTRAIT[id] ?? (id !== 'nightmare' && id !== 'twilight' && CAST[id].friend ? id : undefined);
   return p ? `${import.meta.env.BASE_URL}img/portraits/${p}.png` : null;
 }
 

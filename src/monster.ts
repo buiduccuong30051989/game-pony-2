@@ -2,11 +2,20 @@
 import * as THREE from 'three';
 import type { ChallengeKind } from './data';
 import type { World } from './world';
+import type { Actor } from './actors';
 import { tween, easeOutQuad } from './tween';
+
+/** Bong bóng nhỏ giữ bạn pony đứng cạnh quái (lệch phải-sau so với camera để luôn nhìn thấy khi đi tới). */
+const BUBBLE_R = 1.15;
 
 export class Monster {
   readonly group = new THREE.Group();
   defeated = false;
+  /** bạn pony bị nhốt trong bong bóng cạnh quái (null nếu không có) */
+  friend: Actor | null = null;
+  private bubble: THREE.Group | null = null;
+  private bubbleMesh: THREE.Mesh | null = null;
+  private bubbleBaseY = 0;
   private t = Math.random() * 10;
   private readonly body: THREE.Mesh;
 
@@ -62,7 +71,71 @@ export class Monster {
   /** Quay mặt về phía nhân vật. */
   faceTo(x: number, z: number): void { this.group.rotation.y = Math.atan2(x - this.x, z - this.z); }
 
+  /**
+   * Nhốt `actor` vào bong bóng pha lê nhỏ cạnh quái. `place(x, z)` kéo chỗ đặt vào trong đảo.
+   * Bạn pony đứng ở đáy bong bóng, quay ra phía Nhím đi tới, không tự nhảy.
+   */
+  holdFriend(actor: Actor, fromX: number, fromZ: number, clamp: (x: number, z: number) => [number, number]): void {
+    const { group, mesh, holder } = this.world.makeBubble(BUBBLE_R);
+    // lệch sang phải-sau (hướng camera nhìn từ +z) để quái không che bong bóng
+    const [bx, bz] = clamp(this.x + 2.0, this.z - 1.1);
+    this.bubbleBaseY = BUBBLE_R + 0.25;
+    group.position.set(bx, this.bubbleBaseY, bz);
+    this.world.scene.add(group);
+    actor.allowHop = false;
+    actor.hover = 0;
+    actor.place(0, 0, Math.atan2(fromX - bx, fromZ - bz));
+    holder.add(actor.root);
+    this.friend = actor;
+    this.bubble = group;
+    this.bubbleMesh = mesh;
+  }
+
+  /** Vị trí thế giới của bong bóng (null nếu đã vỡ / không có). */
+  get bubblePos(): THREE.Vector3 | null { return this.bubble ? this.bubble.position.clone() : null; }
+
+  /**
+   * Bong bóng rung rồi vỡ tung lấp lánh; bạn pony rơi xuống cỏ (đã ra scene, toạ độ thế giới) và nhảy cẫng.
+   * Trả về Actor đã tự do (null nếu quái không giữ ai).
+   */
+  async popBubble(): Promise<Actor | null> {
+    const b = this.bubble, mesh = this.bubbleMesh, a = this.friend;
+    if (!b || !mesh || !a) return null;
+    await tween(380, (k) => { mesh.scale.setScalar(1 + Math.sin(k * Math.PI * 6) * 0.1 * (1 + k)); });
+    const c = b.position.clone();
+    this.world.magic.burst(c, 110, 0xffffff, 3.0, 0.32, 1.0, -1.5);
+    this.world.magic.burst(c, 60, 0xff7ac8, 2.2, 0.28, 0.9, -1.5);
+    this.world.magic.ring(new THREE.Vector3(c.x, 0.1, c.z), 0xffd166, 50, 1.8);
+    const wp = a.root.getWorldPosition(new THREE.Vector3());
+    this.world.scene.add(a.root);
+    a.root.scale.setScalar(1);
+    a.allowHop = true;
+    a.place(wp.x, wp.z, a.yaw);
+    a.y = wp.y;
+    a.vy = 3.5;
+    this.disposeBubble();
+    return a;
+  }
+
+  private disposeBubble(): void {
+    if (!this.bubble) return;
+    this.bubble.removeFromParent();
+    this.bubbleMesh?.geometry.dispose();
+    this.bubble = null;
+    this.bubbleMesh = null;
+  }
+
+  /** Rời màn: gỡ quái + bong bóng (bạn pony còn trong bong bóng do main dispose). */
+  dispose(): void {
+    this.group.removeFromParent();
+    this.disposeBubble();
+  }
+
   update(dt: number): void {
+    if (this.bubble) {
+      this.bubble.position.y = this.bubbleBaseY + Math.sin((this.t + dt) * 1.7) * 0.14;
+      this.friend?.update(dt);
+    }
     if (this.defeated) return;
     this.t += dt;
     const s = Math.sin(this.t * 3);

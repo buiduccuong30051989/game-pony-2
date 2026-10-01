@@ -24,8 +24,46 @@ export const BATTLE_CAM = { pos: new THREE.Vector3(0, 6.8, 17.5), look: new THRE
 /** Chỗ đứng của từng người sau lưng Nhím (x, z) — chừa giữa cho Twilight. */
 const SPOTS: Partial<Record<CastId, [number, number]>> = {
   'me-yen': [-3.2, 4.0], 'ba-cuong': [3.2, 4.0], 'ong-cuong': [-5.9, 2.8], 'ba-tuyet': [6.3, 2.2],
-  pinkie: [-8.7, 1.0], fluttershy: [9.6, 4.6], spike: [-1.7, 5.4], mun: [-4.3, 6.3], rom: [4.3, 6.3],
+  spike: [-1.7, 5.4], mun: [-4.3, 6.3], rom: [4.3, 6.3],
 };
+
+/**
+ * Chỗ đứng cho n bạn pony: đám đông 2 cánh quanh người nhà, CHỈ ở chỗ camera trận cuối nhìn thấy (chiếu thử từng ô
+ * bằng camera BATTLE_CAM theo tỉ lệ màn hiện tại → iPad ngang/dọc đều vừa), chừa lối giữa nhìn thẳng Twilight →
+ * Nightmare Moon và chừa đáy màn cho bảng thử thách. Người nhà đứng trước; bạn pony lùi sau, toả 2 bên.
+ */
+function crowdSpots(n: number, taken: [number, number][]): [number, number][] {
+  const cam = new THREE.PerspectiveCamera(BATTLE_CAM.fov, window.innerWidth / Math.max(1, window.innerHeight), 0.1, 400);
+  cam.position.copy(BATTLE_CAM.pos);
+  cam.lookAt(BATTLE_CAM.look);
+  cam.updateMatrixWorld();
+  const cands: { x: number; z: number; s: number }[] = [];
+  const v = new THREE.Vector3();
+  for (let z = -0.6; z <= 9.5; z += 0.45) {
+    for (let x = -14; x <= 14; x += 0.45) {
+      if (Math.abs(x) < 2.6 && z < 9) continue;           // lối giữa: Twilight + tia phép
+      v.set(x, 0.1, z).project(cam);
+      if (Math.abs(v.x) > 0.9 || v.y < -0.55) continue;     // ngoài màn / dưới bảng thử thách
+      v.set(x, 1.5, z).project(cam);
+      if (Math.abs(v.x) > 0.9) continue;
+      // người nhà đứng trước (gần camera) → bạn pony ưu tiên đứng lùi sau, toả rộng 2 bên
+      cands.push({ x, z, s: Math.abs(z - 0.4) * 0.8 + Math.abs(Math.abs(x) - 7) * 0.45 });
+    }
+  }
+  cands.sort((a, b) => a.s - b.s);
+  const out: [number, number][] = [];
+  const far = (x: number, z: number, list: [number, number][], d: number) => list.every(([px, pz]) => Math.hypot(px - x, pz - z) >= d);
+  for (const minD of [1.45, 1.2, 1.0, 0.8]) {
+    for (const c of cands) {
+      if (out.length >= n) break;
+      if (far(c.x, c.z, out, minD) && far(c.x, c.z, taken, minD + 0.5) && Math.hypot(c.x - HERO_SPOT.x, c.z - HERO_SPOT.z) > 2.4) out.push([c.x, c.z]);
+    }
+    if (out.length >= n) break;
+  }
+  while (out.length < n) out.push([(out.length % 2 ? 1 : -1) * 7, 6]);
+  // trái/phải xen kẽ theo thứ tự cứu cho cân
+  return out.sort((a, b) => a[1] - b[1]);
+}
 
 const TAUNTS: [string, string][] = [
   ['nmm_taunt_0', 'Hô hô! Ta thích màn đêm mãi mãi!'],
@@ -69,6 +107,8 @@ export class FinalBattle {
     private level: LevelDef,
     /** người nhà + bạn đứng xem (đã tạo, chưa đặt chỗ) */
     private crowd: Actor[],
+    /** tất cả bạn pony đã cứu (đứng sau người nhà) */
+    private friends: Actor[],
     private group: THREE.Group,
   ) {}
 
@@ -123,6 +163,14 @@ export class FinalBattle {
       a.idleOn = true;
       this.world.scene.add(a.root);
     }
+    const spots = crowdSpots(this.friends.length, this.crowd.map((a) => SPOTS[a.id] ?? [0, 9]));
+    this.friends.forEach((a, i) => {
+      const [x, z] = spots[i];
+      a.place(x, z, 0);
+      a.faceTo(BOSS_SPOT.x, BOSS_SPOT.z + BOSS_HOVER);
+      a.idleOn = true;
+      this.world.scene.add(a.root);
+    });
     this.world.setCamera(BATTLE_CAM.pos, BATTLE_CAM.look, true, BATTLE_CAM.fov);
     // đèn tím dịu soi mặt Nightmare Moon (bộ lông đen) cho bé nhìn rõ
     this.glow = new THREE.PointLight(0xd9ccff, 30, 14, 1.5);
@@ -192,6 +240,7 @@ export class FinalBattle {
     }
     if (this.luna?.root.visible) this.luna.update(dt);
     for (const a of this.crowd) a.update(dt);
+    for (const a of this.friends) a.update(dt);
     // ngọc xoay vòng quanh Twilight
     const hx = this.hero.x, hz = this.hero.z;
     this.gems.forEach((m, i) => {
@@ -203,7 +252,16 @@ export class FinalBattle {
     });
   }
 
-  private crowdIds(): CastId[] { return this.crowd.map((a) => a.id); }
+  private crowdIds(): CastId[] { return [...this.crowd, ...this.friends].map((a) => a.id); }
+
+  /** Cả đám bạn pony nhảy cẫng lần lượt như sóng, ai cũng ngó Nightmare Moon. */
+  private friendsCheer(): void {
+    this.friends.forEach((a, k) => setTimeout(() => {
+      a.faceTo(this.boss.x, this.boss.z + 3);
+      a.hop(4 + Math.random() * 1.5);
+      if (k % 3 === 0) this.world.magic.twinkle(a.center().add(new THREE.Vector3(0, 0.6, 0)), 0xffd166, 3, 0.5);
+    }, 200 + k * 70));
+  }
 
   private async laugh(): Promise<void> {
     this.bossShake = 1;
@@ -263,6 +321,7 @@ export class FinalBattle {
         toast(`◆ ${h.name}`);
         await play(h.audio);
         for (const [k, a] of this.crowd.entries()) setTimeout(() => a.hop(4.5), k * 90);
+        this.friendsCheer();
         if (i < HARMONY.length - 1) {
           await say('nightmare', TAUNTS[i + 1][0], TAUNTS[i + 1][1]);
           const owner = h.owner;
@@ -348,8 +407,9 @@ export class FinalBattle {
     this.hero.faceTo(this.hero.x, this.hero.z + 5);
     this.luna.turnTo(0);
     for (const a of this.crowd) a.turnTo(0);
+    for (const a of this.friends) a.turnTo(0);
     confetti(120);
-    const all = [this.luna, ...this.crowd];
+    const all = [this.luna, ...this.crowd, ...this.friends];
     all.forEach((a, k) => setTimeout(() => (a.id === 'ba-cuong' ? void a.loopAround() : a.hop(5)), k * 120));
     await this.hero.celebrate();
     const fam = (['me-yen', 'ba-cuong', 'ong-cuong', 'ba-tuyet', 'bac-hanh'] as CastId[])
@@ -362,6 +422,7 @@ export class FinalBattle {
   dispose(): void {
     this.world.scene.remove(this.boss?.root, this.luna?.root);
     for (const a of this.crowd) this.world.scene.remove(a.root);
+    for (const a of this.friends) this.world.scene.remove(a.root);
     this.world.setCamera(null);
   }
 }

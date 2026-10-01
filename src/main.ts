@@ -2,7 +2,9 @@
 // Người nhà đã cứu (hoá pony) đi theo Twilight ở các màn sau; màn 7 đấu Nightmare Moon (src/battle.ts).
 // Debug URL: xem README (?level=, &auto=1, &mute=1, &stars=3, &rescue=1, &battle=N, &win=1, &end=1, &unlock=all, &done=all).
 import * as THREE from 'three';
-import { LEVELS, WORDS, PALETTE, CAST, HARMONY, SPIKE_HINTS, type LevelDef, type CastId } from './data';
+import {
+  LEVELS, WORDS, PALETTE, CAST, HARMONY, SPIKE_HINTS, FRIEND_IDS, MAX_PARADE, type LevelDef, type CastId, type FriendId,
+} from './data';
 import { World, type LevelHandles } from './world';
 import { Hero } from './hero';
 import { Monster } from './monster';
@@ -13,7 +15,7 @@ import { unlockAudio, preload, play, sfx, stopSpeech } from './audio';
 import { say, cheer, clearFamily } from './family';
 import {
   els, showControls, showHud, setHudMode, setStars, setGems, toast, confetti, renderMap, hideMap, showPanel, showEnding,
-  type MapNode,
+  renderFriendsHome, type MapNode,
 } from './ui';
 import { tween, wait, easeOutBack } from './tween';
 
@@ -28,6 +30,8 @@ const DEBUG = {
   end: Q.has('end'),
   unlock: Q.get('unlock') === 'all',
   done: Q.get('done'),
+  /** bạn pony đã cứu: all | none | số N (N bạn đầu) | id,id… — không có thì suy từ &done (bạn của các màn đã xong) */
+  friends: Q.get('friends'),
 };
 const IS_DEBUG = [...Q.keys()].length > 0;
 
@@ -42,6 +46,7 @@ const AUDIO_KEYS = [
   ...LEVELS.flatMap((l) => [l.introAudio, l.rescueAudio]),
   ...WORDS.flatMap((w) => [`ask_${w.id}`, `name_${w.id}`, ...w.tokens.map((t) => t.audio)]),
   ...FAMILY_KEYS, ...SPIKE_HINTS, ...HARMONY.map((h) => h.audio),
+  ...FRIEND_IDS.map((f) => CAST[f].thanks![0]), 'friend_home', 'friends_gallery',
   ...[0, 1, 2, 3, 4].map((i) => `nmm_taunt_${i}`), 'nmm_laugh_1', 'nmm_laugh_2',
 ];
 
@@ -68,10 +73,16 @@ const SPIKE_TEXT: Record<string, string> = {
   spike_hint_bubble: 'Bong bóng ở đằng kia, đi tới đó nhé!',
 };
 
-interface Progress { unlocked: number; done: string[] }
+interface Progress { unlocked: number; done: string[]; /** bạn pony đã cứu (theo thứ tự cứu) */ friends: FriendId[] }
 function loadProgress(): Progress {
-  try { const p = JSON.parse(localStorage.getItem('haan-progress') || ''); if (p && typeof p.unlocked === 'number') return p; } catch { /* trống */ }
-  return { unlocked: 1, done: [] };
+  try {
+    const p = JSON.parse(localStorage.getItem('haan-progress') || '');
+    if (p && typeof p.unlocked === 'number') {
+      const friends = Array.isArray(p.friends) ? p.friends.filter((f: string) => (FRIEND_IDS as string[]).includes(f)) : [];
+      return { unlocked: p.unlocked, done: Array.isArray(p.done) ? p.done : [], friends };
+    }
+  } catch { /* trống */ }
+  return { unlocked: 1, done: [], friends: [] };
 }
 function saveProgress(p: Progress): void {
   if (IS_DEBUG) return; // chơi thử bằng URL debug không ghi đè tiến độ thật của bé
@@ -85,6 +96,14 @@ async function boot(): Promise<void> {
   const progress = loadProgress();
   if (DEBUG.unlock) progress.unlocked = LEVELS.length;
   if (DEBUG.done) progress.done = DEBUG.done === 'all' ? LEVELS.map((l) => l.id) : DEBUG.done.split(',');
+  if (DEBUG.friends !== null) {
+    const f = DEBUG.friends;
+    progress.friends = f === 'all' ? [...FRIEND_IDS] : f === 'none' ? []
+      : /^\d+$/.test(f) ? FRIEND_IDS.slice(0, Number(f))
+        : f.split(',').filter((x): x is FriendId => (FRIEND_IDS as string[]).includes(x));
+  } else if (DEBUG.done) {
+    progress.friends = LEVELS.filter((l) => progress.done.includes(l.id)).flatMap((l) => l.friends);
+  }
 
   let phase: Phase = 'start';
   let hero: Hero | null = null;
@@ -92,6 +111,13 @@ async function boot(): Promise<void> {
   let handles: LevelHandles | null = null;
   let monsters: Monster[] = [];
   let followers: Actor[] = [];
+  /** bạn pony vừa ra khỏi bong bóng, đang cảm ơn (chưa vào hàng) */
+  let loose: Actor[] = [];
+  /** model bạn pony đã tải cho màn này → giải phóng khi rời màn */
+  let friendModels = new Set<string>();
+  /** đang thử thách: hàng đi theo túm lại sau lưng Nhím, tránh xa chỗ này (quái / bong bóng) */
+  let huddleAt: { x: number; z: number } | null = null;
+  let toldHome = false;
   let rescueActor: Actor | null = null;
   let battle: FinalBattle | null = null;
   const trail = new Trail();
@@ -152,6 +178,7 @@ async function boot(): Promise<void> {
     showControls(false);
     showHud(false);
     renderMap(mapNodes(), (id) => void startLevel(id));
+    renderFriendsHome(FRIEND_IDS, progress.friends, () => void play('friends_gallery'));
   }
 
   function openEnding(): void {
@@ -159,7 +186,7 @@ async function boot(): Promise<void> {
     showControls(false);
     showHud(false);
     void play('the_end');
-    showEnding(['twilight', 'bac-hanh', 'ba-tuyet', 'ong-cuong', 'ba-cuong', 'me-yen', 'mun', 'rom', 'spike'], () => openMap());
+    showEnding(['twilight', 'bac-hanh', 'ba-tuyet', 'ong-cuong', 'ba-cuong', 'me-yen', 'mun', 'rom', 'spike'], () => openMap(), progress.friends);
   }
 
   /** Người nhà đã cứu ở các màn TRƯỚC màn đang chơi (theo thứ tự cứu). */
@@ -174,11 +201,40 @@ async function boot(): Promise<void> {
     showPanel(false);
     inChallenge = false;
     if (hero) world.scene.remove(hero.root);
-    for (const m of monsters) world.scene.remove(m.group);
-    for (const a of followers) world.scene.remove(a.root);
+    for (const m of monsters) { m.friend?.dispose(); m.dispose(); }
+    for (const a of followers) a.dispose();
+    for (const a of loose) a.dispose();
     rescueActor?.root.removeFromParent();
     battle?.dispose();
-    hero = null; monsters = []; followers = []; rescueActor = null; battle = null; handles = null;
+    // bạn pony: trả bộ nhớ model (màn sau cần thì tải lại) — người nhà giữ cache vì màn nào cũng có
+    for (const m of friendModels) void world.release(m);
+    friendModels = new Set();
+    hero = null; monsters = []; followers = []; loose = []; rescueActor = null; battle = null; handles = null;
+    huddleAt = null; toldHome = false;
+  }
+
+  /** Thêm bạn vào danh sách đã cứu (không lặp) + lưu. */
+  function markRescued(id: FriendId): void {
+    if (!progress.friends.includes(id)) progress.friends.push(id);
+    saveProgress(progress);
+  }
+
+  /**
+   * Tạo Actor bạn pony (ghi lại model để giải phóng khi rời màn).
+   * `lod`: bản giảm lưới models/friends/lod/<tên>.glb (~5–25k tam giác) cho đám đông trận cuối (18 bạn cùng lúc).
+   */
+  function friendActor(id: FriendId, lod = false): Promise<Actor> {
+    const full = CAST[id].model!;
+    const model = lod ? `models/friends/lod/${full.split('/').pop()}` : full;
+    friendModels.add(model);
+    return Actor.fromDef(world, { ...CAST[id], model });
+  }
+
+  /** Bạn đi trong hàng ở màn `def`: bạn đã cứu ở màn khác, mới nhất trước, vừa đủ chỗ trống sau người nhà. */
+  function paradeFriends(def: LevelDef, familyCount: number): FriendId[] {
+    const slots = Math.max(0, MAX_PARADE - familyCount);
+    if (!slots) return [];
+    return progress.friends.filter((f) => !def.friends.includes(f)).slice(-slots);
   }
 
   // ---------- vào màn ----------
@@ -194,16 +250,25 @@ async function boot(): Promise<void> {
     const bubbleScale = rc.kind === 'cat' ? 1 : rc.kind === 'flyer' ? 1.75 : 1.4;
     const before = rescuedBefore(def);
     // đi theo: Spike + mèo + pony đã cứu; màn cuối thêm Pinkie, Fluttershy
+    // đi theo: Spike + mèo + người nhà đã cứu (đứng đầu hàng), rồi bạn pony đã cứu ở màn trước (tối đa MAX_PARADE)
+    // trận cuối: cả nhà + TẤT CẢ bạn pony đã cứu đứng cổ vũ
     const crowdIds: CastId[] = def.final
-      ? ['spike', ...before.filter((x) => x !== 'bac-hanh'), 'pinkie', 'fluttershy']
+      ? ['spike', ...before.filter((x) => x !== 'bac-hanh')]
       : ['spike', ...before.filter((x) => CAST[x].kind === 'cat'), ...before.filter((x) => CAST[x].kind !== 'cat')];
-    const [h, hnd, crowd, inBubble] = await Promise.all([
+    const paradeIds: FriendId[] = def.final ? [...progress.friends] : paradeFriends(def, crowdIds.length);
+    const [h, hnd, crowd, paradeFr, held, inBubble] = await Promise.all([
       Hero.load(world, def.hero),
       world.buildLevel(def, bubbleScale, rc.kind === 'cat' ? rc.emoji : undefined),
       Promise.all(crowdIds.map((c) => Actor.create(world, c))),
+      Promise.all(paradeIds.map((f) => friendActor(f, !!def.final))),
+      Promise.all(def.friends.map((f) => friendActor(f))),
       !def.final && rc.kind !== 'cat' ? Actor.create(world, def.rescue) : Promise.resolve(null),
     ]);
-    if (my !== token) { world.scene.remove(h.root); return; }
+    if (my !== token) {
+      world.scene.remove(h.root);
+      for (const a of [...crowd, ...paradeFr, ...held]) a.dispose();
+      return;
+    }
     handles = hnd;
     hero = h;
     hero.x = def.start[0]; hero.z = def.start[1];
@@ -223,7 +288,8 @@ async function boot(): Promise<void> {
       showHud(true);
       els.home.hidden = true;
       setHudMode('harmony', HARMONY.map((x) => '#' + x.color.toString(16).padStart(6, '0')));
-      battle = new FinalBattle(world, hero, def, crowd, handles.group);
+      battle = new FinalBattle(world, hero, def, crowd, paradeFr, handles.group);
+      followers = [...crowd, ...paradeFr]; // để cleanup() dọn
       await battle.setup();
       if (my !== token) return;
       await battle.run({ startGems: DEBUG.battle, skipToWin: DEBUG.win }, () => sfx('sfx_soft', 0.4));
@@ -237,8 +303,10 @@ async function boot(): Promise<void> {
     }
 
     monsters = def.monsters.map((m) => new Monster(world, m.x, m.z, m.kind, m.color));
+    // mỗi quái giữ 1 bạn pony trong bong bóng nhỏ ngay cạnh
+    monsters.forEach((m, i) => { if (held[i]) m.holdFriend(held[i], def.start[0], def.start[1], (x, z) => world.clampToIsland(x, z)); });
     hero.faceTo(def.monsters[0].x, def.monsters[0].z);
-    followers = crowd;
+    followers = [...crowd, ...paradeFr];
     trail.reset(hero.x, hero.z, hero.yaw);
     let dist = 0;
     for (const a of followers) {
@@ -253,7 +321,7 @@ async function boot(): Promise<void> {
     phase = 'play';
 
     if (DEBUG.stars >= 3 || DEBUG.rescue) {
-      for (const m of monsters) { m.defeated = true; world.scene.remove(m.group); }
+      for (const m of monsters) { m.defeated = true; m.friend?.dispose(); m.dispose(); }
       stars = 3; setStars(3);
     }
     if (DEBUG.rescue) {
@@ -274,8 +342,61 @@ async function boot(): Promise<void> {
     if (LEVELS.indexOf(def) < 2) await play('hint_move');
   }
 
+  /** Khoảng cách tới người đứng trước trong hàng (~1.1 cho bạn nhỏ, rộng hơn chút cho pony to). */
   function gapOf(a: Actor): number {
-    return a.def.kind === 'cat' ? 1.3 : a.def.kind === 'dragon' ? 1.6 : a.def.kind === 'flyer' ? 2.6 : 2.1;
+    if (a.def.kind === 'cat') return 1.1;
+    if (a.def.kind === 'dragon') return 1.2;
+    if (a.def.kind === 'flyer') return 2.0;
+    return Math.max(1.1, a.def.height * 0.85);
+  }
+  /** Bán kính "thân" để hàng không chen lấn nhau. */
+  function radiusOf(a: Actor): number {
+    return a.def.kind === 'cat' ? 0.4 : a.def.kind === 'flyer' ? 0.9 : Math.max(0.42, a.def.height * 0.36);
+  }
+
+  /** Chỗ túm tụm sau lưng Nhím (tránh xa `from`): hàng 3, so le. */
+  function huddleSpot(i: number, from: { x: number; z: number }): { x: number; z: number } {
+    if (!hero) return { x: 0, z: 0 };
+    let bx = hero.x - from.x, bz = hero.z - from.z;
+    const bl = Math.hypot(bx, bz) || 1;
+    bx /= bl; bz /= bl;
+    const lx = -bz, lz = bx;
+    const row = Math.floor(i / 3), col = (i % 3) - 1;
+    const back = 1.8 + row * 1.25, side = col * 1.3 + (row % 2) * 0.65;
+    const [x, z] = world.clampToIsland(hero.x + bx * back + lx * side, hero.z + bz * back + lz * side);
+    return { x, z };
+  }
+
+  /** Đẩy nhẹ những người đứng quá sát nhau / sát Nhím / sát quái + bong bóng (không chồng hình). */
+  function separate(list: Actor[]): void {
+    if (!hero) return;
+    for (let i = 0; i < list.length; i++) {
+      const a = list[i];
+      if (a.busy) continue;
+      const ra = radiusOf(a);
+      for (let j = i + 1; j < list.length; j++) {
+        const b = list[j];
+        const min = ra + radiusOf(b);
+        let dx = b.x - a.x, dz = b.z - a.z;
+        let d = Math.hypot(dx, dz);
+        if (d >= min) continue;
+        if (d < 1e-4) { dx = Math.random() - 0.5; dz = Math.random() - 0.5; d = Math.hypot(dx, dz); }
+        const push = (min - d) * 0.5 / d;
+        if (!b.busy) { b.x += dx * push; b.z += dz * push; }
+        a.x -= dx * push; a.z -= dz * push;
+      }
+      const away = (x: number, z: number, min: number) => {
+        const dx = a.x - x, dz = a.z - z, d = Math.hypot(dx, dz);
+        if (d < min && d > 1e-4) { a.x = x + (dx / d) * min; a.z = z + (dz / d) * min; }
+      };
+      away(hero.x, hero.z, ra + 0.75);
+      for (const m of monsters) {
+        if (!m.defeated) away(m.x, m.z, ra + 1.0);
+        const bp = m.bubblePos;
+        if (bp) away(bp.x, bp.z, ra + 1.2);
+      }
+      [a.x, a.z] = world.clampToIsland(a.x, a.z);
+    }
   }
 
   /** Mục tiêu hiện tại: quái gần nhất chưa bị phép, hoặc bong bóng khi đủ sao. */
@@ -291,10 +412,12 @@ async function boot(): Promise<void> {
     return best ? new THREE.Vector3(best.x, 0.5, best.z) : null;
   }
 
+  /** Ai khen khi đúng mà quái không giữ bạn nào: người nhà + Spike + bạn đang đi trong hàng. */
   function cheerPool(): CastId[] {
     if (!level) return ['spike'];
     const fam = rescuedBefore(level).filter((x) => x !== 'bac-hanh');
-    return fam.length ? [...fam, 'spike'] : ['spike', 'pinkie', 'fluttershy'];
+    const fr = followers.filter((a) => a.def.friend).map((a) => a.id);
+    return ['spike', ...fam, ...fr];
   }
 
   // ---------- vòng lặp màn ----------
@@ -303,16 +426,19 @@ async function boot(): Promise<void> {
     if (battle) { battle.update(dt); return; }
     for (const m of monsters) m.update(dt);
 
-    // hàng người đi theo vết chân
+    // hàng người đi theo vết chân Nhím (rắn), lúc thử thách thì túm tụm sau lưng
     trail.push(hero.x, hero.z);
     let dist = 0;
     const clamp = (x: number, z: number) => world.clampToIsland(x, z);
-    for (const a of followers) {
+    followers.forEach((a, i) => {
       dist += gapOf(a);
-      const p = trail.at(dist);
-      a.follow(dt, p.x, p.z, clamp);
-      a.update(dt);
-    }
+      const p = huddleAt ? huddleSpot(i, huddleAt) : trail.at(dist);
+      a.follow(dt, p.x, p.z, clamp, huddleAt ? 0.25 : 0.4);
+      if (huddleAt && !a.busy && a.grounded && Math.hypot(p.x - a.x, p.z - a.z) < 0.5) a.turnTo(Math.atan2(huddleAt.x - a.x, huddleAt.z - a.z));
+    });
+    separate(followers);
+    for (const a of followers) a.update(dt);
+    for (const a of loose) a.update(dt);
     rescueActor?.update(dt);
 
     hornSparkle += dt;
@@ -378,6 +504,7 @@ async function boot(): Promise<void> {
     if (!hero || !level) return;
     const my = token;
     inChallenge = true;
+    huddleAt = { x: m.x, z: m.z };
     hero.locked = true; hero.setMove(0, 0);
     hero.faceTo(m.x, m.z);
     m.faceTo(hero.x, hero.z);
@@ -390,18 +517,51 @@ async function boot(): Promise<void> {
     void hero.castPose(900);
     await world.magic.beam(hero.hornWorld(), m.center, PALETTE.magic, PALETTE.magicPink, 0.9);
     void m.defeat();
+    // quái tan thành bướm + bong bóng bên cạnh vỡ → bạn pony nhảy ra
+    const freed = m.popBubble();
     stars++; setStars(stars);
     toast('⭐ +1');
     confetti(30);
     followers.forEach((a, i) => setTimeout(() => a.hop(4.5 + Math.random()), 80 * i));
+    const fr = await freed;
+    if (fr) { m.friend = null; loose.push(fr); }
     await play(stars >= 3 ? 'stars3' : 'star');
     if (my !== token) return;
-    await cheer(cheerPool());
+    if (fr) await friendJoins(fr, my);
+    else await cheer(cheerPool());
     if (my !== token) return;
+    huddleAt = null;
     if (stars >= 3) await hero.celebrate();
     hero.locked = false;
     inChallenge = false;
     hintT = 0;
+  }
+
+  /** Bạn pony vừa được cứu: lấp lánh, quay sang Nhím cảm ơn, rồi chạy vào cuối hàng (đầy hàng thì bạn cũ nhất về nhà). */
+  async function friendJoins(fr: Actor, my: number): Promise<void> {
+    if (!hero) return;
+    const id = fr.id as FriendId;
+    markRescued(id);
+    await wait(450);
+    if (my !== token || !hero) return;
+    fr.faceTo(hero.x, hero.z);
+    world.magic.burst(fr.center(), 50, 0xffe08a, 2.0, 0.28, 0.8, -1);
+    fr.hop(6);
+    const sparkle = setInterval(() => world.magic.twinkle(fr.center(), 0xff7ac8, 2, 0.6), 120);
+    const thanks = CAST[id].thanks!;
+    try { await say(id, thanks[0], thanks[1]); } finally { clearInterval(sparkle); }
+    if (my !== token) return;
+    loose = loose.filter((a) => a !== fr);
+    // hàng đầy → bạn đi theo lâu nhất về nhà Nhím trước (vẫn có trên bản đồ + trận cuối)
+    const famCount = followers.filter((a) => !a.def.friend).length;
+    const friendsInLine = followers.filter((a) => a.def.friend);
+    if (famCount + friendsInLine.length + 1 > MAX_PARADE && friendsInLine.length) {
+      const old = friendsInLine[0];
+      followers = followers.filter((a) => a !== old);
+      void old.goHome();
+      if (!toldHome) { toldHome = true; void play('friend_home'); }
+    }
+    followers.push(fr);
   }
 
   async function rescue(): Promise<void> {
@@ -410,6 +570,7 @@ async function boot(): Promise<void> {
     const def = level, hnd = handles, h = hero;
     rescued = true;
     inChallenge = true;
+    huddleAt = { x: hnd.bubble.position.x, z: hnd.bubble.position.z };
     h.locked = true; h.setMove(0, 0);
     h.faceTo(hnd.bubble.position.x, hnd.bubble.position.z);
     await play('bubble');
@@ -564,6 +725,8 @@ async function boot(): Promise<void> {
     get battlePhase() { return battle?.phase ?? null; },
     get hero() { return hero; },
     get followers() { return followers; },
+    get loose() { return loose; },
+    get battle() { return battle; },
     get monsters() { return monsters; },
     get level() { return level; },
     get stars() { return stars; },

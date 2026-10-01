@@ -17,7 +17,18 @@ Không có thua, sai chỉ bị quái/Nightmare Moon cười rồi gợi ý.
 | Ông Cương | Applejack | màn 5 (vườn táo) |
 | Bà Tuyết | Công chúa Celestia: được cứu thì bay lên kéo mặt trời, trời sáng hẳn | màn 6 (đồi pha lê) |
 | Bác Hanh | Công chúa Luna, bị bóng tối biến thành **Nightmare Moon** (trùm cuối, được cứu chứ không bị đánh) | màn 7 (lâu đài mặt trăng) |
-| bạn bè | Spike (đi theo, đứng yên 10 s thì nhắc đường), Pinkie Pie + Fluttershy (cổ vũ trận cuối) | |
+| bạn bè | Spike (đi theo từ đầu, đứng yên 10 s thì nhắc đường) | |
+| 18 bạn pony | mỗi quái giữ 1 bạn trong bong bóng nhỏ cạnh nó; trả lời đúng → bong bóng vỡ, bạn nhảy ra cảm ơn rồi vào hàng | màn 1–6, 3 bạn/màn |
+
+**Bạn pony theo màn** (không bạn nào lặp lại; `LEVELS[].friends` trong `src/data.ts`): 1 Pinkie Pie, Fluttershy, Derpy ·
+2 Minty, Babs Seed, Bạc Hà · 3 Starlight Glimmer, Sunset Shimmer, Cầu Vồng · 4 Zipp Storm, Pipp Petals, Surprise ·
+5 Big Mac, Sunny, Izzy · 6 Công chúa Cadance, Shining Armor, Sunburst. Trận cuối không cứu thêm: TẤT CẢ bạn đã cứu đứng
+sau người nhà cổ vũ (nhảy theo sóng mỗi viên ngọc, ngó Nightmare Moon).
+
+**Hàng đi theo**: rắn bám vết chân Twilight (cách ~1.1–1.4), người nhà đứng đầu rồi tới bạn pony; tối đa 8 người (iPad),
+bạn mới vào thì bạn đi lâu nhất "về nhà" (xoay, bụi sao). Lúc làm thử thách / cứu người cả hàng túm lại sau lưng Nhím;
+không ai chồng lên nhau hay lên quái / bong bóng (đẩy tách mỗi khung). Bạn đã cứu lưu trong `haan-progress.friends`;
+bản đồ có dải "🏡 Bạn pony đã cứu N/18" → chạm mở bộ sưu tập (ô chưa cứu là "?"), màn kết hiện mặt tất cả bạn.
 
 Thẻ cổ vũ (mặt pony + tên + câu khen, có giọng đọc) hiện sau mỗi câu đúng và khi cứu được người. Ảnh thật người nhà
 (tuỳ chọn): thả `public/family/<id>.jpg` (xem `public/family/README.txt`) → hiện thành huy hiệu tròn cạnh mặt pony.
@@ -53,12 +64,14 @@ pnpm exec tsc --noEmit
 | `&battle=N` | màn cuối, N ngọc Hài Hoà đã sáng sẵn (0–5) |
 | `&win=1` | màn cuối, nhảy thẳng tới cầu vồng + Nightmare Moon hoá Luna + ăn mừng |
 | `&end=1` | mở thẳng màn kết "Nhím đã cứu cả nhà!" |
+| `&friends=all` / `none` / `N` / `pinkie,derpy` | bạn pony đã cứu (không có thì suy từ `&done`: bạn của các màn đã xong) |
 
-Ví dụ: `/?level=final&done=all&battle=2&auto=1&mute=1`, `/?level=final&done=all&win=1&auto=1`, `/?unlock=all&done=mun,rom,me,ba&auto=1`.
-`window.__game` (phase, battlePhase, hero, followers, monsters, startLevel...) để công cụ test đọc trạng thái.
+Ví dụ: `/?level=mun&friends=none&auto=1&mute=1` (màn 1 cứu 3 bạn), `/?level=ba&done=mun,rom,me&auto=1&mute=1` (8 người đi theo),
+`/?unlock=all&done=mun,rom,me,ba&auto=1` (bản đồ + bộ sưu tập), `/?level=final&done=all&battle=2&auto=1&mute=1`, `/?level=final&done=all&win=1&auto=1`, `/?unlock=all&done=mun,rom,me,ba&auto=1`.
+`window.__game` (phase, battlePhase, hero, followers, loose, monsters, progress, startLevel...) để công cụ test đọc trạng thái.
 
-Trang dev khác: `/viewer.html?model=models/ponies/rarity.glb&yaw=0.7` xem model; `/portrait.html?model=...&yaw=-0.2[&f=fx,fy,fz&r=0.2]`
-chụp mặt pony (dataURL ở `window.__png`) → lưu thành `public/img/portraits/<tên>.png` (đã chụp sẵn 10 ảnh).
+Trang dev khác: `/viewer.html?model=models/ponies/rarity.glb&yaw=0.7[&rig=1][&eyes=material_3,3f9a3a]` xem model (`rig=1` thử auto-rig + phi tại chỗ, ghi số tam giác); `/portrait.html?model=...&yaw=-0.2[&f=fx,fy,fz&r=0.2]`
+chụp mặt pony (dataURL ở `window.__png`, `&eyes=` như viewer, `&zoom=0.75` lùi xa) → lưu thành `public/img/portraits/<tên>.png` (người nhà + 18 bạn).
 
 ## Cấu trúc
 
@@ -71,21 +84,25 @@ src/family.ts     thẻ lời nói / cổ vũ (mặt pony chụp sẵn + huy hi�
 src/world.ts      đảo + props theo chủ đề màn (hoa, táo, mây, pha lê), ngày/đêm (setNight 0..1: trời, nước, đèn, trăng, sao, mặt trời, mây), bướm, chim, đom đóm, cỏ hoa đung đưa, lâu đài trăng, bong bóng pha lê, camera
 src/hero.ts       Twilight: đi 4 hướng, nhảy, nhún; đứng yên thì thở, ngó quanh, phẩy đuôi, cúi ngửi, quay ra camera, nhảy cẫng
 src/rig.ts        auto-rig ngựa không xương (11 xương: thân, 4 chân × 2, đầu, đuôi) + điều khiển nhìn/đuôi; người (dò xương); công chúa bay (xương sẵn: vỗ cánh, đung chân, vẫy đuôi)
-src/monster.ts    quái tròn, cười khi sai, tan thành bươm bướm
+src/monster.ts    quái tròn, cười khi sai, tan thành bươm bướm; giữ 1 bạn pony trong bong bóng nhỏ cạnh mình (vỡ khi đúng)
+src/eyes.ts       vẽ mống mắt + con ngươi (vertex color) cho model rip từ Source có nhãn cầu trắng trơn
 src/magic.ts      hạt 1 Points + shader; đêm cộng màu, ngày trộn thường (không loá trên nền sáng)
 src/challenge.ts  A1 nghe – chọn hình (đánh vần GDPT 2018 với thẻ chữ), B1 đếm ngọc – chọn số
 src/data.ts       palette, 16 từ + token đánh vần, CAST (cả nhà + bạn), 7 màn, 5 ngọc Hài Hoà
 src/ui.ts, src/audio.ts, src/tween.ts
 vite.config.ts    plugin quét public/family/ → module ảo 'virtual:family-photos'
 scripts/          gen-audio.sh + audio-manifest.txt (~180 clip)
-public/models/    twilight_static, twilight (EG), ponies/*.glb (xem CREDITS.md), props Kenney CC0
+public/models/    twilight_static, twilight (EG), ponies/*.glb, friends/*.glb (+ friends/lod/ cho trận cuối) — xem CREDITS.md, props Kenney CC0
 ```
 
 ## Hiệu năng (iPad)
 
 Người đi theo không đổ bóng thật (dùng bóng tròn mờ), pixel ratio tối đa 1.5. Trận cuối ~570k tam giác/khung
 (Nightmare Moon 143k + Celestia 98k là 2 model nặng nhất; gltf-transform simplify không giảm thêm được vì lưới nhiều đường nối UV).
-Model Celestia/Nightmare Moon/Luna chỉ tải khi vào màn 6–7.
+Model Celestia/Nightmare Moon/Luna chỉ tải khi vào màn 6–7. Bạn pony tải theo màn (3 bạn trong bong bóng + bạn đang đi
+theo) và `World.release()` giải phóng lưới/texture khi rời màn; mỗi bạn 3–30k tam giác sau optimize. Pony có xương sẵn
+(Starlight, Sunset, Derpy, Sunny, Izzy, Pipp, Zipp) không auto-rig được → nhún nhảy bằng pivot như Spike. Đo headless
+1180×820: màn 4 với 8 người đi theo ~325k tam giác/khung; trận cuối cả 18 bạn (bản lod/) ~680k tam giác, ~640 draw call.
 
 ## Assets và giấy phép
 

@@ -5,6 +5,7 @@ import { CAST, type CastDef, type CastId } from './data';
 import type { World } from './world';
 import { autoRigQuadruped, makeFlyer, type Walker, type WalkerPose } from './rig';
 import { tween, easeOutQuad, easeInOutSine } from './tween';
+import { paintEyes } from './eyes';
 
 const GRAVITY = 24;
 const RAINBOW = [0xff4d5e, 0xff9a2e, 0xffe066, 0x5bd96b, 0x4fb3ff, 0x9b6bff];
@@ -85,9 +86,12 @@ export class Actor {
     } else {
       const { obj } = await world.instance(def.model);
       world.fitHeight(obj, def.height);
-      obj.traverse((o) => { o.castShadow = false; });
+      if (def.eyes) paintEyes(obj, def.eyes.mat, def.eyes.iris);
+      let skinned = false;
+      obj.traverse((o) => { o.castShadow = false; if ((o as THREE.SkinnedMesh).isSkinnedMesh) skinned = true; });
       let walker: (Walker & { flap?: number }) | null = null;
-      if (def.kind === 'pony') walker = autoRigQuadruped(obj);
+      // pony có xương sẵn (VV2006, G5...) thì không auto-rig được (đè xương) → nhún nhảy bằng pivot như Spike
+      if (def.kind === 'pony' && !skinned) walker = autoRigQuadruped(obj);
       else if (def.kind === 'flyer') walker = makeFlyer(obj);
       actor = new Actor(world, def, walker, null);
       actor.pivot.add(obj);
@@ -276,6 +280,30 @@ export class Actor {
     }, easeInOutSine);
     this.x = cx; this.z = cz; this.y = y0; this.yaw = yaw0;
     this.busy = false;
+  }
+
+  /** Rời màn: gỡ khỏi scene + trả texture xương (model dùng chung do World.release giải phóng). */
+  dispose(): void {
+    this.root.removeFromParent();
+    this.root.traverse((o) => { const sm = o as THREE.SkinnedMesh; if (sm.isSkinnedMesh) sm.skeleton.dispose(); });
+    this.blob.geometry.dispose();
+    (this.blob.material as THREE.Material).dispose();
+  }
+
+  /** Bạn pony "về nhà": nhảy lên, xoay, thu nhỏ trong bụi sao rồi biến mất. */
+  async goHome(): Promise<void> {
+    this.busy = true;
+    const y0 = this.y, yaw0 = this.yaw;
+    const c = this.center();
+    this.world.magic.burst(c, 60, 0xffe08a, 2.2, 0.3, 0.9, -1);
+    await tween(900, (k) => {
+      this.y = y0 + Math.sin(k * Math.PI * 0.5) * 1.6;
+      this.yaw = yaw0 + k * Math.PI * 3;
+      this.root.scale.setScalar(Math.max(0.01, 1 - k * k));
+      if (Math.random() < 0.5) this.world.magic.twinkle(this.center(), 0xff7ac8, 1, 0.5);
+    }, easeOutQuad);
+    this.world.magic.burst(this.center(), 50, 0xc084fc, 2.6, 0.32, 0.9, -1);
+    this.dispose();
   }
 
   /** Điểm giữa người (để bắn phép, gắn hạt). */

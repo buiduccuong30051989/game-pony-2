@@ -3,6 +3,7 @@
 // Chụp hàng loạt bằng trình duyệt headless (xem README: "Ảnh chân dung").
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { paintEyes } from './eyes';
 
 const q = new URLSearchParams(location.search);
 const url = q.get('model') ?? 'models/ponies/rarity.glb';
@@ -32,6 +33,9 @@ new GLTFLoader().load(url, (gltf) => {
     const mats = Array.isArray(m.material) ? m.material : [m.material];
     for (const mat of mats) if ('metalness' in mat) { (mat as THREE.MeshStandardMaterial).metalness = 0; (mat as THREE.MeshStandardMaterial).roughness = 0.9; }
   });
+  // &eyes=material_3,3f9a3a: vẽ mắt cho model rip từ Source (như trong game, src/eyes.ts)
+  const eyesQ = new URLSearchParams(location.search).get('eyes');
+  if (eyesQ) { const [m, c] = eyesQ.split(','); paintEyes(obj, m, parseInt(c, 16)); }
   scene.add(obj);
   obj.updateMatrixWorld(true);
   // vùng đầu: xương Head nếu có, không thì đỉnh-trước của khối (pony hướng +z trước khi xoay)

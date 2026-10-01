@@ -94,9 +94,17 @@ export type ChallengeKind = 'spell' | 'count';
 
 // ------------------------------------------------------------------ dàn nhân vật
 
+export type FriendId =
+  | 'pinkie' | 'fluttershy' | 'derpy'
+  | 'minty' | 'babs' | 'applemint'
+  | 'starlight' | 'sunset' | 'rainbowswirl'
+  | 'zipp' | 'pipp' | 'surprise'
+  | 'bigmac' | 'sunny' | 'izzy'
+  | 'cadance' | 'shining' | 'sunburst';
+
 export type CastId =
   | 'me-yen' | 'ba-cuong' | 'ong-cuong' | 'ba-tuyet' | 'bac-hanh'
-  | 'spike' | 'pinkie' | 'fluttershy' | 'mun' | 'rom';
+  | 'spike' | 'mun' | 'rom' | FriendId;
 
 /** pony = ngựa đất/kỳ lân/pegasus (auto-rig 4 chân), flyer = công chúa có xương sẵn (bay lơ lửng), dragon = Spike, cat = emoji. */
 export type ActorKind = 'pony' | 'flyer' | 'dragon' | 'cat';
@@ -119,6 +127,12 @@ export interface CastDef {
   ball?: [string, string];
   /** màn cứu người này (nếu có) */
   level?: string;
+  /** bạn pony bị quái giữ trong bong bóng nhỏ (cứu khi trả lời đúng) */
+  friend?: boolean;
+  /** lời cảm ơn khi được cứu: [audio key, chữ hiện] */
+  thanks?: [string, string];
+  /** model có nhãn cầu trắng trơn (rip từ Source) → vẽ mống mắt + con ngươi bằng vertex color (src/eyes.ts) */
+  eyes?: { mat: string; iris: number };
 }
 
 export const CAST: Record<CastId, CastDef> = {
@@ -158,14 +172,112 @@ export const CAST: Record<CastId, CastDef> = {
     lines: [['fr_spike_1', 'Nhím giỏi quá!'], ['fr_spike_2', 'Phép của Nhím đẹp ghê!']],
   },
   pinkie: {
-    id: 'pinkie', name: 'Pinkie Pie', pony: 'bạn vui vẻ', kind: 'pony', model: 'models/ponies/pinkie.glb', height: 1.6,
-    emoji: '🎈', color: '#ff5fb4',
+    id: 'pinkie', name: 'Pinkie Pie', pony: 'bạn vui vẻ', kind: 'pony', model: 'models/ponies/pinkie.glb', height: 1.35,
+    emoji: '🎈', color: '#ff5fb4', friend: true,
     lines: [['fr_pinkie_1', 'Hoan hô Nhím!']],
+    thanks: ['thx_pinkie', 'Mình là Pinkie Pie! Cảm ơn Nhím nhé!'],
   },
   fluttershy: {
-    id: 'fluttershy', name: 'Fluttershy', pony: 'bạn hiền lành', kind: 'pony', model: 'models/ponies/fluttershy.glb', height: 1.6,
-    emoji: '🦋', color: '#e6b800',
+    id: 'fluttershy', name: 'Fluttershy', pony: 'bạn hiền lành', kind: 'pony', model: 'models/ponies/fluttershy.glb', height: 1.35,
+    emoji: '🦋', color: '#e6b800', friend: true,
     lines: [['fr_fluttershy_1', 'Nhím giỏi lắm!']],
+    thanks: ['thx_fluttershy', 'Mình là Fluttershy... Cảm ơn Twilight nhiều lắm!'],
+  },
+  derpy: {
+    id: 'derpy', name: 'Derpy', pony: 'bạn đưa thư', kind: 'pony', model: 'models/friends/derpy.glb', height: 1.3,
+    emoji: '📮', color: '#9aa3b5', friend: true,
+    lines: [['fr_derpy_1', 'Ối, Nhím giỏi ghê!']],
+    thanks: ['thx_derpy', 'Mình là Derpy! Cảm ơn Nhím, mình tặng Nhím bánh muffin!'],
+  },
+  minty: {
+    id: 'minty', name: 'Minty', pony: 'bạn bạc hà', kind: 'pony', model: 'models/friends/minty.glb', height: 1.25,
+    emoji: '🍬', color: '#4cc79a', friend: true,
+    lines: [['fr_minty_1', 'Nhím ngọt ngào quá!']],
+    thanks: ['thx_minty', 'Mình là Minty! Cảm ơn Twilight nha!'],
+  },
+  babs: {
+    id: 'babs', name: 'Babs Seed', pony: 'bạn nhỏ vườn táo', kind: 'pony', model: 'models/friends/babs.glb', height: 1.15,
+    emoji: '🌱', color: '#d9663a', friend: true,
+    lines: [['fr_babs_1', 'Chị Nhím giỏi quá!']],
+    thanks: ['thx_babs', 'Em là Babs Seed! Cảm ơn chị Nhím!'],
+  },
+  applemint: {
+    id: 'applemint', name: 'Bạc Hà', pony: 'bạn táo xanh', kind: 'pony', model: 'models/friends/applemint.glb', height: 1.25,
+    emoji: '🍏', color: '#6dbb3c', friend: true, eyes: { mat: 'material_1', iris: 0xc4701c },
+    lines: [['fr_applemint_1', 'Nhím tuyệt quá!']],
+    thanks: ['thx_applemint', 'Mình là Bạc Hà! Cảm ơn Nhím nhiều nhé!'],
+  },
+  starlight: {
+    id: 'starlight', name: 'Starlight Glimmer', pony: 'bạn kỳ lân phép thuật', kind: 'pony', model: 'models/friends/starlight.glb', height: 1.4,
+    emoji: '✨', color: '#c86fd6', friend: true,
+    lines: [['fr_starlight_1', 'Phép của Nhím hay quá!']],
+    thanks: ['thx_starlight', 'Mình là Starlight! Cảm ơn Twilight, phép của bạn đẹp lắm!'],
+  },
+  sunset: {
+    id: 'sunset', name: 'Sunset Shimmer', pony: 'bạn kỳ lân hoàng hôn', kind: 'pony', model: 'models/friends/sunset.glb', height: 1.4,
+    emoji: '🌅', color: '#f2803a', friend: true,
+    lines: [['fr_sunset_1', 'Nhím sáng như mặt trời!']],
+    thanks: ['thx_sunset', 'Mình là Sunset Shimmer! Cảm ơn Nhím nhé!'],
+  },
+  rainbowswirl: {
+    id: 'rainbowswirl', name: 'Cầu Vồng', pony: 'bạn kỳ lân bảy màu', kind: 'pony', model: 'models/friends/rainbowswirl.glb', height: 1.3,
+    emoji: '🌈', color: '#4fb3ff', friend: true,
+    lines: [['fr_rainbowswirl_1', 'Nhím giỏi nhất!']],
+    thanks: ['thx_rainbowswirl', 'Mình là Cầu Vồng! Cảm ơn Twilight đã cứu mình!'],
+  },
+  zipp: {
+    id: 'zipp', name: 'Zipp Storm', pony: 'bạn bay nhanh', kind: 'pony', model: 'models/friends/zipp.glb', height: 1.35,
+    emoji: '💨', color: '#7f8ce0', friend: true,
+    lines: [['fr_zipp_1', 'Nhím nhanh như chớp!']],
+    thanks: ['thx_zipp', 'Mình là Zipp! Cảm ơn Nhím, giờ mình bay được rồi!'],
+  },
+  pipp: {
+    id: 'pipp', name: 'Pipp Petals', pony: 'bạn ca sĩ', kind: 'pony', model: 'models/friends/pipp.glb', height: 1.35,
+    emoji: '🎤', color: '#e58ad8', friend: true,
+    lines: [['fr_pipp_1', 'Nhím hay quá, la la la!']],
+    thanks: ['thx_pipp', 'Mình là Pipp! Cảm ơn Nhím, mình hát tặng Nhím nhé!'],
+  },
+  surprise: {
+    id: 'surprise', name: 'Surprise', pony: 'bạn bất ngờ', kind: 'pony', model: 'models/friends/surprise.glb', height: 1.35,
+    emoji: '🎁', color: '#e0b52c', friend: true, eyes: { mat: 'material_5', iris: 0x3b8fd9 },
+    lines: [['fr_surprise_1', 'Bất ngờ chưa, Nhím giỏi quá!']],
+    thanks: ['thx_surprise', 'Mình là Surprise! Cảm ơn Twilight nha!'],
+  },
+  bigmac: {
+    id: 'bigmac', name: 'Big Mac', pony: 'anh khoẻ mạnh', kind: 'pony', model: 'models/friends/bigmac.glb', height: 1.6,
+    emoji: '🍎', color: '#d4373f', friend: true, eyes: { mat: 'material_3', iris: 0x3f9a3a },
+    lines: [['fr_bigmac_1', 'Đúng vậy! Nhím giỏi!']],
+    thanks: ['thx_bigmac', 'Anh là Big Mac! Cảm ơn Nhím nhé!'],
+  },
+  sunny: {
+    id: 'sunny', name: 'Sunny', pony: 'bạn mặt trời', kind: 'pony', model: 'models/friends/sunny.glb', height: 1.3,
+    emoji: '🌻', color: '#f59a3a', friend: true,
+    lines: [['fr_sunny_1', 'Nhím là bạn tốt nhất!']],
+    thanks: ['thx_sunny', 'Mình là Sunny! Cảm ơn Twilight, mình làm bạn nhé!'],
+  },
+  izzy: {
+    id: 'izzy', name: 'Izzy', pony: 'bạn kỳ lân vui tính', kind: 'pony', model: 'models/friends/izzy.glb', height: 1.3,
+    emoji: '💜', color: '#8f6bd9', friend: true,
+    lines: [['fr_izzy_1', 'Ôi, Nhím giỏi tuyệt vời!']],
+    thanks: ['thx_izzy', 'Mình là Izzy! Cảm ơn Nhím, Nhím dễ thương quá!'],
+  },
+  cadance: {
+    id: 'cadance', name: 'Công chúa Cadance', pony: 'công chúa tình yêu', kind: 'pony', model: 'models/friends/cadance.glb', height: 1.6,
+    emoji: '💖', color: '#ff8fc8', friend: true,
+    lines: [['fr_cadance_1', 'Cô thương Nhím lắm!']],
+    thanks: ['thx_cadance', 'Cô là công chúa Cadance! Cảm ơn Nhím nhé!'],
+  },
+  shining: {
+    id: 'shining', name: 'Shining Armor', pony: 'anh hiệp sĩ', kind: 'pony', model: 'models/friends/shining.glb', height: 1.6,
+    emoji: '🛡️', color: '#4a6fd1', friend: true, eyes: { mat: 'material_2', iris: 0x2f6fd8 },
+    lines: [['fr_shining_1', 'Nhím dũng cảm quá!']],
+    thanks: ['thx_shining', 'Anh là Shining Armor! Cảm ơn em Twilight!'],
+  },
+  sunburst: {
+    id: 'sunburst', name: 'Sunburst', pony: 'bạn phù thuỷ nhỏ', kind: 'pony', model: 'models/friends/sunburst.glb', height: 1.4,
+    emoji: '🔮', color: '#e86a2a', friend: true, eyes: { mat: 'material_0', iris: 0x3fa38a },
+    lines: [['fr_sunburst_1', 'Phép thuật tuyệt vời!']],
+    thanks: ['thx_sunburst', 'Mình là Sunburst! Cảm ơn Nhím nhé!'],
   },
   mun: {
     id: 'mun', name: 'Mèo Mun', pony: 'mèo đen', kind: 'cat', height: 0.9, emoji: '🐈‍⬛', color: '#5a4b6e', level: 'mun',
@@ -204,6 +316,8 @@ export interface LevelDef {
   island: { rx: number; rz: number };          // bán trục ellipse của đảo
   start: [number, number];                     // vị trí xuất phát (x, z)
   monsters: { x: number; z: number; kind: ChallengeKind; color: number }[];
+  /** bạn pony mỗi quái đang giữ (cùng thứ tự với monsters; không bạn nào lặp lại giữa các màn) */
+  friends: FriendId[];
   gems: [number, number][];                    // (x, z) các viên ngọc
   bubble: [number, number];                    // bong bóng nhốt người thân
   countRange: [number, number];                // số ngọc quái giữ
@@ -223,6 +337,7 @@ export const LEVELS: LevelDef[] = [
       { x: 10, z: 8, kind: 'count', color: 0x7fd8c8 },
       { x: 19, z: -7, kind: 'spell', color: 0xffb36b },
     ],
+    friends: ['pinkie', 'fluttershy', 'derpy'],
     gems: [[-12, 0], [-9, -4], [-2, 2], [3, -3], [6, 4], [13, 0], [16, 3], [12, -10], [21, 2], [-8, 9]],
     bubble: [22, 6],
     countRange: [1, 5],
@@ -238,6 +353,7 @@ export const LEVELS: LevelDef[] = [
       { x: 6, z: -9, kind: 'count', color: 0x8fd3ff },
       { x: 18, z: 6, kind: 'spell', color: 0xa5e887 },
     ],
+    friends: ['minty', 'babs', 'applemint'],
     gems: [[-14, 2], [-11, 7], [-4, 4], [-1, -3], [3, -8], [9, -5], [10, 2], [14, 8], [22, -2], [0, 10], [-6, -10]],
     bubble: [23, -8],
     countRange: [3, 8],
@@ -253,6 +369,7 @@ export const LEVELS: LevelDef[] = [
       { x: 7, z: -8, kind: 'count', color: 0x9be3ff },
       { x: 17, z: 5, kind: 'spell', color: 0xc9a7ff },
     ],
+    friends: ['starlight', 'sunset', 'rainbowswirl'],
     gems: [[-14, 1], [-10, 5], [-3, 3], [0, -3], [4, -6], [10, -3], [12, 3], [20, 0], [-6, -9], [3, 10]],
     bubble: [22, -5],
     countRange: [2, 6],
@@ -268,6 +385,7 @@ export const LEVELS: LevelDef[] = [
       { x: 5, z: 8, kind: 'count', color: 0xffd36b },
       { x: 16, z: -6, kind: 'spell', color: 0xff8f8f },
     ],
+    friends: ['zipp', 'pipp', 'surprise'],
     gems: [[-14, 0], [-11, -5], [-3, -3], [0, 3], [3, 6], [9, 2], [11, -4], [20, -1], [-8, 9], [14, 9]],
     bubble: [22, 5],
     countRange: [3, 7],
@@ -283,6 +401,7 @@ export const LEVELS: LevelDef[] = [
       { x: 3, z: -8, kind: 'spell', color: 0xa5e887 },
       { x: 15, z: 7, kind: 'spell', color: 0xff8fb1 },
     ],
+    friends: ['bigmac', 'sunny', 'izzy'],
     gems: [[-15, 0], [-12, 4], [-5, 2], [-2, -4], [1, -9], [7, -4], [9, 3], [19, 2], [-4, 11], [12, -10]],
     bubble: [22, -6],
     countRange: [4, 8],
@@ -298,6 +417,7 @@ export const LEVELS: LevelDef[] = [
       { x: 4, z: 7, kind: 'count', color: 0xc9a7ff },
       { x: 17, z: -6, kind: 'spell', color: 0x9be3ff },
     ],
+    friends: ['cadance', 'shining', 'sunburst'],
     gems: [[-15, 0], [-12, -5], [-4, -4], [-1, 2], [1, 9], [8, 3], [10, -3], [20, -2], [-9, 8], [13, 9]],
     bubble: [23, 4],
     countRange: [5, 9],
@@ -309,6 +429,7 @@ export const LEVELS: LevelDef[] = [
     island: { rx: 22, rz: 16 },
     start: [0, 5],
     monsters: [],
+    friends: [],
     gems: [],
     bubble: [0, -7],
     countRange: [3, 9],
@@ -326,3 +447,8 @@ export const HARMONY: { kind: ChallengeKind; name: string; color: number; owner:
   { kind: 'count', name: 'Hào phóng', color: 0x9b6bff, owner: 'me-yen', audio: 'gem_4' },
   { kind: 'spell', name: 'Trung thành', color: 0xff4d5e, owner: 'ba-cuong', audio: 'gem_5' },
 ];
+
+/** Tất cả bạn pony theo thứ tự cứu (màn 1 → 6). */
+export const FRIEND_IDS: FriendId[] = LEVELS.flatMap((l) => l.friends);
+/** Số người đi theo tối đa hiện cùng lúc (iPad); bạn dư về nhà (bản đồ + trận cuối). */
+export const MAX_PARADE = 8;

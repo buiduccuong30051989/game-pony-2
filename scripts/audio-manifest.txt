@@ -185,3 +185,40 @@ n7|bảy
 n8|tám
 n9|chín
 n10|mười
+# --- bạn pony được cứu (mỗi câu đúng cứu 1 bạn): khen + cảm ơn
+thx_pinkie|Mình là Pinh-ki Pai! Cảm ơn Nhím nhé! Mình đi dự tiệc cùng Nhím nha!
+thx_fluttershy|Mình là Phlớt-tơ-sai... Cảm ơn Twai-lai nhiều lắm!
+fr_derpy_1|Đơ-pi khen: ối, Nhím giỏi ghê!
+thx_derpy|Mình là Đơ-pi! Cảm ơn Nhím, mình tặng Nhím cái bánh mắp-phin!
+fr_minty_1|Min-ti khen: Nhím ngọt ngào quá!
+thx_minty|Mình là Min-ti! Cảm ơn Twai-lai nha!
+fr_babs_1|Báp Xít khen: chị Nhím giỏi quá!
+thx_babs|Em là Báp Xít! Cảm ơn chị Nhím!
+fr_applemint_1|Bạc Hà khen: Nhím tuyệt quá!
+thx_applemint|Mình là Bạc Hà! Cảm ơn Nhím nhiều nhé!
+fr_starlight_1|Xta-lai khen: phép của Nhím hay quá!
+thx_starlight|Mình là Xta-lai! Cảm ơn Twai-lai, phép của bạn đẹp lắm!
+fr_sunset_1|Xăn-xét khen: Nhím sáng như mặt trời!
+thx_sunset|Mình là Xăn-xét Sim-mơ! Cảm ơn Nhím nhé!
+fr_rainbowswirl_1|Cầu Vồng khen: Nhím giỏi nhất!
+thx_rainbowswirl|Mình là Cầu Vồng! Cảm ơn Twai-lai đã cứu mình!
+fr_zipp_1|Díp khen: Nhím nhanh như chớp!
+thx_zipp|Mình là Díp! Cảm ơn Nhím, giờ mình bay được rồi!
+fr_pipp_1|Píp khen: Nhím hay quá, la la la!
+thx_pipp|Mình là Píp! Cảm ơn Nhím, mình hát tặng Nhím nhé! La la la!
+fr_surprise_1|Xơ-prai khen: bất ngờ chưa, Nhím giỏi quá!
+thx_surprise|Mình là Xơ-prai! Cảm ơn Twai-lai nha!
+fr_bigmac_1|Bích Mác nói: đúng vậy! Nhím giỏi!
+thx_bigmac|Anh là Bích Mác! Cảm ơn Nhím nhé!
+fr_sunny_1|Xăn-ni khen: Nhím là bạn tốt nhất!
+thx_sunny|Mình là Xăn-ni! Cảm ơn Twai-lai, mình làm bạn nhé!
+fr_izzy_1|I-di khen: ôi, Nhím giỏi tuyệt vời!
+thx_izzy|Mình là I-di! Cảm ơn Nhím, Nhím dễ thương quá!
+fr_cadance_1|Công chúa Ca-đần nói: cô thương Nhím lắm!
+thx_cadance|Cô là công chúa Ca-đần! Cảm ơn Nhím nhé!
+fr_shining_1|Sai-ninh A-mơ khen: Nhím dũng cảm quá!
+thx_shining|Anh là Sai-ninh A-mơ! Cảm ơn em Twai-lai!
+fr_sunburst_1|Xăn-bơt khen: phép thuật tuyệt vời!
+thx_sunburst|Mình là Xăn-bơt! Cảm ơn Nhím nhé!
+friend_home|Hàng đi theo đông quá rồi! Bạn ấy về nhà Nhím chơi trước nha!
+friends_gallery|Đây là các bạn pony Nhím đã cứu!

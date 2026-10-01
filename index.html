@@ -170,6 +170,37 @@
     @keyframes endHop { from { transform: translateY(0); } to { transform: translateY(-14px); } }
     #ending-home { width: 110px; height: 110px; font-size: 54px; }
 
+
+    /* nhà bạn bè dưới bản đồ + bộ sưu tập bạn pony */
+    #map-friends { position: absolute; bottom: max(18px, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 12px; max-width: 94vw; padding: 8px 18px 8px 20px; border: 4px solid #fff; border-radius: 999px;
+      background: linear-gradient(180deg, #ffb3dc, #ff7ac8); color: #fff; font: inherit; font-weight: 800; font-size: 22px; cursor: pointer;
+      box-shadow: 0 6px 0 rgba(59,50,32,.25); -webkit-text-stroke: .5px rgba(59,50,32,.3); }
+    #map-friends:active { transform: translateX(-50%) scale(.96); }
+    .mf-label { white-space: nowrap; }
+    .mf-faces { display: flex; align-items: center; }
+    .mf-ava { width: 52px; height: 52px; margin-left: -10px; border-radius: 50%; border: 3px solid #fff; background: #fff; overflow: hidden; flex: none; animation: famBob .9s ease-in-out infinite alternate; }
+    .mf-ava > img:first-child, .gal-ava > img:first-child, .end-fr > img:first-child { width: 100%; height: 100%; object-fit: cover; display: block; border-radius: 50%; }
+    .mf-more { margin-left: 6px; font-size: 22px; }
+    #gallery { background: linear-gradient(180deg, rgba(58,58,140,.96), rgba(143,127,208,.96) 60%, rgba(255,233,201,.96)); z-index: 15; }
+    .gal-box { display: flex; flex-direction: column; align-items: center; gap: 16px; padding: 16px; max-height: 100vh; overflow-y: auto; }
+    .gal-box h2 { margin: 0; color: #fff; font-size: clamp(28px, 4.5vw, 44px); text-shadow: 0 4px 0 rgba(40,30,90,.35); }
+    #gallery-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px 12px; max-width: 900px; width: 100%; }
+    .gal-card { display: flex; flex-direction: column; align-items: center; gap: 4px; animation: endHop .9s ease-in-out infinite alternate both; }
+    .gal-ava { width: 104px; height: 104px; max-width: 100%; aspect-ratio: 1; border-radius: 50%; border: 5px solid var(--c); background: radial-gradient(circle at 50% 35%, #fff, #f1e6ff);
+      display: grid; place-items: center; font-size: 54px; font-weight: 800; color: #b9a8e8; overflow: hidden; }
+    .gal-card small { font-size: 16px; font-weight: 800; color: #fff; background: var(--c); border-radius: 999px; padding: 0 10px; white-space: nowrap; max-width: 140px; overflow: hidden; text-overflow: ellipsis; }
+    .gal-card.locked { animation: none; opacity: .55; }
+    .gal-card.locked .gal-ava { border-color: #cfc4ff; background: #e8e2ff; }
+    .gal-card.locked small { background: #9d93c9; }
+    #ending-friends { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; max-width: 900px; }
+    .end-fr { width: 64px; height: 64px; border-radius: 50%; border: 4px solid #fff; background: #fff; overflow: hidden; animation: endHop .7s ease-in-out infinite alternate both; }
+    @media (max-width: 720px) {
+      #gallery-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+      #map-friends { font-size: 18px; }
+      .mf-ava { width: 40px; height: 40px; }
+    }
+
     #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 20; overflow: hidden; }
     #confetti i { position: absolute; top: -20px; width: 14px; height: 22px; border-radius: 4px; animation: fall linear forwards; }
     @keyframes fall { to { transform: translateY(110vh) rotate(720deg); opacity: .6; } }
@@ -227,6 +258,15 @@
   <div id="map" class="overlay" hidden>
     <h1><span id="map-hero"></span>Nhím đi cứu cả nhà</h1>
     <div id="map-nodes"></div>
+    <button id="map-friends" aria-label="Các bạn pony đã cứu"></button>
+  </div>
+
+  <div id="gallery" class="overlay" hidden>
+    <div class="gal-box">
+      <h2>Các bạn pony Nhím đã cứu</h2>
+      <div id="gallery-grid"></div>
+      <button id="gallery-close" class="big" aria-label="Đóng">✖</button>
+    </div>
   </div>
 
   <div id="ending" class="overlay" hidden>
@@ -234,6 +274,7 @@
       <div class="end-sun">☀️</div>
       <h2>Nhím đã cứu cả nhà!</h2>
       <div id="ending-fam"></div>
+      <div id="ending-friends"></div>
       <button id="ending-home" class="big" aria-label="Về bản đồ">🏠</button>
     </div>
   </div>
