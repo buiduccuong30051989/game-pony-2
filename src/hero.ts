@@ -37,6 +37,14 @@ export class Hero {
   private walkK = 0;   // 0..1 mức độ đang đi (mượt)
   private walker: Walker | null = null;
   private pose: WalkerPose | null = null;
+  // đứng chơi khi bé không bấm: thở, ngó quanh, phẩy đuôi, quay ra camera, nhảy cẫng
+  private idleT = 0;
+  private nextIdle = 2.5;
+  private actT = 0;
+  private lookGoal = 0;
+  private pitchGoal = 0;
+  private tailGoal = 0;
+  private yawGoal: number | null = null;
   private readonly cfg: HeroConfig;
 
   private constructor(readonly kind: HeroKind, model: THREE.Object3D) {
@@ -90,6 +98,33 @@ export class Hero {
     return true;
   }
 
+  private idleTick(dt: number): void {
+    const free = !this.moving && this.grounded && !this.locked;
+    if (!free) {
+      this.idleT = 0; this.yawGoal = null;
+      this.lookGoal = this.pitchGoal = this.tailGoal = 0;
+      return;
+    }
+    this.idleT += dt;
+    if (this.actT > 0) { this.actT -= dt; if (this.actT <= 0) { this.lookGoal = this.pitchGoal = this.tailGoal = 0; } }
+    if (this.idleT > this.nextIdle) {
+      this.idleT = 0;
+      this.nextIdle = 2.2 + Math.random() * 3;
+      const acts = this.walker?.look ? ['look', 'look', 'tail', 'sniff', 'camera', 'hop'] : ['camera', 'hop', 'camera'];
+      const a = acts[Math.floor(Math.random() * acts.length)];
+      if (a === 'look') { this.lookGoal = (Math.random() < 0.5 ? -1 : 1) * (0.4 + Math.random() * 0.3); this.actT = 1.6; }
+      else if (a === 'tail') { this.tailGoal = 1; this.actT = 1.3; }
+      else if (a === 'sniff') { this.pitchGoal = 0.35; this.actT = 1.1; }
+      else if (a === 'camera') this.yawGoal = 0;
+      else if (a === 'hop') { this.vy = 5; this.grounded = false; }
+    }
+    if (this.yawGoal !== null) {
+      let d = this.yawGoal - this.yaw;
+      d = Math.atan2(Math.sin(d), Math.cos(d));
+      this.yaw += d * Math.min(1, dt * 2.5);
+    }
+  }
+
   /** Quay mặt về một điểm. */
   faceTo(x: number, z: number): void {
     this.yaw = Math.atan2(x - this.x, z - this.z);
@@ -115,6 +150,14 @@ export class Hero {
       let d = target - this.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));
       this.yaw += d * Math.min(1, dt * TURN);
+    }
+    this.idleTick(dt);
+    const L = this.walker?.look;
+    if (L) {
+      const r = Math.min(1, dt * 4);
+      L.yaw += (this.lookGoal - L.yaw) * r;
+      L.pitch += (this.pitchGoal - L.pitch) * r;
+      L.tail += (this.tailGoal - L.tail) * r;
     }
     if (!this.grounded) {
       this.vy -= GRAVITY * dt;

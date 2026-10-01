@@ -2,6 +2,11 @@
 
 Trạng thái: PLAN bản 2 sau góp ý Adam 29/09/2026, chờ duyệt + 1 việc Adam tự tải model.
 
+> **Cập nhật 01/10/2026 (bản 3, đã làm):** Adam chốt hướng khác — không biến hình Hà An từng bộ phận nữa. Nhím = Twilight
+> từ đầu; cả nhà hoá pony (mẹ Yến = Rarity, ba Cường = Rainbow Dash, ông Cương = Applejack, bà Tuyết = Celestia,
+> bác Hanh = Luna bị biến thành Nightmare Moon). 7 màn: Mun, Rơm, mẹ, ba, ông, bà (kéo mặt trời lên), trận cuối
+> Nightmare Moon với 5 ngọc Hài Hoà. Xem README.md (dàn nhân vật, debug URL) và CREDITS.md. Phần dưới là plan bản 2, giữ để tham khảo.
+
 ## Thay đổi so với bản 1
 
 - Bỏ pixel 2D Phaser. Adam muốn pony 3D đẹp nét → **Three.js 3D**, tái dùng engine game 1 (scene, audio, tween, loader GLB).

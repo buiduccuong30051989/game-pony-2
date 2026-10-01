@@ -5,21 +5,24 @@ import { els, showPanel, showWord, showOptions, showGemRow, setCounter, wobbleEl
 import { wait } from './tween';
 
 export interface ChallengeHooks {
-  onWrong: () => void;                    // quái cười
+  /** quái cười / Nightmare Moon cười (không phạt); trả Promise thì chờ cười xong mới nhắc lại */
+  onWrong: () => Promise<void> | void;
 }
+
+// 1 nút 🔊 dùng chung: chỉ thử thách đang chạy được nghe lại
+let activeRepeat: (() => void) | null = null;
+els.repeat.addEventListener('click', () => activeRepeat?.());
 
 export class Challenge {
   private used = new Set<string>();
-  private repeatFn: (() => void) | null = null;
+  private set repeatFn(fn: (() => void) | null) { activeRepeat = fn; }
 
-  constructor(private level: LevelDef, private hooks: ChallengeHooks) {
-    els.repeat.addEventListener('click', () => this.repeatFn?.());
-  }
+  constructor(private level: LevelDef, private hooks: ChallengeHooks) {}
 
-  /** Chạy 1 thử thách, resolve khi bé trả lời đúng (luôn thành công, không kẹt). */
-  async run(kind: ChallengeKind): Promise<void> {
-    showPanel(true);
-    await play('monster');
+  /** Chạy 1 thử thách, resolve khi bé trả lời đúng (luôn thành công, không kẹt). low = bảng sát đáy màn. */
+  async run(kind: ChallengeKind, introKey = 'monster', low = false): Promise<void> {
+    showPanel(true, low);
+    await play(introKey);
     if (kind === 'spell') await this.spell(); else await this.count();
     await wait(300);
     showPanel(false);
@@ -51,9 +54,9 @@ export class Challenge {
           wrong++;
           sfx('sfx_soft', 0.5);
           wobbleEl(btn);
-          this.hooks.onWrong();
+          if (wrong === 1) btn.classList.add('gone');
+          await this.hooks.onWrong();
           if (wrong === 1) {
-            btn.classList.add('gone');
             await play('retry');
             await play(`ask_${target.id}`);
           } else {
@@ -120,9 +123,9 @@ export class Challenge {
           wrong++;
           sfx('sfx_soft', 0.5);
           wobbleEl(btn);
-          this.hooks.onWrong();
+          if (wrong === 1) btn.classList.add('gone');
+          await this.hooks.onWrong();
           if (wrong === 1) {
-            btn.classList.add('gone');
             await play('retry');
             await play(NUMBER_AUDIO[n]);
           } else {

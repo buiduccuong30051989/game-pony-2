@@ -21,13 +21,16 @@ const VERT = /* glsl */ `
     gl_PointSize = aSize * (260.0 / -mv.z);
     gl_Position = projectionMatrix * mv;
   }`;
+// uAdd = 1: cộng màu (đẹp trên nền tối/đêm); 0: trộn thường (nền sáng ban ngày không bị loá trắng)
 const FRAG = /* glsl */ `
+  uniform float uAdd;
   varying float vAlpha;
   varying vec3 vColor;
   void main() {
     float d = length(gl_PointCoord - 0.5);
     float a = smoothstep(0.5, 0.12, d) * vAlpha;
-    gl_FragColor = vec4(vColor * a, a);
+    vec3 core = mix(vColor, vec3(1.0), smoothstep(0.22, 0.0, d) * 0.6 * (1.0 - uAdd));
+    gl_FragColor = vec4(mix(core, vColor * a, uAdd), a);
   }`;
 
 export class Magic {
@@ -40,6 +43,17 @@ export class Magic {
   private readonly alpha: Float32Array;
   private readonly geo: THREE.BufferGeometry;
   private readonly tmp = new THREE.Color();
+  private readonly mat: THREE.ShaderMaterial;
+  private additive = true;
+
+  /** Đêm: cộng màu cho rực; ngày: trộn thường để hạt vẫn rõ trên nền sáng. */
+  setAdditive(on: boolean): void {
+    if (on === this.additive) return;
+    this.additive = on;
+    this.mat.blending = on ? THREE.AdditiveBlending : THREE.NormalBlending;
+    this.mat.uniforms.uAdd.value = on ? 1 : 0;
+    this.mat.needsUpdate = true;
+  }
 
   constructor(scene: THREE.Scene) {
     this.pos = new Float32Array(this.max * 3);
@@ -54,8 +68,9 @@ export class Magic {
     this.geo.setDrawRange(0, 0);
     const mat = new THREE.ShaderMaterial({
       vertexShader: VERT, fragmentShader: FRAG, transparent: true, depthWrite: false,
-      blending: THREE.AdditiveBlending,
+      blending: THREE.AdditiveBlending, uniforms: { uAdd: { value: 1 } },
     });
+    this.mat = mat;
     this.points = new THREE.Points(this.geo, mat);
     this.points.frustumCulled = false;
     scene.add(this.points);

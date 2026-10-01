@@ -1,6 +1,26 @@
-# Hà An và phép thuật Twilight (dự án 2: Three.js side-scroller 3D)
+# Nhím và phép thuật tình bạn (dự án 2: Three.js, đảo 3D)
 
-Bé điều khiển Twilight Sparkle (màn 1: ngựa, màn 2: người) đi 4 hướng trên một hòn đảo rộng giữa biển, gặp quái vật thì đánh vần hoặc đếm đúng để làm phép, đủ 3 sao thì tới bong bóng cứu mèo Mun / mèo Rơm. Có "đường sao" lấp lánh dẫn tới quái gần nhất để bé không lạc. Plan chi tiết: `PLAN.md`.
+Nhím (Hà An, 5 tuổi) là **Twilight Sparkle**. Nightmare Moon phủ màn đêm và nhốt cả nhà (đã hoá pony) vào bong bóng
+pha lê mặt trăng trên 7 hòn đảo Equestria. Bé đi 4 hướng, gặp quái bóng đêm thì đánh vần hoặc đếm đúng để làm phép,
+đủ 3 sao thì tới bong bóng làm Đại phép cứu người nhà. Người đã cứu đi theo Nhím ở các màn sau. Màn 7: đấu Nightmare Moon
+bằng 5 ngọc Hài Hoà → cầu vồng → Nightmare Moon hoá lại công chúa Luna = bác Hanh, trời sáng, cả nhà ăn mừng.
+Không có thua, sai chỉ bị quái/Nightmare Moon cười rồi gợi ý.
+
+## Dàn nhân vật
+
+| Người nhà | Vai | Ở đâu trong game |
+|---|---|---|
+| Nhím (Hà An) | Twilight Sparkle | nhân vật chính (màn 2: Twilight Equestria Girls) |
+| Mèo Mun, mèo Rơm | mèo (emoji) | màn 1, 2 |
+| Mẹ Yến | Rarity | màn 3 (rừng hoa) |
+| Ba Cường | Rainbow Dash, nhanh và mạnh (hay bay vòng kéo cầu vồng) | màn 4 (đảo mây) |
+| Ông Cương | Applejack | màn 5 (vườn táo) |
+| Bà Tuyết | Công chúa Celestia: được cứu thì bay lên kéo mặt trời, trời sáng hẳn | màn 6 (đồi pha lê) |
+| Bác Hanh | Công chúa Luna, bị bóng tối biến thành **Nightmare Moon** (trùm cuối, được cứu chứ không bị đánh) | màn 7 (lâu đài mặt trăng) |
+| bạn bè | Spike (đi theo, đứng yên 10 s thì nhắc đường), Pinkie Pie + Fluttershy (cổ vũ trận cuối) | |
+
+Thẻ cổ vũ (mặt pony + tên + câu khen, có giọng đọc) hiện sau mỗi câu đúng và khi cứu được người. Ảnh thật người nhà
+(tuỳ chọn): thả `public/family/<id>.jpg` (xem `public/family/README.txt`) → hiện thành huy hiệu tròn cạnh mặt pony.
 
 ## Chạy
 
@@ -8,46 +28,70 @@ Bé điều khiển Twilight Sparkle (màn 1: ngựa, màn 2: người) đi 4 h�
 pnpm install
 pnpm dev        # http://localhost:5173 (thêm --host để mở trên iPad cùng Wi-Fi)
 pnpm build      # ra dist/
-pnpm audio      # sinh lại audio từ scripts/audio-manifest.txt (macOS, giọng Linh)
+pnpm audio      # sinh lại audio từ scripts/audio-manifest.txt (macOS, giọng Linh; đổi câu thì xoá m4a cũ không còn key)
+pnpm exec tsc --noEmit
 ```
-
-Trang dev xem model: `/viewer.html?model=models/twilight_static/scene.gltf&yaw=0.7` (thêm `&anim=0` để chạy animation nếu có).
 
 ## Điều khiển
 
-- iPad: D-pad ▲◀▶▼ giữ để đi, ⬆ (tím) nhảy. Mac: phím mũi tên đi, Space nhảy.
-- Đi tới gần quái là tự dừng. Bảng thử thách hiện: 🔊 nghe lại, 3 lựa chọn to.
-- Sai lần 1: bỏ 1 đáp án sai, đọc lại. Sai lần 2: đáp án đúng nhấp nháy. Không bao giờ kẹt.
-- Đi tới mép đảo thì dừng lại, không rơi.
-- Đủ 3 ⭐ và tới bong bóng: bấm ✨ để làm Đại phép, cứu mèo, mở màn tiếp.
+- iPad: D-pad ▲◀▶▼ giữ để đi, ⬆ (tím) nhảy, 🏠 về bản đồ (khi không đang làm thử thách). Mac: phím mũi tên, Space nhảy.
+- Đi tới gần quái là tự dừng. Bảng thử thách: 🔊 nghe lại, 3 lựa chọn to. Sai lần 1 bỏ 1 đáp án sai; sai lần 2 đáp án đúng nhấp nháy.
+- Đủ 3 ⭐ và tới bong bóng: bấm ✨ để làm Đại phép.
+- Trận cuối không cần đi: chỉ trả lời 5 câu (bảng nằm sát đáy để thấy Nightmare Moon).
+
+## Debug URL (chơi thử / chụp màn hình; có tham số debug thì KHÔNG ghi đè tiến độ thật trong localStorage)
+
+| Tham số | Tác dụng |
+|---|---|
+| `?level=ong` hoặc `?level=5` | vào thẳng màn (id: `mun rom me ba ong ba_tuyet final`, hoặc số 1–7) sau khi chạm 🦄 |
+| `&auto=1` | bỏ qua màn chạm 🦄 (trình duyệt phải cho phát tiếng không cần chạm, hoặc dùng kèm `mute`) |
+| `&mute=1` | tắt tiếng, mỗi câu thoại coi như 150 ms → kịch bản chạy nhanh |
+| `&done=all` hoặc `&done=mun,rom,me` | coi như đã cứu những màn đó (người đi theo, mặt trên bản đồ) |
+| `&unlock=all` | mở hết nút bản đồ |
+| `&stars=3` | vào màn với 3 sao sẵn (quái đã biến mất), đi tới bong bóng |
+| `&rescue=1` | đặt Nhím cạnh bong bóng và tự làm Đại phép cứu (vd `?level=ba_tuyet&rescue=1&done=mun,rom,me,ba,ong&auto=1&mute=1` xem bà Tuyết kéo mặt trời) |
+| `&battle=N` | màn cuối, N ngọc Hài Hoà đã sáng sẵn (0–5) |
+| `&win=1` | màn cuối, nhảy thẳng tới cầu vồng + Nightmare Moon hoá Luna + ăn mừng |
+| `&end=1` | mở thẳng màn kết "Nhím đã cứu cả nhà!" |
+
+Ví dụ: `/?level=final&done=all&battle=2&auto=1&mute=1`, `/?level=final&done=all&win=1&auto=1`, `/?unlock=all&done=mun,rom,me,ba&auto=1`.
+`window.__game` (phase, battlePhase, hero, followers, monsters, startLevel...) để công cụ test đọc trạng thái.
+
+Trang dev khác: `/viewer.html?model=models/ponies/rarity.glb&yaw=0.7` xem model; `/portrait.html?model=...&yaw=-0.2[&f=fx,fy,fz&r=0.2]`
+chụp mặt pony (dataURL ở `window.__png`) → lưu thành `public/img/portraits/<tên>.png` (đã chụp sẵn 10 ảnh).
 
 ## Cấu trúc
 
 ```
-index.html        UI DOM đè lên canvas: HUD sao/ngọc, 3 nút điều khiển, bảng thử thách, bản đồ, pháo giấy
-src/main.ts       điều phối: bản đồ → màn → đi/nhảy/nhặt ngọc → quái → thử thách → phép → bong bóng → cứu; lưu tiến độ localStorage
-src/world.ts      Three.js: đảo ellipse (trụ + viền + bóng dưới nước), camera bám sau lưng, trời gradient, đồi xa, mây, biển, props Kenney rải theo seed (recolor + metalness 0), ngọc, bong bóng, emoji sprite
-src/hero.ts       nhân vật: load GLB, đi 4 hướng + xoay mượt, nhảy, nhún nhẹ, ăn mừng, tư thế làm phép; model người: giấu đầu thừa
-src/rig.ts        cho model "cứng" đi được: ngựa (không xương) → tự gắn 11 xương (thân, 4 chân × hông+gối, đầu, đuôi) theo hình học (móng → 4 cụm → trọng số da, bờm/đuôi theo mesh tóc) rồi chạy phi nước đại có gập gối, nhún thân, gật đầu, phất đuôi; người (xương mất tên, có xương D trùng vị trí) → dò đùi/gối/tay theo vị trí rồi vung quanh trục ngang
-src/monster.ts    quái tròn (cầu + mắt + má + sừng), cười khi sai, tan thành bươm bướm khi bị phép
-src/magic.ts      hệ hạt 1 Points + shader riêng: burst, ring, twinkle, beam theo đường cong
-src/challenge.ts  mini-game: A1 nghe – chọn hình (đánh vần chuẩn lớp 1 với thẻ chữ), B1 đếm ngọc – chọn số
-src/ui.ts         helper DOM
-src/data.ts       palette, 10 từ + token đánh vần, 2 màn, thứ tự cứu 6 người
-src/audio.ts, src/tween.ts   dùng lại từ game 1
-scripts/          gen-audio.sh + audio-manifest.txt (92 clip)
-public/models/    twilight_static (Sketchfab, CC BY), twilight (Equestria Girls, Sketchfab, CC BY), haan.glb (Quaternius CC0, dự phòng), props Kenney CC0
+index.html        UI DOM đè lên canvas: HUD sao / 5 ngọc Hài Hoà, D-pad, 🏠, bảng thử thách, thẻ cổ vũ, bản đồ, màn kết, chớp sáng
+src/main.ts       điều phối: bản đồ → màn → đi/nhặt ngọc → quái → thử thách → phép → bong bóng → cứu; hàng người đi theo; Spike nhắc; debug URL; lưu tiến độ
+src/battle.ts     màn cuối: Nightmare Moon + lớp bóng tối nứt dần (canvas), 5 ngọc Hài Hoà, tia hài hoà, cầu vồng, hoá Luna, trời sáng, ăn mừng
+src/actors.ts     Actor cho người nhà/bạn: pony auto-rig, công chúa bay (vỗ cánh), Spike, mèo emoji; đi theo vết chân có trễ, nhảy, quay ra camera, ngó nghiêng, ba Cường bay vòng cầu vồng; bóng tròn mờ dưới chân
+src/family.ts     thẻ lời nói / cổ vũ (mặt pony chụp sẵn + huy hiệu ảnh thật), cheer ngẫu nhiên, cả nhà lần lượt khen
+src/world.ts      đảo + props theo chủ đề màn (hoa, táo, mây, pha lê), ngày/đêm (setNight 0..1: trời, nước, đèn, trăng, sao, mặt trời, mây), bướm, chim, đom đóm, cỏ hoa đung đưa, lâu đài trăng, bong bóng pha lê, camera
+src/hero.ts       Twilight: đi 4 hướng, nhảy, nhún; đứng yên thì thở, ngó quanh, phẩy đuôi, cúi ngửi, quay ra camera, nhảy cẫng
+src/rig.ts        auto-rig ngựa không xương (11 xương: thân, 4 chân × 2, đầu, đuôi) + điều khiển nhìn/đuôi; người (dò xương); công chúa bay (xương sẵn: vỗ cánh, đung chân, vẫy đuôi)
+src/monster.ts    quái tròn, cười khi sai, tan thành bươm bướm
+src/magic.ts      hạt 1 Points + shader; đêm cộng màu, ngày trộn thường (không loá trên nền sáng)
+src/challenge.ts  A1 nghe – chọn hình (đánh vần GDPT 2018 với thẻ chữ), B1 đếm ngọc – chọn số
+src/data.ts       palette, 16 từ + token đánh vần, CAST (cả nhà + bạn), 7 màn, 5 ngọc Hài Hoà
+src/ui.ts, src/audio.ts, src/tween.ts
+vite.config.ts    plugin quét public/family/ → module ảo 'virtual:family-photos'
+scripts/          gen-audio.sh + audio-manifest.txt (~180 clip)
+public/models/    twilight_static, twilight (EG), ponies/*.glb (xem CREDITS.md), props Kenney CC0
 ```
+
+## Hiệu năng (iPad)
+
+Người đi theo không đổ bóng thật (dùng bóng tròn mờ), pixel ratio tối đa 1.5. Trận cuối ~570k tam giác/khung
+(Nightmare Moon 143k + Celestia 98k là 2 model nặng nhất; gltf-transform simplify không giảm thêm được vì lưới nhiều đường nối UV).
+Model Celestia/Nightmare Moon/Luna chỉ tải khi vào màn 6–7.
 
 ## Assets và giấy phép
 
-- Twilight Sparkle (ngựa) và Twilight (người): model fan-made trên Sketchfab, CC BY 4.0. Nhân vật là IP Hasbro: **chỉ chơi trong nhà, không publish, không bán**. Ghi công tác giả trong `assets-raw/sketchfab/*/license.txt`.
-- Kenney Nature Kit, UI/Impact audio: CC0. Quaternius Animated Woman: CC0.
-- Emoji: font hệ thống (Apple Color Emoji).
-- Giọng đọc: giọng Linh của macOS (`say`), dùng cá nhân.
+Xem `CREDITS.md`. Nhân vật là IP Hasbro: **chỉ chơi trong nhà, không publish, không bán**.
 
 ## Đã biết / chưa làm
 
-- Chân ngựa/người vung bằng heuristic (`src/rig.ts`), chưa phải animation thật; biên độ chỉnh ở `amp`.
-- Chưa có: biến hình Hà An → Twilight từng bộ phận (đang chờ Adam chốt lại sau khi đổi sang "màn 1 ngựa, màn 2 người"), màn 3–6, mini-game A2/B2/B3, ảnh thật người thân, giọng ba mẹ.
-- Chưa test trên iPad thật.
+- Chân ngựa vung bằng heuristic (`src/rig.ts`), không có xương tai nên chưa vẫy tai; Luna có tên xương hỏng (mã hoá Nhật) nên chỉ bay nhún, không vỗ cánh.
+- Chưa có ảnh thật người nhà, giọng ba mẹ (thay file m4a cùng tên là xong). Chưa test trên iPad thật.

@@ -4,9 +4,13 @@
 import * as THREE from 'three';
 
 export interface WalkerPose { bob: number; pitch: number; roll: number }
+/** Điều khiển thêm khi đứng chơi: ngó trái/phải (yaw), cúi/ngẩng (pitch), phẩy đuôi mạnh hơn (tail 0..1). */
+export interface WalkerLook { yaw: number; pitch: number; tail: number }
 export interface Walker {
   /** t: giây, k: 0..1 mức độ đang đi, yaw: hướng nhân vật (world). Trả về nhún thân nếu walker tự lo. */
   update(t: number, k: number, yaw: number): WalkerPose | void;
+  /** có nếu walker biết quay đầu / phẩy đuôi (ngựa auto-rig) */
+  look?: WalkerLook;
 }
 
 const Y = new THREE.Vector3(0, 1, 0);
@@ -173,7 +177,9 @@ export function autoRigQuadruped(model: THREE.Object3D): Walker | null {
 
   const lat = fr.lat, up = fr.up;
   const qTmp = new THREE.Quaternion();
+  const look: WalkerLook = { yaw: 0, pitch: 0, tail: 0 };
   return {
+    look,
     update(t, k) {
       // phi nước đại kiểu hoạt hình: 2 chân trước cùng pha, 2 chân sau lệch pha, thân nhún theo
       const w = t * 13;
@@ -186,12 +192,12 @@ export function autoRigQuadruped(model: THREE.Object3D): Walker | null {
         knees[i].quaternion.setFromAxisAngle(lat, kneeA);
       }
       // đầu gật theo nhịp + ngó nghiêng khi đứng
-      const nod = -0.1 * Math.sin(w + 1.0) * k + 0.04 * Math.sin(t * 1.3) * (1 - k);
-      const look = 0.08 * Math.sin(t * 0.7) * (1 - k);
-      head.quaternion.setFromAxisAngle(lat, nod).multiply(qTmp.setFromAxisAngle(up, look));
-      // đuôi: dựng lên khi chạy, phất theo nhịp, ve vẩy khi đứng
-      const tailPitch = -0.35 * k + 0.3 * Math.sin(w - 1.2) * k + 0.05 * Math.sin(t * 1.7);
-      const tailSway = 0.14 * Math.sin(t * 2.1) * (1 - k) + 0.08 * Math.sin(w * 0.5) * k;
+      const nod = -0.1 * Math.sin(w + 1.0) * k + 0.04 * Math.sin(t * 1.3) * (1 - k) + look.pitch;
+      const turn = 0.08 * Math.sin(t * 0.7) * (1 - k) + look.yaw;
+      head.quaternion.setFromAxisAngle(lat, nod).multiply(qTmp.setFromAxisAngle(up, turn));
+      // đuôi: dựng lên khi chạy, phất theo nhịp, ve vẩy khi đứng (look.tail = phẩy mạnh, nhanh)
+      const tailPitch = -0.35 * k + 0.3 * Math.sin(w - 1.2) * k + 0.05 * Math.sin(t * 1.7) - 0.15 * look.tail;
+      const tailSway = (0.14 + 0.3 * look.tail) * Math.sin(t * (2.1 + 7 * look.tail)) * (1 - k) + 0.08 * Math.sin(w * 0.5) * k;
       tail.quaternion.setFromAxisAngle(lat, tailPitch).multiply(qTmp.setFromAxisAngle(up, tailSway));
       return {
         bob: 0.16 * (0.5 + 0.5 * Math.sin(w + 1.0)) * k,
@@ -278,4 +284,48 @@ export function makeHumanWalker(model: THREE.Object3D, height: number): Walker |
       }
     },
   };
+}
+
+// ---------------- Công chúa bay (model có xương sẵn tên chuẩn: *Wing*, *Thigh*, *Shoulder*, Head, Tail1) ----------------
+
+/**
+ * Vỗ cánh + đung đưa chân + vẫy đuôi cho model đã có skeleton (Celestia, Nightmare Moon).
+ * Không tìm thấy xương nào (tên hỏng như Luna) thì trả walker rỗng: actor vẫn bay nhún bằng pivot.
+ * `flap` 0..1: biên độ vỗ cánh (bay lên mạnh thì 1, lơ lửng thì ~0.4).
+ */
+export function makeFlyer(model: THREE.Object3D): Walker & { flap: number } {
+  model.updateMatrixWorld(true);
+  const bones: THREE.Bone[] = [];
+  model.traverse((o) => { if ((o as THREE.Bone).isBone) bones.push(o as THREE.Bone); });
+  const box = new THREE.Box3().setFromObject(model, true);
+  const cx = (box.min.x + box.max.x) / 2;
+  const sideOf = (b: THREE.Bone) => Math.sign(b.getWorldPosition(new THREE.Vector3()).x - cx) || 1;
+  const isWing = (b: THREE.Object3D | null) => !!b && /wing/i.test(b.name);
+  const wings = bones
+    .filter((b) => isWing(b) && !/closed/i.test(b.name) && !isWing(b.parent))
+    .map((b) => ({ b, rest: b.quaternion.clone(), side: sideOf(b) }));
+  const legs = bones.filter((b) => /(thigh|shoulder)/i.test(b.name)).map((b, i) => ({ b, rest: b.quaternion.clone(), i }));
+  const head = bones.find((b) => /^head/i.test(b.name));
+  const headRest = head?.quaternion.clone();
+  const tail = bones.find((b) => /^tail_?1/i.test(b.name) || /jiggle_tail1/i.test(b.name));
+  const tailRest = tail?.quaternion.clone();
+  const tmp = new THREE.Quaternion();
+  const look: WalkerLook = { yaw: 0, pitch: 0, tail: 0 };
+  const fwd = new THREE.Vector3(), lat = new THREE.Vector3();
+  if (import.meta.env.DEV) console.debug('[rig] flyer wings', wings.length, 'legs', legs.length, 'head', !!head, 'tail', !!tail);
+  const walker = {
+    flap: 0.4,
+    look,
+    update(t: number, _k: number, yaw: number) {
+      fwd.set(Math.sin(yaw), 0, Math.cos(yaw));
+      lat.set(Math.cos(yaw), 0, -Math.sin(yaw));
+      const f = walker.flap;
+      const beat = Math.sin(t * (4 + f * 5));
+      for (const w of wings) worldAxisRotate(w.b, w.rest, fwd, -w.side * (0.12 + 0.45 * f) * beat, tmp);
+      for (const l of legs) worldAxisRotate(l.b, l.rest, lat, 0.1 * Math.sin(t * 1.7 + l.i * 1.3) + 0.12, tmp);
+      if (head && headRest) worldAxisRotate(head, headRest, Y, 0.1 * Math.sin(t * 0.6) + look.yaw, tmp);
+      if (tail && tailRest) worldAxisRotate(tail, tailRest, Y, (0.18 + 0.3 * look.tail) * Math.sin(t * 1.4), tmp);
+    },
+  };
+  return walker;
 }

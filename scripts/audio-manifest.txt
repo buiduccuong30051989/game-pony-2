@@ -1,28 +1,89 @@
 # key|text  (giọng Linh macOS; thay file cùng tên bằng giọng ba mẹ nếu muốn)
 # --- dẫn chuyện
-intro_mun|Hà An ơi! Mây Đen bắt mèo Mun rồi. Mình đi cứu Mun nào!
-intro_rom|Mèo Rơm cũng bị bắt rồi! Đi cứu Rơm thôi!
+intro_story|Nhím ơi! Nightmare Moon làm trời tối mãi, và nhốt cả nhà mình vào bong bóng mặt trăng rồi. Nhím là Twilight Sparkle, mình đi cứu mọi người nhé!
+intro_mun|Đầu tiên, đi cứu mèo Mun nào!
+intro_rom|Mèo Rơm đang ở trong bong bóng! Đi cứu Rơm thôi!
+intro_me|Mẹ Yến là Rarity xinh đẹp, đang bị nhốt ở rừng hoa. Đi cứu mẹ nào!
+intro_ba|Ba Cường là Rainbow Dash, nhanh và mạnh! Ba bị nhốt ở đảo mây. Đi cứu ba nào!
+intro_ong|Ông Cương là Applejack, ở vườn táo. Đi cứu ông nào!
+intro_ba_tuyet|Bà Tuyết là công chúa Celestia, người kéo mặt trời lên. Cứu bà thì trời sẽ sáng đó!
+intro_final|Đây là lâu đài mặt trăng. Nightmare Moon thật ra là bác Hanh bị bóng tối biến thành đó. Cả nhà ở đây cùng Nhím rồi. Dùng phép tình bạn để cứu bác Hanh nhé!
 hint_move|Chạm mũi tên để đi, chạm nút tròn để nhảy nhé.
-monster|Ui, quái vật chặn đường! Trả lời đúng để làm phép nào!
+monster|Ui, quái vật bóng đêm chặn đường! Trả lời đúng để làm phép nào!
 ask_count|Quái vật giữ mấy viên ngọc? Chạm từng viên để đếm nhé.
 ask_pick_number|Có mấy viên ngọc? Chạm vào số đúng nhé.
 right|Đúng rồi!
 magic|Làm phép nào!
-good|Giỏi lắm!
-yay|Tuyệt vời!
 retry|Thử lại nhé!
-almost|Gần đúng rồi, thử lại nào!
 hint_last|Chạm vào cái đang nhấp nháy nhé.
 star|Được một mảnh sao rồi!
 stars3|Đủ ba mảnh sao rồi! Đi tìm bong bóng thôi!
 bubble|Bong bóng kia rồi! Chạm nút phép để cứu nhé.
 bigspell|Đại phép thuật!
-rescued_mun|Mun được cứu rồi! Cảm ơn Hà An!
-rescued_rom|Rơm được cứu rồi! Cảm ơn Hà An!
 meow|Meo meo!
-level_done|Giỏi quá! Sang màn tiếp nào!
-fall|Ối! Bay lên nào!
-gem|Ngọc!
+level_done|Nhím giỏi quá! Sang màn tiếp nào!
+sun_rise|Bà Tuyết kéo mặt trời lên rồi! Trời sáng hơn rồi!
+# --- được cứu
+rescued_mun|Mun được cứu rồi! Cảm ơn Nhím!
+rescued_rom|Rơm được cứu rồi! Cảm ơn Nhím!
+rescued_me|Mẹ Yến được cứu rồi! Mẹ ôm Nhím một cái thật chặt!
+rescued_ba|Ba Cường được cứu rồi! Ba bay nhanh như gió tới ôm Nhím!
+rescued_ong|Ông Cương được cứu rồi! Cảm ơn cháu yêu của ông!
+rescued_ba_tuyet|Bà Tuyết được cứu rồi! Bà sẽ kéo mặt trời lên cho Nhím!
+help_me|Nhím ơi, mẹ ở trong bong bóng nè!
+help_ba|Nhím ơi, ba ở đây nè!
+help_ong|Nhím ơi, ông ở vườn táo nè!
+help_ba_tuyet|Nhím ơi, bà ở đồi pha lê nè!
+# --- cả nhà khen (người nói được gọi tên để bé biết ai khen)
+fam_me_yen_1|Mẹ Yến khen Nhím giỏi quá!
+fam_me_yen_2|Mẹ Yến thương Nhím nhất trên đời!
+fam_me_yen_3|Mẹ Yến nói: con gái mẹ tuyệt vời!
+fam_me_yen_ball|Mẹ Yến: hoan hô Nhím!
+fam_ba_cuong_1|Ba Cường nói: Nhím của ba mạnh mẽ quá!
+fam_ba_cuong_2|Ba Cường bay vèo vèo cổ vũ Nhím!
+fam_ba_cuong_3|Ba Cường giơ ngón tay cái cho Nhím!
+fam_ba_cuong_ball|Ba Cường: Nhím nhanh như gió!
+fam_ong_cuong_1|Ông Cương vỗ tay cho Nhím nè!
+fam_ong_cuong_2|Ông Cương khen cháu ông giỏi quá!
+fam_ong_cuong_3|Ông Cương nói: hay lắm cháu ơi!
+fam_ong_cuong_ball|Ông Cương: tuyệt vời cháu ơi!
+fam_ba_tuyet_1|Bà Tuyết thương Nhím nhiều lắm!
+fam_ba_tuyet_2|Bà Tuyết khen cháu bà ngoan quá!
+fam_ba_tuyet_3|Bà Tuyết nói: Nhím sáng như mặt trời!
+fam_ba_tuyet_ball|Bà Tuyết: bà thương Nhím!
+fam_bac_hanh_1|Bác Hanh thơm Nhím một cái!
+fam_bac_hanh_2|Bác Hanh khen Nhím thông minh quá!
+fam_bac_hanh_ball|Bác Hanh: cảm ơn Nhím!
+fam_all|Cả nhà yêu Nhím nhiều lắm!
+fr_spike_1|Spike reo lên: Nhím giỏi quá!
+fr_spike_2|Spike nói: phép của Nhím đẹp ghê!
+fr_pinkie_1|Pinkie Pie nhảy tưng tưng: hoan hô Nhím!
+fr_fluttershy_1|Fluttershy thì thầm: Nhím giỏi lắm!
+fr_mun_1|Mèo Mun kêu meo meo khen Nhím!
+fr_rom_1|Mèo Rơm kêu meo meo, hoan hô Nhím!
+spike_hint_1|Nhím ơi, đi theo đường sao lấp lánh nhé!
+spike_hint_2|Bấm mũi tên để đi nào Nhím!
+spike_hint_3|Quái vật ở đằng kia kìa Nhím!
+spike_hint_bubble|Bong bóng ở đằng kia, Nhím đi tới đó nhé!
+# --- trận cuối
+final_challenge|Trả lời đúng để thắp sáng ngọc Hài Hoà nào!
+final_next|Thêm một viên ngọc nữa nào Nhím!
+nmm_taunt_0|Hô hô! Ta là Nightmare Moon! Ta thích màn đêm mãi mãi!
+nmm_taunt_1|Hừm, mới một viên ngọc thôi mà!
+nmm_taunt_2|Ối, phép gì mà sáng thế!
+nmm_taunt_3|Bóng tối của ta mỏng dần rồi!
+nmm_taunt_4|Không thể nào! Còn một viên nữa thôi sao?
+nmm_laugh_1|Hô hô hô! Thử lại đi nào!
+nmm_laugh_2|Hì hì! Ta biết Nhím làm được mà!
+gem_1|Ngọc Trung thực của ông Cương sáng lên!
+gem_2|Ngọc Tốt bụng của Fluttershy sáng lên!
+gem_3|Ngọc Vui vẻ của Pinkie Pie sáng lên!
+gem_4|Ngọc Hào phóng của mẹ Yến sáng lên!
+gem_5|Ngọc Trung thành của ba Cường sáng lên!
+rainbow_blast|Phép thuật tình bạn! Cầu vồng hài hoà!
+luna_back|Bóng tối tan rồi! Nightmare Moon biến thành công chúa Luna, chính là bác Hanh! Trời sáng trở lại rồi!
+luna_thanks|Cảm ơn Nhím đã cứu bác! Bác thương Nhím lắm!
+the_end|Nhím đã cứu cả nhà! Hoan hô Nhím!
 # --- câu hỏi + tên
 ask_meo|Con nào là con mèo?
 ask_ga|Con nào là con gà?
@@ -34,6 +95,12 @@ ask_vit|Con nào là con vịt?
 ask_tho|Con nào là con thỏ?
 ask_voi|Con nào là con voi?
 ask_khi|Con nào là con khỉ?
+ask_sao|Đâu là ngôi sao?
+ask_hoa|Đâu là bông hoa?
+ask_cua|Con nào là con cua?
+ask_la|Đâu là chiếc lá?
+ask_de|Con nào là con dê?
+ask_no|Đâu là cái nơ?
 name_meo|con mèo
 name_ga|con gà
 name_bo|con bò
@@ -44,14 +111,26 @@ name_vit|con vịt
 name_tho|con thỏ
 name_voi|con voi
 name_khi|con khỉ
+name_sao|ngôi sao
+name_hoa|bông hoa
+name_cua|con cua
+name_la|chiếc lá
+name_de|con dê
+name_no|cái nơ
 # --- token đánh vần
 v_e|e
 v_o|o
 v_a|a
 v_i|i
+v_u|u
+v_ee|ê
+v_ow|ơ
 v_eo|eo
 v_oi|oi
 v_it|it
+v_ao|ao
+v_oa|oa
+v_ua|ua
 c_mo|mờ
 c_go|gờ
 c_bo|bờ
@@ -62,6 +141,10 @@ c_vo|vờ
 c_tho|thờ
 c_kho|khờ
 c_to|tờ
+c_so|sờ
+c_lo|lờ
+c_do|dờ
+c_no|nờ
 s_meo|meo
 s_ga|ga
 s_bo|bo
@@ -72,6 +155,12 @@ s_vit|vit
 s_tho|tho
 s_voi|voi
 s_khi|khi
+s_sao|sao
+s_hoa|hoa
+s_cua|cua
+s_la|la
+s_de|dê
+s_no|nơ
 t_huyen|huyền
 t_sac|sắc
 t_hoi|hỏi
@@ -84,6 +173,7 @@ w_ca|cá
 w_vit|vịt
 w_tho|thỏ
 w_khi|khỉ
+w_la|lá
 # --- số
 n1|một
 n2|hai

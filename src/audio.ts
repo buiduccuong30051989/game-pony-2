@@ -1,6 +1,8 @@
 // Audio: WebAudio, mở khoá bằng click/touchend (iPad Safari), clip m4a sinh sẵn + sfx ogg.
 
 const clips = new Map<string, AudioBuffer>();
+/** ?mute=1 (debug): không phát tiếng, mỗi câu coi như dài 150 ms → chạy kịch bản nhanh khi chụp màn hình. */
+const MUTE = new URLSearchParams(location.search).has('mute');
 let ctx: AudioContext | null = null;
 let unlocked = false;
 
@@ -45,6 +47,7 @@ async function load(key: string, ext: string): Promise<AudioBuffer | null> {
 }
 
 export function preload(keys: string[]): Promise<unknown> {
+  if (MUTE) return Promise.resolve();
   return Promise.all(keys.map((k) => load(k, k.startsWith('sfx_') ? 'ogg' : 'm4a')));
 }
 
@@ -53,6 +56,7 @@ let seqToken = 0;
 
 /** Phát 1 clip, resolve khi phát xong. Clip mới cắt clip giọng đang phát. */
 export function play(key: string, opts: { volume?: number; cut?: boolean } = {}): Promise<void> {
+  if (MUTE) return new Promise((r) => setTimeout(r, key.startsWith('sfx_') ? 0 : 150));
   const ext = key.startsWith('sfx_') ? 'ogg' : 'm4a';
   return load(key, ext).then((buf) => {
     if (!buf) return;
@@ -68,8 +72,11 @@ export function play(key: string, opts: { volume?: number; cut?: boolean } = {})
     src.connect(gain).connect(c.destination);
     if (!key.startsWith('sfx_')) current = src;
     return new Promise<void>((resolve) => {
+      // phòng hờ: AudioContext bị treo (iPad chưa mở khoá) thì onended không bao giờ tới → không để game kẹt
+      const guard = setTimeout(resolve, buf.duration * 1000 + 600);
       src.onended = () => {
         if (current === src) current = null;
+        clearTimeout(guard);
         resolve();
       };
       src.start(0);
