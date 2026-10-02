@@ -11,6 +11,8 @@ Bẫy đã biết (thử 02/10/2026):
   - Mỗi clip có ~0.15–0.2 s lặng đầu và >1 s lặng cuối → cắt theo ngưỡng −42 dBFS (chừa 25 ms đầu, 60 ms cuối),
     để chuỗi đánh vần (bờ – a – ba) không hở.
 Pipeline: edge-tts mp3 → afconvert ra wav 16-bit → cắt lặng (module wave, không cần ffmpeg) → afconvert m4a AAC 64 kbps.
+Tên riêng tiếng Anh viết trong {ngoặc nhọn}: đoạn đó sinh bằng giọng tiếng Anh của nhân vật (VOICES[].en), các đoạn tiếng Việt
+bằng giọng Việt; từng đoạn cắt lặng rồi GHÉP, cách nhau GAP_MS = 80 ms ("Fluttershy" [EN] + "nói: cảm ơn Nhím nhé!" [VI]).
 Cần macOS (afconvert). Sổ `scripts/audio/.done.json` nhớ câu + giọng của từng file để biết file nào cần sinh lại.
 """
 import array
@@ -35,6 +37,8 @@ RETRIES = 5
 THRESH_DB = -42.0
 LEAD_MS = 25
 TAIL_MS = 60
+GAP_MS = 80
+EN_RATE = '-6%'
 
 
 def read_lines():
@@ -43,15 +47,16 @@ def read_lines():
         for raw in f:
             raw = raw.rstrip('\n')
             if raw.startswith('#voice '):
-                name, voice, rate, pitch = raw[7:].split('|')
-                voices[name] = (voice, rate, pitch)
+                name, voice, rate, pitch, en, en_pitch = raw[7:].split('|')
+                voices[name] = (voice, rate, pitch, en, en_pitch)
             elif raw and not raw.startswith('#'):
                 key, v, text = raw.split('|', 2)
                 lines.append((key, v, text))
     return voices, lines
 
 
-def trim_wav(src, dst):
+def trim_wav(src):
+    """Đọc wav 16-bit, cắt lặng đầu/cuối theo ngưỡng → (mảng mẫu mono, tần số)."""
     with wave.open(src, 'rb') as w:
         ch, sw, sr, n = w.getnchannels(), w.getsampwidth(), w.getframerate(), w.getnframes()
         data = w.readframes(n)
@@ -77,12 +82,30 @@ def trim_wav(src, dst):
     for i in range(min(fade, len(out))):
         out[i] = int(out[i] * i / fade)
         out[-1 - i] = int(out[-1 - i] * i / fade)
+    return out, sr
+
+
+def write_wav(dst, samples, sr):
     with wave.open(dst, 'wb') as w:
         w.setnchannels(1)
         w.setsampwidth(2)
         w.setframerate(sr)
-        w.writeframes(out.tobytes())
-    return (end - start) / sr
+        w.writeframes(samples.tobytes())
+
+
+def segments(text):
+    """'Mình là {Fluttershy}! Cảm ơn' → [('vi', 'Mình là'), ('en', 'Fluttershy'), ('vi', '! Cảm ơn')] (bỏ đoạn rỗng/chỉ dấu câu)."""
+    out, i = [], 0
+    while i < len(text):
+        j = text.find('{', i)
+        if j < 0:
+            out.append(('vi', text[i:])); break
+        if j > i:
+            out.append(('vi', text[i:j]))
+        k = text.index('}', j)
+        out.append(('en', text[j + 1:k]))
+        i = k + 1
+    return [(lang, t.strip()) for lang, t in out if any(ch.isalnum() for ch in t)]
 
 
 async def synth(text, voice, rate, pitch):
@@ -113,7 +136,7 @@ async def main():
     os.makedirs(OUT, exist_ok=True)
     todo = []
     for key, v, text in lines:
-        sig = hashlib.sha1('|'.join([*voices[v], text]).encode()).hexdigest()[:12]
+        sig = hashlib.sha1('|'.join([*voices[v], EN_RATE, str(GAP_MS), text]).encode()).hexdigest()[:12]
         path = os.path.join(OUT, key + '.m4a')
         if only and key not in only:
             continue
@@ -127,14 +150,31 @@ async def main():
 
     async def one(key, v, text, sig, path):
         async with sem:
-            voice, rate, pitch = voices[v]
+            voice, rate, pitch, en, en_pitch = voices[v]
             try:
-                mp3 = await synth(text, voice, rate, pitch)
-                p_mp3, p_wav, p_cut = (os.path.join(tmp, key + e) for e in ('.mp3', '.wav', '.cut.wav'))
-                with open(p_mp3, 'wb') as f:
-                    f.write(mp3)
-                subprocess.run(['afconvert', '-f', 'WAVE', '-d', 'LEI16', p_mp3, p_wav], check=True, capture_output=True)
-                dur = trim_wav(p_wav, p_cut)
+                parts, sr0 = [], None
+                for n, (lang, seg) in enumerate(segments(text)):
+                    if lang == 'en':
+                        mp3 = await synth(seg, en, EN_RATE, en_pitch)
+                    else:
+                        mp3 = await synth(seg, voice, rate, pitch)
+                    p_mp3, p_wav = (os.path.join(tmp, f'{key}.{n}{e}') for e in ('.mp3', '.wav'))
+                    with open(p_mp3, 'wb') as f:
+                        f.write(mp3)
+                    subprocess.run(['afconvert', '-f', 'WAVE', '-d', 'LEI16', p_mp3, p_wav], check=True, capture_output=True)
+                    samples, sr = trim_wav(p_wav)
+                    if sr0 is None:
+                        sr0 = sr
+                    assert sr == sr0, f'tần số lệch {sr} ≠ {sr0}'
+                    if parts:
+                        parts.append(array.array('h', bytes(2 * (sr * GAP_MS // 1000))))
+                    parts.append(samples)
+                allsamples = array.array('h')
+                for ptr in parts:
+                    allsamples.extend(ptr)
+                p_cut = os.path.join(tmp, key + '.cut.wav')
+                write_wav(p_cut, allsamples, sr0)
+                dur = len(allsamples) / sr0
                 subprocess.run(['afconvert', '-f', 'm4af', '-d', 'aac', '-b', '64000', p_cut, path], check=True, capture_output=True)
                 done[key] = sig
                 print(f'  ✓ {key} ({dur:.2f}s) {text}', flush=True)

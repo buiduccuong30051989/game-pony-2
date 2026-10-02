@@ -77,7 +77,7 @@ export const CAST: Record<CastId, CastDef> = {
   babs: fr('babs', 'Babs Seed', 1.15, '🌱', '#d9663a'),
   applemint: fr('applemint', 'Bạc Hà', 1.25, '🍏', '#6dbb3c'),
   bigmac: fr('bigmac', 'Big Mac', 1.6, '🍎', '#d4373f'),
-  surprise: fr('surprise', 'Surprise', 1.35, '🎁', '#e0b52c'),
+  surprise: fr('surprise', 'Surprise', 1.35, '🎁', '#e0b52c', { mat: 'material_5', iris: 0x3b8fd9 }),
   cadance: fr('cadance', 'Cadance', 1.6, '💖', '#ff8fc8'),
   shining: fr('shining', 'Shining Armor', 1.6, '🛡️', '#4a6fd1'),
   sunburst: fr('sunburst', 'Sunburst', 1.4, '🔮', '#e86a2a'),

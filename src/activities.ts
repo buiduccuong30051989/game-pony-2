@@ -13,15 +13,16 @@ import { Actor } from './actors';
 import { Monster } from './monster';
 import type { Parade } from './parade';
 import { LetterStar, Plank, type Pickable, type ToneName } from './letterstar';
-import { letter, nameKey, objKey, confusablesOf, LETTER_ORDER } from './letters';
+import { letter, nameKey, confusablesOf, LETTER_ORDER } from './letters';
 import { spell, splitTone, slug } from './spell';
 import { WORDS } from './words';
-import { lockKey, spellKey, toneFindKey } from './lines';
+import { lockKey, spellKey, toneFindKey, FRIEND_THANKS, thanksKey } from './lines';
 import { play, sfx, speakSequence, stopSpeech } from './audio';
 import { sayBank, findLine, bankLine } from './voice';
 import { say, narrate } from './talk';
 import { addLetter, markWeak, markStrong, saveProgress, type Progress } from './progress';
 import { setAnswer } from './testhook';
+import { spellExample } from './example';
 import { flyToBoard, setBoardCount, bumpBoard, confetti, showWord, hideWord, toast } from './ui';
 import { tween, wait, easeOutBack } from './tween';
 
@@ -170,8 +171,10 @@ export abstract class Activity {
       fr.faceTo(hero.x, hero.z);
       fr.hop(6);
       world.magic.burst(fr.center(), 50, 0xffe08a, 2.0, 0.28, 0.8, -1);
-      const line = bankLine('thanks');
-      await say(fr.id, line.key, line.text);
+      // lời cảm ơn riêng của bạn đó (tên tiếng Anh đọc bằng giọng tiếng Anh)
+      const list = FRIEND_THANKS[fr.id] ?? [];
+      const i = Math.floor(Math.random() * list.length);
+      if (list.length) await say(fr.id, thanksKey(fr.id, i), list[i]);
       this.joinFriend(fr);
     }
     m.faceTo(hero.x, hero.z + 4);
@@ -227,7 +230,7 @@ export class HuntActivity extends Activity {
     const n = all.length;
     all.forEach((ch, i) => {
       const a = n === 1 ? 0 : -1 + (2 * i) / (n - 1);
-      const s = this.track(new LetterStar({ label: ch, size: 1.05 }));
+      const s = this.track(new LetterStar({ label: ch, size: 1.25 }));
       s.setPos(this.cx + 0.5 + a * 3.6, 1.35, this.cz + 1.6 - Math.abs(a) * 1.6 + (i % 2) * 0.9);
       s.root.userData.letter = ch;
     });
@@ -285,10 +288,11 @@ export class HuntActivity extends Activity {
       void star.pop();
       world.magic.burst(star.worldCenter(), 70, star.color, 2.6, 0.3, 0.9, -1);
       const at = star.worldCenter();
-      popObject(world, at.clone().add(new THREE.Vector3(0, 0.6, 0)), letter(target).emoji);
+      popObject(world, at.clone().add(new THREE.Vector3(0, 0.6, 0)), letter(target).emoji, 2.2, 6500);
       await play(bankLine('ok').key);
       void star.vanish(500);
-      await Promise.all([collect(ctx, target, at, star.color), play(objKey(target))]);
+      // từ ví dụ: "ô… ô" / "ê… ếch: ê – chờ – ếch" đọc chậm, chữ sáng theo token; xong mới chơi tiếp
+      await Promise.all([collect(ctx, target, at, star.color), spellExample(target, { short: false })]);
       // tia phép làm quái yếu dần
       if (this.monster) void world.magic.beam(hero.hornWorld(), this.monster.center(), PALETTE.magicPink, PALETTE.star, 0.7);
     }
@@ -390,7 +394,7 @@ export class BridgeActivity extends Activity {
       correct.sign.position.y = 0.55;
       correct.sign.scale.setScalar(0.7);
       sfx('sfx_tap', 0.5);
-      await Promise.all([collect(ctx, target, from, 0xffd166), play(objKey(target))]);
+      await Promise.all([collect(ctx, target, from, 0xffd166), spellExample(target, { short: false })]);
     }
     for (const p of this.planks) if (!p.gone) { p.gone = true; void tween(400, (q) => p.root.scale.setScalar(Math.max(0.01, 1 - q))).then(() => (p.root.visible = false)); }
     this.done = true;
@@ -522,8 +526,8 @@ export class LockActivity extends Activity {
       sfx('sfx_tap', 0.6);
       await tween(400, (k) => { this.lock.rotation.z = Math.sin(k * Math.PI * 3) * 0.2; });
       for (const s of this.orbit) if (s !== correct) void s.vanish();
-      popObject(world, lp.clone().add(new THREE.Vector3(0.4, 1.2, 1)), letter(target).emoji);
-      await Promise.all([collect(ctx, target, from, correct.color), play(objKey(target))]);
+      popObject(world, lp.clone().add(new THREE.Vector3(1.6, 0.6, 0.6)), letter(target).emoji, 2.2, 6500);
+      await Promise.all([collect(ctx, target, from, correct.color), spellExample(target, { short: false })]);
     }
     // khoá bật, cổng mở
     await tween(500, (k) => { this.lock.position.y = 2.0 - k * 2.0; this.lock.rotation.x = k * 1.2; });

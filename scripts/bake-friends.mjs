@@ -13,7 +13,8 @@ const root = pjoin(dirname(fileURLToPath(import.meta.url)), '..');
 /** bạn → [tên vật liệu nhãn cầu, màu mống mắt] (trước đây ở CAST[].eyes) */
 const ONLY = process.argv.slice(2);
 const EYES = {
-  applemint: ['material_1', 0xc4701c], bigmac: ['material_3', 0x3f9a3a], surprise: ['material_5', 0x3b8fd9],
+  applemint: ['material_1', 0xc4701c], bigmac: ['material_3', 0x3f9a3a],
+  // surprise: KHÔNG bake (lưới mắt của bản này bake ra 1 mắt đen thui) → vẽ lúc tải bằng src/eyes.ts (CAST.surprise.eyes)
   shining: ['material_2', 0x2f6fd8], sunburst: ['material_0', 0x3fa38a],
 };
 const io = new NodeIO().registerExtensions(ALL_EXTENSIONS);

@@ -31,8 +31,13 @@ function loadImg(url: string): Promise<HTMLImageElement | null> {
  * Canvas của ảnh `slot` (cắt giữa theo `aspect` = rộng/cao, cạnh dài ≤ max). Không có ảnh → chân dung Twilight vẽ tay.
  * Trình duyệt tự xoay theo EXIF khi vẽ (image-orientation: from-image), canvas ra không còn EXIF.
  */
-export function photoCanvas(slot: string | null, aspect = 3 / 4, max = 800): Promise<HTMLCanvasElement> {
-  const key = `${slot}|${aspect}|${max}`;
+/** Vùng cắt quanh mặt: tâm (x, y theo tỉ lệ ảnh) + độ phóng (1 = cắt vừa ảnh). */
+export interface Focus { x: number; y: number; zoom: number }
+/** Mặt bé trong ảnh chân dung thường ở giữa, hơi cao (nhim-1: khoảng 47% ngang, 40% dọc). */
+export const FACE: Focus = { x: 0.47, y: 0.4, zoom: 2.3 };
+
+export function photoCanvas(slot: string | null, aspect = 3 / 4, max = 800, focus?: Focus): Promise<HTMLCanvasElement> {
+  const key = `${slot}|${aspect}|${max}|${focus ? `${focus.x},${focus.y},${focus.zoom}` : ''}`;
   let p = cache.get(key);
   if (!p) {
     p = (async () => {
@@ -42,7 +47,14 @@ export function photoCanvas(slot: string | null, aspect = 3 / 4, max = 800): Pro
       const c = document.createElement('canvas');
       c.width = w; c.height = h;
       const g = c.getContext('2d')!;
-      if (img) {
+      if (img && focus) {
+        // cắt quanh mặt: phóng `zoom` lần, đặt điểm focus vào giữa khung, không lòi viền ảnh
+        const s = Math.max(w / img.naturalWidth, h / img.naturalHeight) * focus.zoom;
+        const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
+        const ox = Math.min(0, Math.max(w - dw, w / 2 - focus.x * dw));
+        const oy = Math.min(0, Math.max(h - dh, h / 2 - focus.y * dh));
+        g.drawImage(img, ox, oy, dw, dh);
+      } else if (img) {
         const s = Math.max(w / img.naturalWidth, h / img.naturalHeight);
         const dw = img.naturalWidth * s, dh = img.naturalHeight * s;
         // ảnh chân dung: lệch lên trên chút để giữ mặt
@@ -58,8 +70,8 @@ export function photoCanvas(slot: string | null, aspect = 3 / 4, max = 800): Pro
 }
 
 /** data URL (JPEG) cho thẻ <img> — đã đi qua canvas nên sạch EXIF. */
-export async function photoUrl(slot: string | null, aspect = 3 / 4, max = 800): Promise<string> {
-  return (await photoCanvas(slot, aspect, max)).toDataURL('image/jpeg', 0.88);
+export async function photoUrl(slot: string | null, aspect = 3 / 4, max = 800, focus?: Focus): Promise<string> {
+  return (await photoCanvas(slot, aspect, max, focus)).toDataURL('image/jpeg', 0.88);
 }
 
 /** Chân dung Twilight thay ảnh thật: nền tím gradient, sao, mặt pony chụp sẵn. */

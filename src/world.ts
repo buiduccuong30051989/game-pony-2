@@ -24,8 +24,8 @@ function mulberry32(seed: number) {
   };
 }
 
-/** Camera bám nhân vật: lùi ~25% so với game cũ (9.5 / 12.5). */
-export const CAM_OFFSET = new THREE.Vector3(0, 11.9, 15.6);
+/** Camera bám nhân vật: lùi ~25% so với game cũ (9.5 / 12.5), rồi thêm ~18% theo góp ý ba (11.9 / 15.6 → 14 / 18.4). */
+export const CAM_OFFSET = new THREE.Vector3(0, 14.0, 18.4);
 const lerpHex = (a: number, b: number, k: number, out = new THREE.Color()) => out.setHex(a).lerp(new THREE.Color(b), k);
 
 interface Swayer { obj: THREE.Object3D; phase: number; amp: number }

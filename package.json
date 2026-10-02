@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host --port 5185 --strictPort",
-    "build": "node scripts/check-spelling.mjs && tsc --noEmit && vite build",
+    "build": "node scripts/check-spelling.mjs && node scripts/audio-lines.mjs --check && tsc --noEmit && vite build",
     "preview": "vite preview --host --port 5185",
     "check:spelling": "node scripts/check-spelling.mjs",
     "audio": "node scripts/audio-lines.mjs && scripts/.venv/bin/python scripts/gen-audio.py"

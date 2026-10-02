@@ -49,6 +49,10 @@
     #home { position: fixed; z-index: 6; top: var(--safe-t); right: var(--safe-r); width: 76px; height: 76px; font-size: 36px; }
     #skip { position: fixed; z-index: 31; top: calc(6vh + 10px); right: var(--safe-r); width: 96px; height: 76px; font-size: 40px; background: #fff7d6; border-color: #b98a00; }
     #jump { position: fixed; z-index: 5; right: calc(var(--safe-r) + 6px); bottom: calc(var(--safe-b) + 6px); width: 150px; height: 150px; font-size: 72px; background: radial-gradient(circle at 40% 35%, #d8b4ff, var(--magic)); border-color: #6f3fa8; color: #fff; }
+    #fly-btn { position: fixed; z-index: 5; right: calc(var(--safe-r) + 172px); bottom: calc(var(--safe-b) + 6px); width: 150px; height: 150px; font-size: 76px;
+      background: radial-gradient(circle at 40% 35%, #fff, #bfe6ff); border-color: #2f7fbf; transition: opacity .3s, transform .1s; }
+    #fly-btn.on { background: radial-gradient(circle at 40% 35%, #fff, #ffd1f0); border-color: #ff5fa8; animation: pulse .5s ease-in-out infinite; }
+    #fly-btn.cool { opacity: .45; }
     #bigspell { position: fixed; z-index: 9; left: 50%; bottom: calc(var(--safe-b) + 30px); margin-left: -95px; width: 190px; height: 190px; font-size: 100px; background: radial-gradient(circle at 40% 35%, #fff2a8, #ffb300); border-color: #b97b00; animation: pulse 1s ease-in-out infinite; }
     @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
     #night { position: fixed; inset: 0; pointer-events: none; z-index: 1; opacity: calc(var(--night, 0) * .6); background: radial-gradient(ellipse at 50% 45%, rgba(40,30,110,0) 60%, rgba(40,30,110,.5) 100%); }
@@ -61,6 +65,20 @@
     #word.whole span { color: var(--success); animation: hop .5s ease; }
     @keyframes hop { 0% { transform: scale(1); } 40% { transform: scale(1.18) rotate(-3deg); } 100% { transform: scale(1); } }
 
+    /* từ ví dụ sau mỗi chữ đúng */
+    #example { position: fixed; top: calc(var(--safe-t) + 92px); left: 50%; transform: translateX(-50%); z-index: 24; display: flex; align-items: center; gap: 22px;
+      background: rgba(255,250,240,.97); border: 6px solid #ff9600; border-radius: 40px; padding: 10px 34px 10px 22px; box-shadow: var(--shadow), 0 0 0 8px rgba(255,214,102,.45); pointer-events: none; }
+    #example.in { animation: exIn .45s cubic-bezier(.2,1.5,.4,1) both; }
+    @keyframes exIn { from { transform: translateX(-50%) scale(.5); opacity: 0; } }
+    #example-emoji { font-size: clamp(90px, 13vw, 140px); line-height: 1; animation: hop 1s ease-in-out infinite alternate; }
+    .ex-right { display: flex; flex-direction: column; align-items: flex-start; }
+    .ex-top { display: flex; align-items: baseline; gap: 22px; }
+    #example-letter { font-size: clamp(54px, 7vw, 80px); font-weight: 800; color: #ff5fa8; width: 1.2em; height: 1.2em; border-radius: 50%; background: #fff0f7; border: 5px solid #ff5fa8; display: grid; place-items: center; line-height: 1; }
+    #example-word { font-size: clamp(70px, 10vw, 118px); font-weight: 800; line-height: 1.1; display: flex; letter-spacing: .03em; }
+    #example-word span { display: inline-block; transition: color .15s, transform .15s; }
+    #example-word span.lit { color: #ff5fa8; transform: translateY(-8px) scale(1.12); }
+    #example-word.whole span { color: var(--success); }
+    #example-obj { font-size: 24px; font-weight: 800; opacity: .6; margin-top: -4px; }
     #toast { position: fixed; top: 30%; left: 50%; transform: translate(-50%, -50%); z-index: 9; pointer-events: none; font-size: clamp(56px, 9vw, 110px); font-weight: 800; color: #fff;
       -webkit-text-stroke: 3px var(--ink); text-shadow: 0 6px 0 rgba(59,50,32,.25); opacity: 0; transition: opacity .25s, transform .25s; white-space: nowrap; }
     #toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
@@ -84,10 +102,20 @@
     .fam-say { font-size: 27px; font-weight: 800; line-height: 1.15; }
     @keyframes famIn { from { transform: translateX(120%) rotate(6deg); opacity: 0; } to { transform: none; opacity: 1; } }
     @keyframes famOut { to { transform: translateX(120%); opacity: 0; } }
-    #subtitle { position: fixed; left: 50%; bottom: calc(6vh + 16px); transform: translateX(-50%); z-index: 12; max-width: min(1000px, 88vw); background: rgba(255,250,240,.95); border: 5px solid #a06cd5;
-      border-radius: 28px; padding: 8px 28px; font-size: clamp(24px, 3vw, 34px); font-weight: 800; text-align: center; box-shadow: var(--shadow); pointer-events: none; }
-    #subtitle.in { animation: subIn .35s ease both; }
+    #subtitle { --sc: #a06cd5; position: fixed; left: calc(50% - 90px); bottom: calc(var(--safe-b) + 12px); transform: translateX(-50%); z-index: 26; width: max-content;
+      max-width: min(920px, calc(100vw - 2 * 340px + 120px)); min-width: min(420px, 60vw); display: flex; align-items: center; gap: 14px; background: rgba(255,250,240,.97);
+      border: 5px solid var(--sc); border-radius: 30px; padding: 8px 24px 8px 8px; box-shadow: var(--shadow); pointer-events: none; }
+    body.cinema #subtitle { left: 50%; bottom: calc(6vh + 12px); max-width: min(920px, 84vw); }
+    #subtitle.dark { background: #ece6ff; }
+    #subtitle.in { animation: subIn .3s ease both; }
     @keyframes subIn { from { transform: translate(-50%, 30px); opacity: 0; } to { transform: translateX(-50%); opacity: 1; } }
+    .sub-ava { width: 72px; height: 72px; flex: none; border-radius: 50%; border: 4px solid var(--sc); background: radial-gradient(circle at 50% 35%, #fff, #f1e6ff);
+      display: grid; place-items: center; font-size: 44px; line-height: 1; position: relative; overflow: visible; }
+    .sub-ava > img:first-child { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; display: block; }
+    .sub-ava.narr { font-size: 40px; }
+    .sub-body { display: flex; flex-direction: column; min-width: 0; }
+    .sub-body b { font-size: clamp(18px, 2.2vw, 24px); color: var(--sc); line-height: 1.1; }
+    .sub-body span { font-size: clamp(22px, 2.8vw, 31px); font-weight: 800; line-height: 1.18; }
     #title-card { position: fixed; left: 50%; top: 38%; transform: translateX(-50%); z-index: 13; text-align: center; pointer-events: none; color: #fff; }
     #title-card small { display: block; font-size: 30px; font-weight: 800; -webkit-text-stroke: 1px rgba(59,50,32,.4); text-shadow: 0 3px 0 rgba(59,50,32,.3); }
     #title-card strong { display: block; font-size: clamp(56px, 8vw, 96px); font-weight: 800; line-height: 1; -webkit-text-stroke: 3px #6f3fa8; text-shadow: 0 6px 0 rgba(80,40,140,.35); }
@@ -214,6 +242,7 @@
       .pill { font-size: 21px; padding: 2px 12px; }
       #board-btn { font-size: 21px; }
       #jump { width: 128px; height: 128px; font-size: 62px; }
+      #fly-btn { width: 128px; height: 128px; font-size: 64px; right: calc(var(--safe-r) + 148px); }
       .fam-ava { width: 80px; height: 80px; font-size: 50px; }
       .fam-name { font-size: 24px; } .fam-say { font-size: 22px; }
       .ch-ava { width: 78px; height: 78px; font-size: 46px; }
@@ -237,8 +266,10 @@
   <button id="home" class="big" aria-label="Về bản đồ" hidden>🏠</button>
   <button id="skip" class="big" aria-label="Bỏ qua" hidden>⏩</button>
   <button id="jump" class="big" aria-label="Nhảy" hidden>⬆</button>
+  <button id="fly-btn" class="big" aria-label="Bay" hidden>🪽</button>
   <button id="bigspell" class="big" aria-label="Đại phép" hidden>✨</button>
   <div id="word" hidden></div>
+  <div id="example" hidden><div id="example-emoji"></div><div class="ex-right"><div class="ex-top"><b id="example-letter"></b><div id="example-word"></div></div><small id="example-obj"></small></div></div>
   <div id="title-card" hidden><small></small><strong></strong></div>
   <div id="toast"></div>
   <div id="fly"></div>

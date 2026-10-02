@@ -19,6 +19,12 @@ const add = (key, voice, text) => {
   if (!/^[a-z0-9_]+$/.test(key)) { bad++; console.error(`✗ khoá lạ: ${key}`); return; }
   if (!text || !text.trim()) { bad++; console.error(`✗ câu rỗng: ${key}`); return; }
   if (!L.VOICES[voice]) { bad++; console.error(`✗ giọng lạ "${voice}" ở ${key}`); return; }
+  // phần đọc bằng giọng Việt (ngoài {…}) không được chứa tên tiếng Anh → tên tiếng Anh luôn do giọng tiếng Anh đọc
+  const vi = text.replace(/\{[^}]*\}/g, ' ');
+  for (const n of L.EN_NAMES) {
+    if (new RegExp(`(^|[^\\p{L}])${n}([^\\p{L}]|$)`, 'iu').test(vi)) { bad++; console.error(`✗ ${key}: tên tiếng Anh "${n}" nằm trong phần giọng Việt — viết {${n}}`); }
+  }
+  if (/[{}]/.test(vi) || (text.match(/\{/g) ?? []).length !== (text.match(/\}/g) ?? []).length) { bad++; console.error(`✗ ${key}: ngoặc {} lệch`); }
   const prev = out.get(key);
   if (prev && (prev[0] !== voice || prev[1] !== text)) { bad++; console.error(`✗ khoá ${key} trùng mà khác câu: "${prev[1]}" ≠ "${text}"`); return; }
   out.set(key, [voice, text]);
@@ -33,6 +39,9 @@ for (const l of LETTERS) {
   add(L.reviewKey(s), 'spike', L.REVIEW_TEMPLATE.replaceAll('{n}', l.name));
 }
 for (const [t, txt] of Object.entries(L.TONE_FIND)) add(L.toneFindKey(t), 'my', txt);
+for (const [id, list] of Object.entries(L.FRIEND_THANKS)) list.forEach((t, i) => add(L.thanksKey(id, i), 'friend', t));
+// đánh vần từ ví dụ của 29 chữ cái
+for (const l of LETTERS) for (const [k, t] of spell(l.word).lines) add(k, 'my', t);
 for (const [t, txt] of Object.entries(L.TONE_LABEL)) add(L.toneLabelKey(t), 'my', txt);
 const WORD_VOICE = { ba: 'ba', 'bà': 'batuyet', 'mẹ': 'me' };
 for (const w of Object.values(WORDS)) {
@@ -44,7 +53,7 @@ for (const w of Object.values(WORDS)) {
 
 if (bad) { console.error(`audio-lines: ${bad} lỗi`); process.exit(1); }
 if (!process.argv.includes('--check')) {
-  const vo = Object.entries(L.VOICES).map(([k, v]) => `#voice ${k}|${v.voice}|${v.rate}|${v.pitch}`);
+  const vo = Object.entries(L.VOICES).map(([k, v]) => `#voice ${k}|${v.voice}|${v.rate}|${v.pitch}|${v.en}|${v.enPitch}`);
   const lines = [...out].sort(([a], [b]) => a.localeCompare(b)).map(([k, [v, t]]) => `${k}|${v}|${t}`);
   writeFileSync(join(root, 'scripts/audio/_all.gen.txt'),
     ['# TỰ SINH bởi scripts/audio-lines.mjs – ĐỪNG SỬA TAY. Sửa câu trong src/lines.ts / letters.ts / words.ts rồi `pnpm audio`.', ...vo, ...lines].join('\n') + '\n');

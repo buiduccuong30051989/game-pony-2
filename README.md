@@ -37,8 +37,10 @@ Nhịp mỗi chương (`CHAPTERS[].beats` trong `src/data.ts`): cảnh ngắn �
 dấu: *vịt = i – tờ – ít, vờ – ít – vít – nặng – vịt*. Tên chữ theo SGK (gọi theo âm): ă "á", â "ớ", i "i ngắn", y "i dài", k "ca",
 q "quờ" (lý do: PLAN.md §4). `scripts/check-spelling.mjs` (bảng vàng 35 từ + 29 tên chữ) chạy đầu `pnpm build`, lệch là build đỏ.
 
-**Giọng**: Microsoft Hoài My qua edge-tts (sinh sẵn, chơi offline), mọi câu có trong `src/lines.ts`. Không bao giờ đọc tên tiếng
-Anh: gọi Nhím, ba Cường, bà Tuyết, "bạn rồng nhỏ", "Nữ hoàng Bóng Đêm"; tên tiếng Anh chỉ hiện trên bảng tên ở thẻ lời nói.
+**Giọng**: Microsoft Hoài My qua edge-tts (sinh sẵn, chơi offline), mọi câu có trong `src/lines.ts`. Tên riêng tiếng Anh viết
+`{Fluttershy}` → đọc bằng giọng tiếng Anh (Jenny / Ana / Guy) rồi ghép với phần tiếng Việt (cách 80 ms). Mọi câu hiện trong khung
+phụ đề có nhãn người nói ("Ba Cường (Rainbow Dash):", "Fluttershy:", "Người kể chuyện:").
+**Từ ví dụ**: chữ đúng → thẻ to "ê… ếch: ê – chờ – ếch" đọc chậm, chữ sáng theo token (`src/example.ts`); danh sách ở PLAN.md §12.
 Ngân hàng 8–12 câu / tình huống (đúng, sai, nhắc, thanh tẩy, cảm ơn, Nữ hoàng cười…), không lặp 3 câu gần nhất. Nhắc khi bé im
 lặng: lần đầu sau 20 s, rồi 40 s, 80 s, tối đa 160 s.
 
@@ -50,7 +52,7 @@ màu của tình bạn và gia đình…", tia cầu vồng, màn trắng) → k
 
 ## Điều khiển (iPad ngang)
 
-Chạm đất → Twilight chạy tới (giữ kéo thì đi theo ngón); chạm sao / ván → chọn; nút tím to → nhảy; 🔤 bảng chữ; ⏩ bỏ qua phim;
+Chạm đất → Twilight chạy tới (giữ kéo thì đi theo ngón); chạm sao / ván → chọn; nút tím to → nhảy; nút 🪽 → bay ~4 s; 🔤 bảng chữ; ⏩ bỏ qua phim;
 🏠 về bản đồ. Mac: phím mũi tên + Space. Lần chạm đầu mở khoá tiếng. Màn dọc hiện nhắc xoay ngang.
 
 ## Debug URL

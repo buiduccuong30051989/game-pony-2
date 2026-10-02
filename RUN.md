@@ -29,7 +29,8 @@ Chạm kỳ lân 🦄 giữa màn hình để bắt đầu (lần chạm đầu 
 
 ## Cách chơi (cho ba mẹ biết để hướng dẫn)
 
-- **Chạm xuống đất** chỗ nào thì Twilight chạy tới chỗ đó (giữ ngón tay kéo thì Twilight đi theo ngón). Nút tím to góc phải là **nhảy**.
+- **Chạm xuống đất** chỗ nào thì Twilight chạy tới chỗ đó (giữ ngón tay kéo thì Twilight đi theo ngón). Nút tím to góc phải là **nhảy**,
+  nút 🪽 bên cạnh là **bay** (~4 giây, tự hạ cánh; bấm lại để hạ sớm).
 - Đường sao vàng lấp lánh chỉ chỗ cần tới. Tới nơi là bài học tự bắt đầu, không có chữ hướng dẫn, chỉ có giọng nói.
 - **Săn sao chữ**: nghe "Nhím ơi, tìm chữ ô nào!" → cho Twilight chạy tới chạm ngôi sao đúng (hoặc chạm thẳng vào ngôi sao).
 - **Cầu gãy / cổng khoá / ghép chữ**: chạm thẳng vào tấm ván / ngôi sao đúng.
@@ -75,6 +76,9 @@ scripts/.venv/bin/python scripts/gen-audio.py c_b v_a     # sinh lại vài câu
 
 - Giọng `vi-VN-HoaiMyNeural` tốc độ −10% (người kể chuyện −18%, trầm hơn chút). Bạn rồng nhỏ, ba Cường, ông Cương dùng giọng nam
   `vi-VN-NamMinhNeural`. Đổi giọng: bảng `VOICES` đầu `src/lines.ts`.
+- Tên riêng tiếng Anh trong câu viết `{Rainbow Dash}`: đoạn đó đọc bằng giọng tiếng Anh (`en-US-JennyNeural` người lớn nữ,
+  `en-US-AnaNeural` Nhím + các bạn ngựa nhỏ, `en-US-GuyNeural` ba / ông / Spike), rồi ghép với phần tiếng Việt.
+  `node scripts/audio-lines.mjs` báo lỗi nếu phần tiếng Việt còn sót tên tiếng Anh.
 - Câu ngắn đôi khi edge-tts trả về rỗng → script tự thử lại 5 lần, vẫn hỏng thì báo lỗi đỏ (chạy lại là được).
 - Script tự cắt khoảng lặng đầu/cuối (để "bờ – a – ba" liền mạch) và xuất `public/audio/<key>.m4a`.
 - Muốn thay bằng giọng ba mẹ: ghi âm rồi lưu đè file `.m4a` cùng tên.

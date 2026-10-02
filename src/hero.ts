@@ -20,6 +20,9 @@ const CONFIGS: Record<HeroKind, HeroConfig> = {
 };
 
 const GRAVITY = 24;
+/** độ cao bay (vừa phải: vẫn chạm sao chữ được, không bay khỏi đảo vì x/z luôn bị kẹp trong đảo + hàng rào) */
+const FLY_H = 2.2;
+const FLY_TIME = 4;
 const JUMP_V = 8.5;
 const SPEED = 5.5;
 const TURN = 10; // rad/s xoay người
@@ -54,6 +57,7 @@ export class Hero {
     this.cfg = CONFIGS[kind];
     this.pivot.add(model);
     this.root.add(this.pivot);
+    this.root.add(this.wings);
   }
 
   static async load(world: World, kind: HeroKind = 'pony'): Promise<Hero> {
@@ -85,6 +89,55 @@ export class Hero {
   stop(): void { this.goal = null; this.mx = this.mz = 0; }
 
   get moving(): boolean { return (this.mx !== 0 || this.mz !== 0) && !this.locked; }
+
+  /** Đang bay (nút 🪽): ~4 s, cao FLY_H, đi bằng chạm như thường; hạ cánh nhẹ, nghỉ 1.2 s mới bay lại. */
+  flying = false;
+  private landing = false;
+  private flyT = 0;
+  private flyCool = 0;
+  /** đôi cánh ánh sáng vỗ khi bay (mô hình Twilight không có xương cánh) */
+  readonly wings: THREE.Sprite = Hero.makeWings();
+  get canFly(): boolean { return !this.locked && !this.flying && !this.landing && this.flyCool <= 0; }
+  get airborne(): boolean { return this.flying || this.landing || !this.grounded; }
+
+  /** Bấm 🪽: cất cánh (đang bay thì hạ cánh). */
+  fly(): boolean {
+    if (this.flying) { this.land(); return true; }
+    if (!this.canFly) return false;
+    this.flying = true;
+    this.flyT = FLY_TIME;
+    this.grounded = false;
+    this.vy = 0;
+    return true;
+  }
+  land(): void {
+    if (!this.flying) return;
+    this.flying = false;
+    this.landing = true;
+    this.flyCool = 1.2;
+  }
+
+  private static makeWings(): THREE.Sprite {
+    const c = document.createElement('canvas');
+    c.width = 512; c.height = 256;
+    const g = c.getContext('2d')!;
+    for (const s of [-1, 1]) {
+      const grad = g.createRadialGradient(256 + s * 120, 128, 10, 256 + s * 120, 128, 140);
+      grad.addColorStop(0, 'rgba(255,255,255,0.95)');
+      grad.addColorStop(0.5, 'rgba(230,190,255,0.6)');
+      grad.addColorStop(1, 'rgba(230,190,255,0)');
+      g.fillStyle = grad;
+      g.beginPath();
+      g.ellipse(256 + s * 130, 120, 130, 66, s * -0.4, 0, Math.PI * 2);
+      g.fill();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: tex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+    sp.position.set(0, 1.35, -0.1);
+    sp.visible = false;
+    return sp;
+  }
 
   jump(): boolean {
     if (this.locked || !this.grounded) return false;
@@ -145,8 +198,9 @@ export class Hero {
     }
     if (this.moving) {
       const px = this.x;
-      this.x += this.mx * SPEED * dt;
-      this.z += this.mz * SPEED * dt;
+      const sp = this.flying ? SPEED * 1.15 : SPEED;
+      this.x += this.mx * sp * dt;
+      this.z += this.mz * sp * dt;
       [this.x, this.z] = clamp(this.x, this.z);
       // kẹt (mép đảo / hàng rào) → bỏ đích để không chạy tại chỗ mãi
       if (this.goal && Math.abs(this.x - px) < SPEED * dt * 0.05 && Math.abs(this.mx) > 0.9) { this.goal = null; this.mx = this.mz = 0; }
@@ -163,10 +217,26 @@ export class Hero {
       L.pitch += (this.pitchGoal - L.pitch) * r;
       L.tail += (this.tailGoal - L.tail) * r;
     }
-    if (!this.grounded) {
+    this.flyCool = Math.max(0, this.flyCool - dt);
+    if (this.flying) {
+      // bay: lên êm tới FLY_H, vỗ cánh ánh sáng; hết giờ (hoặc bị khoá) thì hạ cánh nhẹ
+      this.flyT -= dt;
+      this.y += (FLY_H + Math.sin(this.t * 3) * 0.12 - this.y) * Math.min(1, dt * 2.5);
+      if (this.flyT <= 0 || this.locked) this.land();
+    } else if (this.landing) {
+      this.y = Math.max(0, this.y - dt * 1.9);
+      if (this.y <= 0) { this.landing = false; this.grounded = true; this.vy = 0; this.landSquash = 1; }
+    } else if (!this.grounded) {
       this.vy -= GRAVITY * dt;
       this.y += this.vy * dt;
       if (this.y <= 0) { this.y = 0; this.vy = 0; this.grounded = true; this.landSquash = 1; }
+    }
+    const air = this.flying || this.landing;
+    this.wings.visible = air;
+    if (air) {
+      const flap = 0.75 + 0.25 * Math.sin(this.t * 13);
+      const k = Math.min(1, this.y / FLY_H + 0.2);
+      this.wings.scale.set(3.4 * flap * k, 1.9 * k, 1);
     }
     this.root.position.set(this.x, this.y, this.z);
     this.root.rotation.y = this.yaw;

@@ -1,21 +1,21 @@
 # TỰ SINH bởi scripts/audio-lines.mjs – ĐỪNG SỬA TAY. Sửa câu trong src/lines.ts / letters.ts / words.ts rồi `pnpm audio`.
-#voice my|vi-VN-HoaiMyNeural|-10%|+0Hz
-#voice nar|vi-VN-HoaiMyNeural|-18%|-2Hz
-#voice twi|vi-VN-HoaiMyNeural|-8%|+14Hz
-#voice spike|vi-VN-NamMinhNeural|-4%|+28Hz
-#voice nmm|vi-VN-HoaiMyNeural|-14%|-18Hz
-#voice ba|vi-VN-NamMinhNeural|-6%|+0Hz
-#voice me|vi-VN-HoaiMyNeural|-10%|+3Hz
-#voice ong|vi-VN-NamMinhNeural|-16%|-10Hz
-#voice batuyet|vi-VN-HoaiMyNeural|-16%|-7Hz
-#voice bachanh|vi-VN-HoaiMyNeural|-12%|-4Hz
-#voice friend|vi-VN-HoaiMyNeural|-4%|+9Hz
-#voice cat|vi-VN-HoaiMyNeural|+0%|+24Hz
+#voice my|vi-VN-HoaiMyNeural|-10%|+0Hz|en-US-JennyNeural|+0Hz
+#voice nar|vi-VN-HoaiMyNeural|-18%|-2Hz|en-US-JennyNeural|-2Hz
+#voice twi|vi-VN-HoaiMyNeural|-8%|+14Hz|en-US-AnaNeural|+0Hz
+#voice spike|vi-VN-NamMinhNeural|-4%|+28Hz|en-US-GuyNeural|+28Hz
+#voice nmm|vi-VN-HoaiMyNeural|-14%|-18Hz|en-US-JennyNeural|-18Hz
+#voice ba|vi-VN-NamMinhNeural|-6%|+0Hz|en-US-GuyNeural|+0Hz
+#voice me|vi-VN-HoaiMyNeural|-10%|+3Hz|en-US-JennyNeural|+3Hz
+#voice ong|vi-VN-NamMinhNeural|-16%|-10Hz|en-US-GuyNeural|-10Hz
+#voice batuyet|vi-VN-HoaiMyNeural|-16%|-7Hz|en-US-JennyNeural|-7Hz
+#voice bachanh|vi-VN-HoaiMyNeural|-12%|-4Hz|en-US-JennyNeural|-4Hz
+#voice friend|vi-VN-HoaiMyNeural|-4%|+9Hz|en-US-AnaNeural|+0Hz
+#voice cat|vi-VN-HoaiMyNeural|+0%|+24Hz|en-US-AnaNeural|+0Hz
 al_1|nar|Nhím và hai bạn mèo lại ở bên nhau rồi!
 al_2|nar|Nhím và ba mẹ lại ở bên nhau rồi!
 al_3|nar|Nhím và ông bà lại ở bên nhau rồi!
 al_4|nar|Nhím và bác Hanh, cả nhà sum vầy!
-al_cover|nar|Cuốn sách phiêu lưu của Nhím.
+al_cover|nar|Cùng xem lại chuyến phiêu lưu của Nhím nhé!
 al_extra|nar|Thêm một kỷ niệm thật đẹp của Nhím.
 b_collect_0|my|Bay vào bảng chữ cái nào!
 b_collect_1|my|Thêm một chữ nữa rồi!
@@ -99,16 +99,6 @@ b_tap_4|spike|Nhím chọn ngôi sao nào?
 b_tap_5|spike|Chạm vào chữ đúng nhé!
 b_tap_6|spike|Ngôi sao đang chờ Nhím chạm đó!
 b_tap_7|spike|Thử chạm một ngôi sao xem!
-b_thanks_0|friend|Cảm ơn Nhím nhé!
-b_thanks_1|friend|Mình được tự do rồi! Cảm ơn Nhím!
-b_thanks_2|friend|Cho mình đi cùng Nhím nha!
-b_thanks_3|friend|Nhím giỏi quá, cảm ơn nha!
-b_thanks_4|friend|A ha! Mình ra được rồi!
-b_thanks_5|friend|Cảm ơn bạn nhiều lắm!
-b_thanks_6|friend|Mình sẽ giúp Nhím cứu cả nhà!
-b_thanks_7|friend|Nhím là bạn tốt nhất!
-b_thanks_8|friend|Hoan hô, cảm ơn Nhím!
-b_thanks_9|friend|Mình đi theo Nhím nhé!
 big_spell|spike|Chạm vào ngôi sao phép thuật to nào!
 board_empty|my|Chữ này Nhím chưa tìm thấy. Mình đi tìm nhé!
 board_open|my|Bảng chữ cái của Nhím đây!
@@ -117,14 +107,25 @@ bridge_2|spike|Ôi, cầu thiếu ván! Chạm vào tấm ván đúng chữ nha.
 bridge_done|my|Cầu lành rồi! Đi qua thôi!
 c_b|my|bờ
 c_c|my|cờ
+c_ch|my|chờ
+c_d|my|dờ
 c_dd|my|đờ
+c_g|my|gờ
+c_h|my|hờ
+c_k|my|ca
 c_l|my|lờ
 c_m|my|mờ
 c_n|my|nờ
+c_ng|my|ngờ
+c_p|my|pờ
+c_qu|my|quờ
+c_r|my|rờ
+c_s|my|sờ
 c_t|my|tờ
 c_v|my|vờ
+c_x|my|xờ
 c1i_1|nar|Chương một. Khu rừng bí ẩn.
-c1i_2|nar|Nhím và bạn rồng nhỏ đi vào khu rừng. Cây cao vút, lá rì rào.
+c1i_2|nar|Nhím và bạn rồng {Spike} đi vào khu rừng {Everfree}. Cây cao vút, lá rì rào.
 c1i_3|cat|Meo meo! Meo meo!
 c1i_4|spike|Nghe kìa! Là tiếng của Mun và Rơm!
 c1i_5|nmm|Hi hi hi! Muốn cứu hai con mèo à? Phải tìm được chữ cái đã!
@@ -139,8 +140,8 @@ c1r_3|nar|Chiếc lồng vỡ tan thành ngàn ánh sao!
 c1r_4|cat|Meo meo! Cảm ơn Nhím!
 c1r_5|nar|Mun và Rơm được cứu rồi! Hai bạn mèo sẽ đi cùng Nhím.
 c2i_1|nar|Chương hai. Làng ngựa nhỏ.
-c2i_2|nar|Nhím tới một ngôi làng có những ngôi nhà nhỏ xinh.
-c2i_3|nar|Trên tháp đồng hồ, ba Cường và mẹ Yến bị nhốt trong bong bóng bóng đêm!
+c2i_2|nar|Nhím tới làng {Ponyville}, có những ngôi nhà nhỏ xinh.
+c2i_3|nar|Trên tháp đồng hồ, ba Cường là {Rainbow Dash} và mẹ Yến là {Rarity} bị nhốt trong bong bóng bóng đêm!
 c2i_4|me|Nhím ơi! Ba mẹ ở trên này!
 c2i_5|ba|Nhím cố lên! Ba tin con!
 c2i_6|nmm|Bong bóng của ta chỉ vỡ khi có người đọc được chữ… ba! Ha ha!
@@ -154,7 +155,7 @@ c2r_3|nar|Bong bóng vỡ tung!
 c2r_4|ba|Nhím giỏi quá! Cả nhà mình đi cứu ông bà nào!
 c2r_me|me|Mẹ đây! Mẹ thương Nhím nhất!
 c3i_1|nar|Chương ba. Thành phố lâu đài.
-c3i_2|nar|Thành phố trắng tinh, mái vàng lấp lánh. Nhưng bây giờ, bóng đêm phủ khắp nơi.
+c3i_2|nar|Thành phố {Canterlot} trắng tinh, mái vàng lấp lánh. Ông Cương là {Applejack}, bà Tuyết là công chúa {Celestia}.
 c3i_3|batuyet|Nhím ơi, ông bà ở trên tháp cao này!
 c3i_4|ong|Cháu ông dũng cảm lắm! Ông chờ cháu!
 c3i_5|nmm|Các phù thuỷ của ta sẽ giữ chặt những chữ cái cuối cùng!
@@ -173,8 +174,8 @@ cl_1|nar|Năm viên ngọc Hài Hoà bay vòng quanh Nhím.
 cl_2|nar|Nhím phát sáng, bay lên thật cao, và dang rộng đôi cánh!
 cl_3|twi|Bằng phép màu của tình bạn và gia đình…
 cl_4|twi|Bóng tối ơi, tan đi!
-e_1|nar|Ánh sáng dịu dần. Nữ hoàng Bóng Đêm biến mất…
-e_2|nar|và bác Hanh trở lại!
+e_1|nar|Ánh sáng dịu dần. {Nightmare Moon} biến mất…
+e_2|nar|và bác Hanh trở lại thành công chúa {Luna}!
 e_3|bachanh|Ôi, bác được cứu rồi! Cảm ơn Nhím nhiều lắm!
 e_4|batuyet|Mặt trời mọc rồi! Cả nhà mình lại ở bên nhau.
 e_5|nar|Nhím đã cứu cả nhà!
@@ -183,7 +184,7 @@ e_7|ba|Con gái ba giỏi nhất!
 e_8|ong|Cháu ông tuyệt vời!
 e_9|nar|Và đây là cuốn sách phiêu lưu của Nhím.
 f_1|nar|Trận chiến cuối cùng.
-f_2|nar|Bầu trời tối sầm lại. Nữ hoàng Bóng Đêm bay xuống cùng đội quân bóng tối.
+f_2|nar|Bầu trời tối sầm lại. {Nightmare Moon} bay xuống cùng đội quân bóng tối.
 f_3|nmm|Ha ha ha! Các ngươi không thắng được ta đâu!
 f_4|nar|Nhưng Nhím không một mình. Cả nhà, hai bạn mèo và các bạn ngựa nhỏ đều ở đây!
 f_5|ba|Cả nhà mình cùng nhau nào!
@@ -494,22 +495,22 @@ ln_x|my|xờ
 ln_y|my|i dài
 lo_a|my|a… áo
 lo_aa|my|ớ… ấm
-lo_aw|my|á… trăng
+lo_aw|my|á… ăn
 lo_b|my|bờ… bò
 lo_c|my|cờ… cá
 lo_d|my|dờ… dê
 lo_dd|my|đờ… đèn
-lo_e|my|e… kem
+lo_e|my|e… em
 lo_ee|my|ê… ếch
 lo_g|my|gờ… gà
 lo_h|my|hờ… hoa
-lo_i|my|i ngắn… mì
+lo_i|my|i ngắn… in
 lo_k|my|ca… kẹo
 lo_l|my|lờ… lá
 lo_m|my|mờ… mèo
 lo_n|my|nờ… nơ
 lo_o|my|o… ong
-lo_oo|my|ô… cái ô
+lo_oo|my|ô… ô
 lo_ow|my|ơ… ớt
 lo_p|my|pờ… pin
 lo_q|my|quờ… quà
@@ -517,10 +518,10 @@ lo_r|my|rờ… rùa
 lo_s|my|sờ… sao
 lo_t|my|tờ… táo
 lo_u|my|u… ủng
-lo_uw|my|ư… sư tử
+lo_uw|my|ư… ướt
 lo_v|my|vờ… vịt
 lo_x|my|xờ… xe
-lo_y|my|i dài… y tá
+lo_y|my|i dài… yên
 lock_done|my|Cạch! Cổng mở rồi!
 lock_intro|spike|Cổng bị khoá rồi! Nhìn ổ khoá xem có chữ gì nào.
 meow|cat|Meo meo!
@@ -528,12 +529,12 @@ p_1|nar|Ngày xửa ngày xưa, ở xứ sở ngựa thần, có một cô bé t
 p_10|nar|Không có chữ cái, phép thuật của Nhím yếu lắm. Mỗi ngôi sao chữ nhặt được sẽ làm phép mạnh thêm.
 p_2|batuyet|Nhím ơi, lại đây bà dạy đọc chữ nào. Đây là chữ a, còn đây là chữ bờ.
 p_3|nar|Bỗng nhiên, phép màu lấp lánh bay ra từ những trang sách…
-p_4|nar|và Nhím biến thành một bạn ngựa kỳ lân màu tím thật xinh!
+p_4|nar|và Nhím biến thành {Twilight Sparkle}, một bạn ngựa kỳ lân màu tím thật xinh!
 p_5|twi|Ôi! Mình có sừng phép thuật nè!
-p_6|nmm|Ha ha ha! Ta là Nữ hoàng Bóng Đêm! Ta sẽ thổi bay hết chữ cái!
+p_6|nmm|Ha ha ha! Ta là {Nightmare Moon}, Nữ hoàng Bóng Đêm! Ta sẽ thổi bay hết chữ cái!
 p_7|nar|Gió bóng đêm thổi hai mươi chín chữ cái thành những ngôi sao, bay đi khắp nơi.
 p_8|nmm|Cả nhà của Nhím, ta bắt đi hết! Ha ha ha!
-p_9|spike|Nhím ơi, đừng lo! Có mình đây. Mình đi nhặt lại chữ cái rồi cứu cả nhà nhé!
+p_9|spike|Nhím ơi, đừng lo! Có {Spike} đây. Mình đi nhặt lại chữ cái rồi cứu cả nhà nhé!
 review_done|spike|Nhím nhớ hết rồi! Giỏi quá đi!
 review_intro|spike|Bạn rồng nhỏ hỏi bài nè! Nhím nhớ chữ nào rồi?
 rotate|my|Nhím ơi, xoay ngang máy nhé!
@@ -570,12 +571,26 @@ s_ba|my|ba
 s_bo|my|bo
 s_ca|my|ca
 s_dda|my|đa
+s_dden|my|đen
+s_dee|my|dê
+s_ga|my|ga
+s_hoa|my|hoa
+s_keo|my|keo
 s_la|my|la
 s_ma|my|ma
 s_me|my|me
+s_meo|my|meo
 s_na|my|na
+s_now|my|nơ
+s_pin|my|pin
+s_qua|my|qua
+s_rua|my|rua
+s_sao|my|sao
+s_tao|my|tao
 s_too|my|tô
 s_ve|my|ve
+s_vits|my|vít
+s_xe|my|xe
 sp_ba|spike|Mình ghép chữ ba nhé!
 sp_baf|spike|Mình ghép chữ bà nhé!
 sp_bof|spike|Mình ghép chữ bò nhé!
@@ -590,6 +605,7 @@ sp_too|spike|Mình ghép chữ tô nhé!
 sp_vex|spike|Mình ghép chữ vẽ nhé!
 spell_intro|spike|Mình dùng phép ghép chữ nhé! Chạm vào ngôi sao đúng chữ nha.
 sun_rise|nar|Bà Tuyết kéo mặt trời lên. Trời sáng rồi!
+t_hoi|my|hỏi
 t_huyen|my|huyền
 t_nang|my|nặng
 t_nga|my|ngã
@@ -599,20 +615,80 @@ tf_huyen|my|Dấu huyền đâu nhỉ?
 tf_nang|my|Dấu nặng đâu nhỉ?
 tf_nga|my|Dấu ngã đâu nhỉ?
 tf_sac|my|Dấu sắc đâu nhỉ?
+thx_applemint_0|friend|Mình là Bạc Hà! Cảm ơn Nhím nhiều nhé!
+thx_applemint_1|friend|Bạc Hà đi cùng Nhím nha!
+thx_babs_0|friend|Em là {Babs Seed}! Cảm ơn chị Nhím!
+thx_babs_1|friend|{Babs Seed} đi theo chị Nhím nè!
+thx_bigmac_0|friend|Anh là {Big Mac}! Cảm ơn Nhím nhé!
+thx_bigmac_1|friend|{Big Mac} sẽ bảo vệ Nhím!
+thx_cadance_0|friend|Cô là công chúa {Cadance}! Cảm ơn Nhím nhé!
+thx_cadance_1|friend|{Cadance} thương Nhím lắm!
+thx_derpy_0|friend|Mình là {Derpy}! Cảm ơn Nhím, tặng Nhím bánh muffin nè!
+thx_derpy_1|friend|{Derpy} đi cùng Nhím nhé!
+thx_fluttershy_0|friend|Mình là {Fluttershy}… Cảm ơn Nhím nhiều lắm!
+thx_fluttershy_1|friend|{Fluttershy} sẽ giúp Nhím nha!
+thx_minty_0|friend|Mình là {Minty}! Cảm ơn Nhím nha!
+thx_minty_1|friend|{Minty} được tự do rồi!
+thx_pinkie_0|friend|Mình là {Pinkie Pie}! Cảm ơn Nhím, mình mở tiệc mừng nhé!
+thx_pinkie_1|friend|{Pinkie Pie} đi theo Nhím nè!
+thx_rainbowswirl_0|friend|Mình là Cầu Vồng! Cảm ơn Nhím đã cứu mình!
+thx_rainbowswirl_1|friend|Cầu Vồng đi theo Nhím nè!
+thx_shining_0|friend|Anh là {Shining Armor}! Cảm ơn em Nhím!
+thx_shining_1|friend|{Shining Armor} sẽ che chắn cho Nhím!
+thx_sunburst_0|friend|Mình là {Sunburst}! Phép của Nhím tuyệt quá!
+thx_sunburst_1|friend|{Sunburst} đi cùng Nhím nhé!
+thx_surprise_0|friend|Mình là {Surprise}! Bất ngờ chưa, cảm ơn Nhím!
+thx_surprise_1|friend|{Surprise} bay theo Nhím nè!
 tl_hoi|my|dấu hỏi
 tl_huyen|my|dấu huyền
 tl_nang|my|dấu nặng
 tl_nga|my|dấu ngã
 tl_sac|my|dấu sắc
 v_a|my|a
+v_aa|my|ớ
+v_aam|my|âm
+v_ao|my|ao
+v_aw|my|á
+v_awn|my|ăn
 v_e|my|e
+v_ee|my|ê
+v_eechs|my|ếch
+v_em|my|em
+v_en|my|en
+v_eo|my|eo
+v_i|my|i
+v_in|my|in
+v_its|my|ít
 v_o|my|o
+v_oa|my|oa
+v_ong|my|ong
 v_oo|my|ô
+v_ow|my|ơ
+v_owts|my|ớt
+v_u|my|u
+v_ua|my|ua
+v_ung|my|ung
+v_uwow|my|ưa
+v_uwowts|my|ướt
+v_yee|my|ia
+v_yeen|my|yên
+w_aams|my|ấm
+w_aos|my|áo
 w_baf|my|bà
 w_bof|my|bò
 w_cas|my|cá
+w_ddenf|my|đèn
+w_gaf|my|gà
+w_keoj|my|kẹo
+w_las|my|lá
 w_mej|my|mẹ
+w_meof|my|mèo
+w_quaf|my|quà
+w_ruaf|my|rùa
+w_taos|my|táo
+w_ungr|my|ủng
 w_vex|my|vẽ
+w_vitj|my|vịt
 wa_ba|ba|Ba đây! Ba đây!
 wa_baf|batuyet|Bà đây! Bà đây!
 wa_bof|my|Con bò kêu ò ò!

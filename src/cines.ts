@@ -3,7 +3,7 @@
 import * as THREE from 'three';
 import type { CineId } from './data';
 import type { World } from './world';
-import { pathZ } from './world';
+import { pathZ, CAM_OFFSET } from './world';
 import type { Hero } from './hero';
 import { Cine } from './cine';
 import { titleCard } from './ui';
@@ -28,7 +28,7 @@ function darkSwirl(world: World, x: number, z: number, ms = 2200): void {
 
 export async function playChapterCine(world: World, hero: Hero, id: CineId): Promise<void> {
   const hx = hero.x, hz = hero.z;
-  const home = { pos: V(hx + 3, 11.9, hz + 15.6), look: V(hx + 3, 1, hz - 1.2) };
+  const home = { pos: V(hx + 3, CAM_OFFSET.y, hz + CAM_OFFSET.z), look: V(hx + 3, 1, hz - 1.2) };
   await Cine.play(world, async (c) => {
     switch (id) {
       case 'c1_intro': {

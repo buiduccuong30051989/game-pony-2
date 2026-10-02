@@ -9,25 +9,32 @@ export interface Letter {
   ch: string;
   /** tên đọc */
   name: string;
-  /** đồ vật quen: chữ hiện + emoji (đọc: "bờ… bò") */
+  /** TỪ VÍ DỤ: 1 tiếng, bắt đầu bằng chính chữ đó, ghép được ở mức lớp 1 (đọc: "ê… ếch: ê – chờ – ếch") */
+  word: string;
+  /** cách gọi đồ vật cho ba mẹ (hiện nhỏ dưới từ) */
   obj: string;
   emoji: string;
   vowel: boolean;
 }
 
-const RAW: [string, string, string, string][] = [
-  ['a', 'a', 'áo', '👕'], ['ă', 'á', 'trăng', '🌙'], ['â', 'ớ', 'ấm', '🫖'], ['b', 'bờ', 'bò', '🐄'],
-  ['c', 'cờ', 'cá', '🐟'], ['d', 'dờ', 'dê', '🐐'], ['đ', 'đờ', 'đèn', '💡'], ['e', 'e', 'kem', '🍦'],
-  ['ê', 'ê', 'ếch', '🐸'], ['g', 'gờ', 'gà', '🐔'], ['h', 'hờ', 'hoa', '🌸'], ['i', 'i ngắn', 'mì', '🍜'],
-  ['k', 'ca', 'kẹo', '🍬'], ['l', 'lờ', 'lá', '🍃'], ['m', 'mờ', 'mèo', '🐈'], ['n', 'nờ', 'nơ', '🎀'],
-  ['o', 'o', 'ong', '🐝'], ['ô', 'ô', 'cái ô', '☂️'], ['ơ', 'ơ', 'ớt', '🌶️'], ['p', 'pờ', 'pin', '🔋'],
-  ['q', 'quờ', 'quà', '🎁'], ['r', 'rờ', 'rùa', '🐢'], ['s', 'sờ', 'sao', '⭐'], ['t', 'tờ', 'táo', '🍎'],
-  ['u', 'u', 'ủng', '👢'], ['ư', 'ư', 'sư tử', '🦁'], ['v', 'vờ', 'vịt', '🦆'], ['x', 'xờ', 'xe', '🚗'],
-  ['y', 'i dài', 'y tá', '👩‍⚕️'],
+/**
+ * [chữ, tên, từ ví dụ, đồ vật, emoji]. Từ ví dụ PHẢI bắt đầu bằng chữ đó và có trong bảng vàng scripts/check-spelling.mjs.
+ * Ca khó (PLAN.md §4): ă → "ăn" (ăn cơm 🍚), â → "ấm" (ấm trà), e → "em" (em bé), i → "in" (máy in), ô → "ô" (cái ô),
+ * ư → "ướt" (mưa ướt 💦: không có đồ vật nào bắt đầu bằng ư), y → "yên" (yên ngựa: hợp truyện pony).
+ */
+const RAW: [string, string, string, string, string][] = [
+  ['a', 'a', 'áo', 'cái áo', '👕'], ['ă', 'á', 'ăn', 'ăn cơm', '🍚'], ['â', 'ớ', 'ấm', 'cái ấm', '🫖'], ['b', 'bờ', 'bò', 'con bò', '🐄'],
+  ['c', 'cờ', 'cá', 'con cá', '🐟'], ['d', 'dờ', 'dê', 'con dê', '🐐'], ['đ', 'đờ', 'đèn', 'cái đèn', '💡'], ['e', 'e', 'em', 'em bé', '👶'],
+  ['ê', 'ê', 'ếch', 'con ếch', '🐸'], ['g', 'gờ', 'gà', 'con gà', '🐔'], ['h', 'hờ', 'hoa', 'bông hoa', '🌸'], ['i', 'i ngắn', 'in', 'máy in', '🖨️'],
+  ['k', 'ca', 'kẹo', 'viên kẹo', '🍬'], ['l', 'lờ', 'lá', 'chiếc lá', '🍃'], ['m', 'mờ', 'mèo', 'con mèo', '🐈'], ['n', 'nờ', 'nơ', 'cái nơ', '🎀'],
+  ['o', 'o', 'ong', 'con ong', '🐝'], ['ô', 'ô', 'ô', 'cái ô', '☂️'], ['ơ', 'ơ', 'ớt', 'quả ớt', '🌶️'], ['p', 'pờ', 'pin', 'cục pin', '🔋'],
+  ['q', 'quờ', 'quà', 'hộp quà', '🎁'], ['r', 'rờ', 'rùa', 'con rùa', '🐢'], ['s', 'sờ', 'sao', 'ngôi sao', '⭐'], ['t', 'tờ', 'táo', 'quả táo', '🍎'],
+  ['u', 'u', 'ủng', 'đôi ủng', '👢'], ['ư', 'ư', 'ướt', 'mưa ướt', '💦'], ['v', 'vờ', 'vịt', 'con vịt', '🦆'], ['x', 'xờ', 'xe', 'xe ô tô', '🚗'],
+  ['y', 'i dài', 'yên', 'yên ngựa', '🐎'],
 ];
 const VOWELS = new Set(Array.from('aăâeêioôơuưy'));
 
-export const LETTERS: Letter[] = RAW.map(([ch, name, obj, emoji]) => ({ ch, name, obj, emoji, vowel: VOWELS.has(ch) }));
+export const LETTERS: Letter[] = RAW.map(([ch, name, word, obj, emoji]) => ({ ch, name, word, obj, emoji, vowel: VOWELS.has(ch) }));
 export const LETTER_ORDER = LETTERS.map((l) => l.ch);
 const BY = new Map(LETTERS.map((l) => [l.ch, l]));
 export function letter(ch: string): Letter {
@@ -68,7 +75,7 @@ export function letterAudioLines(): [string, string][] {
   const out: [string, string][] = [];
   for (const l of LETTERS) {
     out.push([nameKey(l.ch), l.name]);
-    out.push([objKey(l.ch), `${l.name}… ${l.obj}`]);
+    out.push([objKey(l.ch), `${l.name}… ${l.word}`]);
     FIND_TEMPLATES.forEach((t, i) => out.push([findKey(l.ch, i), t.replace('{n}', l.name)]));
   }
   return out;

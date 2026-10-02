@@ -1,5 +1,5 @@
-// Lời nói trên màn hình: thẻ nhân vật trượt vào (mặt pony + BẢNG TÊN: tên nhà to, tên tiếng Anh nhỏ — chỉ hiện,
-// không đọc) và phụ đề của người kể chuyện ở đáy màn. Mọi câu đều có giọng (src/audio.ts) + chữ.
+// Lời nói trên màn hình: khung phụ đề đáy màn có NHÃN NGƯỜI NÓI (mặt tròn + "Ba Cường (Rainbow Dash):",
+// "Fluttershy:", "Người kể chuyện:") + câu. Mọi câu đều có giọng (src/audio.ts) + chữ.
 import photos from 'virtual:family-photos';
 import { CAST, type CastId } from './data';
 import { LINES, BANK_TEXT } from './lines';
@@ -70,44 +70,6 @@ export function lineText(key: string): string {
   return w ? w.after[1] : '';
 }
 
-let box: HTMLElement | null = null;
-function container(): HTMLElement {
-  if (!box) {
-    box = document.createElement('div');
-    box.id = 'family';
-    document.body.appendChild(box);
-  }
-  return box;
-}
-
-function card(id: Speaker, text: string): HTMLElement {
-  const info = speakerInfo(id);
-  const c = document.createElement('div');
-  c.className = 'fam-card' + (id === 'nightmare' ? ' dark' : '');
-  c.style.setProperty('--fam', info.color);
-  c.appendChild(avatarEl(id));
-  const body = document.createElement('div');
-  body.className = 'fam-body';
-  const name = document.createElement('div');
-  name.className = 'fam-name';
-  name.textContent = info.name;
-  const role = document.createElement('small');
-  role.textContent = info.role;
-  name.appendChild(role);
-  const say = document.createElement('div');
-  say.className = 'fam-say';
-  say.textContent = text;
-  body.append(name, say);
-  c.appendChild(body);
-  container().appendChild(c);
-  return c;
-}
-
-function dismiss(c: HTMLElement): void {
-  c.classList.add('out');
-  setTimeout(() => c.remove(), 450);
-}
-
 /** Bị bỏ qua (nút ⏩): mọi câu đang chờ trả về ngay. */
 let skipToken = 0;
 const skipWaiters = new Set<() => void>();
@@ -115,21 +77,30 @@ export function cancelTalk(): void {
   skipToken++;
   for (const r of skipWaiters) r();
   skipWaiters.clear();
-  if (box) box.innerHTML = '';
   hideSubtitle();
 }
 
 /** 1 nhân vật nói 1 câu (thẻ + giọng). Resolve khi đọc xong (tối thiểu `minMs`). */
+/** Nhãn người nói trong khung phụ đề: tên nhà (vai tiếng Anh), vd "Ba Cường (Rainbow Dash)", "Fluttershy". */
+const EN_ROLE: Partial<Record<Speaker, string>> = {
+  'me-yen': 'Rarity', 'ba-cuong': 'Rainbow Dash', 'ong-cuong': 'Applejack', 'ba-tuyet': 'Celestia', 'bac-hanh': 'Luna', twilight: 'Twilight',
+};
+export function speakerLabel(id: Speaker): string {
+  if (id === 'nightmare') return 'Nightmare Moon';
+  const name = speakerInfo(id).name;
+  return EN_ROLE[id] ? `${name} (${EN_ROLE[id]})` : name;
+}
+
+/** 1 nhân vật nói 1 câu: khung phụ đề có mặt tròn + "Tên:" + câu, kèm giọng. Resolve khi đọc xong (tối thiểu `minMs`). */
 export async function say(id: Speaker, key: string, text = lineText(key), minMs = 1400): Promise<void> {
   const my = skipToken;
   sfx('sfx_pop', 0.35);
-  const c = card(id, text);
+  showSubtitle(text, id);
   await raceSkip(Promise.all([play(key), wait(minMs)]));
-  dismiss(c);
-  if (my === skipToken) await wait(150);
+  if (my === skipToken) { hideSubtitle(); await wait(150); }
 }
 
-// ---- phụ đề người kể chuyện
+// ---- khung phụ đề (người kể chuyện + nhân vật)
 let sub: HTMLElement | null = null;
 function subtitleEl(): HTMLElement {
   if (!sub) {
@@ -140,9 +111,23 @@ function subtitleEl(): HTMLElement {
   }
   return sub;
 }
-export function showSubtitle(text: string): void {
+/** Hiện câu trong khung phụ đề. who = người nói (null = người kể chuyện). {Tên} hiện bỏ ngoặc. */
+export function showSubtitle(text: string, who: Speaker | null = null): void {
   const s = subtitleEl();
-  s.textContent = text;
+  s.innerHTML = '';
+  const color = who ? speakerInfo(who).color : '#a06cd5';
+  s.style.setProperty('--sc', color);
+  s.classList.toggle('dark', who === 'nightmare');
+  const ava = who ? avatarEl(who, 'sub-ava') : Object.assign(document.createElement('div'), { className: 'sub-ava narr', textContent: '📖' });
+  ava.style.borderColor = color;
+  const body = document.createElement('div');
+  body.className = 'sub-body';
+  const name = document.createElement('b');
+  name.textContent = `${who ? speakerLabel(who) : 'Người kể chuyện'}:`;
+  const t = document.createElement('span');
+  t.textContent = text.replace(/[{}]/g, '');
+  body.append(name, t);
+  s.append(ava, body);
   s.hidden = false;
   s.classList.remove('in');
   void s.offsetWidth;
@@ -166,6 +151,5 @@ export function raceSkip<T>(p: Promise<T>): Promise<unknown> {
 }
 
 export function clearTalk(): void {
-  if (box) box.innerHTML = '';
   hideSubtitle();
 }

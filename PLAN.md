@@ -22,9 +22,8 @@ hạt phép, dàn người nhà, audio WebAudio), làm lại **cốt truyện** 
 Nhím = Twilight Sparkle (nhân vật chính) · bà Tuyết = Celestia · bác Hanh = Luna, bị biến thành Nightmare Moon tới cuối ·
 ba Cường = Rainbow Dash · mẹ Yến = Rarity · ông Cương = Applejack · mèo Mun (đen), mèo Rơm (vàng) · Spike = bạn rồng.
 
-**Tên khi NÓI** (giọng đọc): Nhím, ba Cường / ba, mẹ Yến / mẹ, ông Cương / ông, bà Tuyết / bà, bác Hanh / bác, Mun, Rơm,
-"bạn rồng nhỏ" (Spike), "Nữ hoàng Bóng Đêm" (Nightmare Moon), "các bạn ngựa nhỏ" (bạn pony), "khu rừng bí ẩn",
-"làng ngựa nhỏ", "thành phố lâu đài". Tên tiếng Anh (Twilight, Rainbow Dash, Everfree, Canterlot…) chỉ HIỆN chữ.
+**Tên khi NÓI** (giọng đọc): gọi tên nhà khi tự nhiên (Nhím, ba Cường, bà Tuyết…); khi nói tên tiếng Anh (Twilight, Rainbow Dash,
+Fluttershy, Nightmare Moon, Everfree…) thì đoạn tên do **giọng tiếng Anh** đọc (bản 2, §12).
 
 ## 3. Cốt truyện
 
@@ -184,3 +183,26 @@ Tam giác đạt ngân sách 300k (game cũ 680k). Draw call trận cuối **ch�
 Đã làm: giảm lưới Celestia 98k→25k, Nightmare Moon 143k→29k, Rarity/Rainbow/Applejack ~18k, Spike 8k; mây + đồi nền thành
 InstancedMesh; ngọc InstancedMesh; props tĩnh gộp theo màu vật liệu; vẽ sẵn mắt + bảng màu cho 5 bạn rip Source
 (`scripts/bake-friends.mjs`, 8–15 → 5–8 draw call/bạn); bạn ngựa nhỏ không có bóng tròn ở trận cuối; texture ≤ 1024 px.
+
+## 12. Bản 2 sau khi ba chơi thử (02/10/2026)
+
+1. **Đọc từ ví dụ sau mỗi chữ đúng** (`src/example.ts`): thẻ to giữa trên (đồ vật + chữ + từ), đọc "ê… ếch" rồi đánh vần chậm
+   theo token lớp 1 ("ê – chờ – ếch"), chữ đang đọc sáng lên; xong mới chơi tiếp. Áp cho săn sao, cổng khoá, cầu, bài ôn trên bảng
+   (bài ôn: chữ vừa đánh vần < 90 s thì chỉ đọc ngắn "ê… ếch"), trận cuối đọc ngắn.
+   Từ ví dụ 29 chữ (bắt đầu đúng bằng chữ đó, đều có trong bảng vàng):
+   a áo · **ă ăn** (ăn cơm 🍚) · â ấm · b bò · c cá · d dê · đ đèn · **e em** (em bé) · ê ếch · g gà · h hoa · **i in** (máy in 🖨️) ·
+   k kẹo · l lá · m mèo · n nơ · o ong · ô ô (cái ô) · ơ ớt · p pin · q quà · r rùa · s sao · t táo · u ủng ·
+   **ư ướt** (mưa ướt 💦 — không có đồ vật nào bắt đầu bằng ư; "sư tử" bị loại vì không bắt đầu bằng ư) · v vịt · x xe ·
+   **y yên** (yên ngựa 🐎). Ca cần ba nghe: ă/ăn, i/in, ư/ướt, y/yên (yên đánh vần "ia – nờ – yên").
+2. **Nhãn người nói**: mọi câu thoại hiện trong khung phụ đề có mặt tròn + "Ba Cường (Rainbow Dash):", "Fluttershy:",
+   "Người kể chuyện:" (`src/talk.ts`).
+3. **Tên tiếng Anh đọc bằng giọng tiếng Anh** (đổi luật cũ): viết `{Fluttershy}` trong câu; `scripts/gen-audio.py` sinh đoạn đó bằng
+   giọng EN (Jenny cho người lớn nữ / người kể, **Ana** cho Nhím và các bạn ngựa nhỏ, Guy cho ba / ông / Spike), phần tiếng Việt bằng
+   Hoài My / Nam Minh, cắt lặng, ghép cách 80 ms. `scripts/audio-lines.mjs` báo lỗi nếu phần giọng Việt còn chứa tên tiếng Anh (`EN_NAMES`).
+   Mỗi bạn ngựa nhỏ có 2 câu cảm ơn riêng có tên ("Mình là {Fluttershy}…").
+4. **Camera** lùi thêm ~18% (offset 14 / 18.4); sao chữ phóng to 1.25 → ~100 px trên màn 1024×768, Twilight ~70 px.
+5. **Bay** (nút 🪽 cạnh nút nhảy, cùng cỡ; phím F trên Mac): cánh ánh sáng vỗ + vệt lấp lánh, bay cao 2.2, đi bằng chạm như thường,
+   tự hạ cánh sau 4 s (bấm lại để hạ sớm), nghỉ 1.2 s. Vị trí luôn kẹp trong đảo + hàng rào cầu/cổng; tới (hoặc bay lố qua) chỗ bài học
+   thì tự hạ cánh rồi mới bắt đầu bài; khi làm bài Twilight bị khoá nên không bay. Bay vẫn chạm được sao chữ (vẫn phải đúng chữ).
+6. Sửa: album bìa không còn lặp tiêu đề; huy hiệu HUD cắt quanh mặt (`FACE` trong `src/photos.ts`); trận cuối bỏ Cadance (model
+   đứng chồm 2 chân) và Derpy (rip có xương, đứng đơ) khỏi đám đông; Surprise bỏ bake mắt (1 mắt đen), vẽ mắt lúc tải như cũ.

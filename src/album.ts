@@ -81,7 +81,7 @@ export async function showAlbumPage(page: AlbumPage, auto = false): Promise<void
 /** Cả cuốn sách phiêu lưu (kết game / nút album ở bản đồ). */
 export async function showAlbumBook(done: number[], auto = false): Promise<void> {
   const pages: AlbumPage[] = [
-    { photo: firstPhoto('nhim-1', 'nhim-2'), title: 'Cuốn sách phiêu lưu của Nhím', caption: 'Cuốn sách phiêu lưu của Nhím.', key: 'al_cover', faces: ['twilight', 'spike'], stickers: '📖🦄🌈⭐' },
+    { photo: firstPhoto('nhim-1', 'nhim-2'), title: 'Cuốn sách phiêu lưu của Nhím', caption: 'Cùng xem lại chuyến phiêu lưu của Nhím nhé!', key: 'al_cover', faces: ['twilight', 'spike'], stickers: '📖🦄🌈⭐' },
     ...[1, 2, 3, 4].filter((n) => done.includes(n)).map(chapterPage),
   ];
   if (firstPhoto('ca-nha') && done.includes(4)) pages.push({ photo: 'ca-nha', title: 'Cả nhà', caption: 'Thêm một kỷ niệm thật đẹp của Nhím.', key: 'al_extra', faces: ['me-yen', 'ba-cuong', 'ong-cuong', 'ba-tuyet', 'bac-hanh'], stickers: '💖🏡💖' });

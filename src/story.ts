@@ -257,7 +257,10 @@ export class ChapterRun {
     return new Promise((resolve) => {
       const check = () => {
         if (!this.alive) { world.updaters.delete(check); resolve(); return; }
-        if (Math.hypot(hero.x - t.x, hero.z - t.z) < t.r && hero.grounded) { world.updaters.delete(check); resolve(); }
+        // tới gần chỗ bài học, hoặc đã đi QUA nó (bay vèo qua / chạy lố) → vẫn bắt đầu bài; chờ chạm đất
+        const near = Math.hypot(hero.x - t.x, hero.z - t.z) < t.r || hero.x > t.x;
+        if (near) hero.land();
+        if (near && hero.grounded) { world.updaters.delete(check); resolve(); }
       };
       world.updaters.add(check);
     });

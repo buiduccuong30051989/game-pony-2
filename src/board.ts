@@ -7,6 +7,7 @@ import { reviewKey } from './lines';
 import { play, sfx, stopSpeech } from './audio';
 import { sayBank, bankLine } from './voice';
 import { avatarEl, say } from './talk';
+import { spellExample } from './example';
 import { markWeak, markStrong, type Progress } from './progress';
 import { setAnswer } from './testhook';
 import { wait } from './tween';
@@ -117,7 +118,7 @@ export async function runReview(p: Progress, chapterLetters: string[], n = 3): P
           sfx('sfx_win', 0.5);
           confetti(30);
           if (!wrongOnce) markStrong(p, target);
-          void (async () => { await play(bankLine('rv_ok').key); await play(objKey(target)); await wait(300); resolve(); })();
+          void (async () => { await play(bankLine('rv_ok').key); await spellExample(target); await wait(200); resolve(); })();
         } else {
           b.classList.remove('wobble'); void b.offsetWidth; b.classList.add('wobble');
           if (!wrongOnce) markWeak(p, target);

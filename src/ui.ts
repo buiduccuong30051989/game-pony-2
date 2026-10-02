@@ -20,6 +20,7 @@ export const els = {
   home: $<HTMLButtonElement>('#home'),
   skip: $<HTMLButtonElement>('#skip'),
   jump: $<HTMLButtonElement>('#jump'),
+  flyBtn: $<HTMLButtonElement>('#fly-btn'),
   bigspell: $<HTMLButtonElement>('#bigspell'),
   word: $('#word'),
   toast: $('#toast'),
@@ -41,6 +42,7 @@ function sync(): void {
   els.hud.hidden = !hudOn || cinema;
   els.home.hidden = !hudOn || cinema;
   els.jump.hidden = !playOn || cinema;
+  els.flyBtn.hidden = !playOn || cinema;
   document.body.classList.toggle('cinema', cinema);
 }
 export function showHud(v: boolean): void { hudOn = v; sync(); }

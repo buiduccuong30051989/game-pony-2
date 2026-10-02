@@ -14,7 +14,7 @@ import { unlockAudio, preload, sfx, stopSpeech } from './audio';
 import { loadProgress, saveProgress } from './progress';
 import { ALL_FRIENDS, CHAPTERS, type CineId } from './data';
 import { LETTER_ORDER } from './letters';
-import { photoUrl, firstPhoto } from './photos';
+import { photoUrl, firstPhoto, FACE } from './photos';
 import { testHook } from './testhook';
 import { clearTalk } from './talk';
 import { els, renderMap, hideMap, showHud, showPlay, setMeBadge, setBoardCount } from './ui';
@@ -59,7 +59,7 @@ async function boot(): Promise<void> {
   void document.fonts?.load("800 100px 'Baloo 2'");
   const hero = await Hero.load(world);
   hero.root.visible = false;
-  setMeBadge(await photoUrl(firstPhoto('nhim-1', 'nhim-2'), 1, 240));
+  setMeBadge(await photoUrl(firstPhoto('nhim-1', 'nhim-2'), 1, 240, FACE));
   setBoardCount(progress.letters.length);
 
   // ---- vòng lặp
@@ -68,6 +68,15 @@ async function boot(): Promise<void> {
     fpsT += dt; fpsN++;
     if (fpsT >= 1) { fps = fpsN / fpsT; fpsT = 0; fpsN = 0; }
     hero.update(dt, (x, z) => world.clampToIsland(x, z));
+    // bay: vệt lấp lánh 7 màu sau lưng + trạng thái nút 🪽
+    if (hero.flying || (hero.y > 0.3 && !hero.grounded && hero.wings.visible)) {
+      for (let i = 0; i < 2; i++) {
+        world.magic.emit({ x: hero.x + (Math.random() - 0.5) * 0.6, y: hero.y + 0.9 + Math.random() * 0.6, z: hero.z + (Math.random() - 0.5) * 0.6,
+          color: [0xff7ac8, 0xffd166, 0x7fd8ff, 0xc084fc][Math.floor(Math.random() * 4)], vy: -0.3, max: 0.9, size: 0.28 });
+      }
+    }
+    els.flyBtn.classList.toggle('on', hero.flying);
+    els.flyBtn.classList.toggle('cool', !hero.flying && !hero.canFly);
     world.follow(dt, hero.x, hero.z, performance.now() / 1000);
     run?.tick(dt);
   });
@@ -227,6 +236,11 @@ async function boot(): Promise<void> {
     }
   }
   els.jump.addEventListener('pointerdown', (e) => { e.preventDefault(); e.stopPropagation(); unlockAudio(); if (hero.jump()) sfx('sfx_tap', 0.4); });
+  els.flyBtn.addEventListener('pointerdown', (e) => {
+    e.preventDefault(); e.stopPropagation(); unlockAudio();
+    if (!canWalk()) return;
+    if (hero.fly()) { sfx(hero.flying ? 'sfx_win' : 'sfx_soft', 0.4); run?.ctx.poke(); }
+  });
 
   // Mac: phím mũi tên + Space
   const held = { ArrowLeft: false, ArrowRight: false, ArrowUp: false, ArrowDown: false };
@@ -234,6 +248,7 @@ async function boot(): Promise<void> {
   window.addEventListener('keydown', (e) => {
     if (e.key in held) { held[e.key as keyof typeof held] = true; if (canWalk()) applyKeys(); e.preventDefault(); run?.ctx.poke(); }
     if (e.key === ' ' && canWalk()) { if (hero.jump()) sfx('sfx_tap', 0.4); e.preventDefault(); }
+    if ((e.key === 'f' || e.key === 'F') && canWalk()) hero.fly();
   });
   window.addEventListener('keyup', (e) => { if (e.key in held) { held[e.key as keyof typeof held] = false; applyKeys(); } });
   window.addEventListener('blur', () => { for (const k of Object.keys(held)) held[k as keyof typeof held] = false; applyKeys(); });

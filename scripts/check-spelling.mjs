@@ -4,7 +4,8 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const { spell } = await import(pathToFileURL(join(root, 'src/spell.ts')).href);
+const { spell, splitTone } = await import(pathToFileURL(join(root, 'src/spell.ts')).href);
+const spellBase = (w) => splitTone(w).base;
 const { LETTERS, letterNameText } = await import(pathToFileURL(join(root, 'src/letters.ts')).href);
 const { GAME_WORDS } = await import(pathToFileURL(join(root, 'src/words.ts')).href);
 
@@ -30,6 +31,12 @@ const GOLDEN = {
   'ớt': 'ơ – tờ – ớt',
   'đẹp': 'e – pờ – ép – đờ – ép – đép – nặng – đẹp',
   'sách': 'a – chờ – ách – sờ – ách – sách',
+  // từ ví dụ của 29 chữ cái (src/letters.ts)
+  'áo': 'a – o – ao – sắc – áo', 'em': 'e – mờ – em', 'đèn': 'e – nờ – en – đờ – en – đen – huyền – đèn',
+  'hoa': 'o – a – oa – hờ – oa – hoa', 'in': 'i – nờ – in', 'lá': 'lờ – a – la – sắc – lá', 'nơ': 'nờ – ơ – nơ',
+  'ong': 'o – ngờ – ong', 'ô': 'ô', 'pin': 'i – nờ – in – pờ – in – pin', 'quà': 'quờ – a – qua – huyền – quà',
+  'rùa': 'u – a – ua – rờ – ua – rua – huyền – rùa', 'sao': 'a – o – ao – sờ – ao – sao', 'táo': 'a – o – ao – tờ – ao – tao – sắc – táo',
+  'ủng': 'u – ngờ – ung – hỏi – ủng', 'ướt': 'ưa – tờ – ướt', 'yên': 'ia – nờ – yên',
   // ă, â đọc á, ớ; y đọc i
   'ăn': 'á – nờ – ăn', 'ấm': 'ớ – mờ – âm – sắc – ấm', 'ly': 'lờ – i – ly',
 };
@@ -56,6 +63,12 @@ for (const [w, want] of Object.entries(GOLDEN)) {
 // mọi từ game dùng phải có trong bảng vàng (từ mới → thêm đáp án tay)
 for (const w of GAME_WORDS) {
   if (!(w in GOLDEN)) { bad++; console.error(`✗ từ "${w}" có trong game nhưng chưa có đáp án trong bảng vàng`); }
+}
+// từ ví dụ của mỗi chữ: bắt đầu bằng chữ đó + có đáp án trong bảng vàng
+for (const l of LETTERS) {
+  const first = Array.from(spellBase(l.word))[0];
+  if (first !== l.ch) { bad++; console.error(`✗ từ ví dụ "${l.word}" của chữ ${l.ch} không bắt đầu bằng ${l.ch}`); }
+  if (!(l.word in GOLDEN)) { bad++; console.error(`✗ từ ví dụ "${l.word}" (chữ ${l.ch}) chưa có đáp án trong bảng vàng`); }
 }
 // 29 chữ cái: đúng thứ tự, đúng tên
 const order = LETTERS.map((l) => l.ch);

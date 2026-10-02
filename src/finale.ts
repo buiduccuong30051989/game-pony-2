@@ -17,7 +17,8 @@ import { Parade } from './parade';
 import { Cine } from './cine';
 import { SpellActivity, pickDistractors, type Ctx } from './activities';
 import { LetterStar, glowTexture, type Pickable } from './letterstar';
-import { nameKey, objKey } from './letters';
+import { nameKey } from './letters';
+import { spellExample } from './example';
 import { play, sfx, stopSpeech } from './audio';
 import { findLine, bankLine } from './voice';
 import { say, narrate } from './talk';
@@ -99,7 +100,9 @@ export class Finale {
     const SPOT: Record<string, [number, number]> = {
       'ong-cuong': [-5.8, 5.8], 'ba-cuong': [-3.0, 7.0], 'me-yen': [3.0, 7.0], 'ba-tuyet': [6.0, 5.6], spike: [-1.2, 8.3], mun: [0.6, 8.6], rom: [1.7, 8.3],
     };
-    const friends: FriendId[] = this.progress.friends.length ? this.progress.friends.slice(-12) : ALL_FRIENDS.slice(0, 12);
+    // Cadance (model đứng chồm 2 chân) và Derpy (rip có xương, không auto-rig → đứng thẳng đơ) nhìn lạ giữa đám đông → không đứng ở trận cuối
+    const ODD: FriendId[] = ['cadance', 'derpy'];
+    const friends: FriendId[] = (this.progress.friends.length ? this.progress.friends : ALL_FRIENDS).filter((f) => !ODD.includes(f)).slice(-12);
     const [fam, fr, boss, luna] = await Promise.all([
       Promise.all(famIds.map((id) => Actor.create(world, id))),
       Promise.all(friends.map((id) => Actor.create(world, id))),
@@ -343,7 +346,7 @@ export class Finale {
       await this.world.magic.beam(this.hero.hornWorld(), correct.worldCenter(), PALETTE.magic, HARMONY[r].color, 0.5);
       this.world.magic.burst(correct.worldCenter(), 70, correct.color, 2.6, 0.3, 0.9, -1);
       await play(bankLine('ok').key);
-      await play(objKey(target));
+      await spellExample(target, { short: true });
       for (const o of opts) void o.vanish();
     }
   }
@@ -438,7 +441,7 @@ export class Finale {
     const { world, hero } = this;
     this.phase = 'climax';
     for (let i = this.lit; i < 5; i++) this.lightGem(i);
-    const photoTex = new THREE.CanvasTexture(await photoCanvas(firstPhoto('nhim-1', 'nhim-2'), 1, 512));
+    const photoTex = new THREE.CanvasTexture(await photoCanvas(firstPhoto('nhim-1', 'nhim-2'), 1, 512, { x: 0.47, y: 0.42, zoom: 1.5 }));
     photoTex.colorSpace = THREE.SRGBColorSpace;
     const photo = new THREE.Mesh(new THREE.CircleGeometry(1.3, 48), new THREE.MeshBasicMaterial({ map: photoTex, transparent: true, opacity: 0, depthWrite: false }));
     const ring = new THREE.Mesh(new THREE.RingGeometry(1.3, 1.5, 48), new THREE.MeshBasicMaterial({ color: 0xffd166, transparent: true, opacity: 0, depthWrite: false }));
