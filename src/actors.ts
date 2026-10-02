@@ -71,6 +71,8 @@ export class Actor {
   private readonly blob: THREE.Mesh;
 
   get id(): CastId { return this.def.id; }
+  /** Bóng tròn dưới chân (tắt ở đám đông trận cuối để bớt draw call). */
+  set blobOn(v: boolean) { this.blob.visible = v; }
   get flyer(): boolean { return this.def.kind === 'flyer'; }
   get grounded(): boolean { return this.y <= this.hover + 1e-3 && this.vy === 0; }
 

@@ -208,14 +208,18 @@ export abstract class Activity {
 
 export class HuntActivity extends Activity {
   private cx: number; private cz: number;
+  /** ôn cách quãng: 1 chữ bé từng chọn sai ở chương trước, thêm làm mục tiêu cuối */
+  extra: string | null = null;
   constructor(ctx: Ctx, private b: Extract<Beat, { t: 'hunt' }>) {
     super(ctx);
     this.cx = b.x; this.cz = pathZ(b.x) + b.z;
   }
   trigger() { return { x: this.cx - 7.5, z: this.cz, r: 4 }; }
 
+  private get targets(): string[] { return this.extra ? [...this.b.letters, this.extra] : this.b.letters; }
+
   async setup(): Promise<void> {
-    const all = [...this.b.letters, ...this.b.decoys].sort(() => Math.random() - 0.5);
+    const all = [...this.targets, ...this.b.decoys.filter((d) => d !== this.extra)].sort(() => Math.random() - 0.5);
     // sao xếp vòng cung trước mặt camera quanh tâm, cách nhau ≥ 2.6, phía trước chỗ Twilight dừng
     const n = all.length;
     all.forEach((ch, i) => {
@@ -231,7 +235,7 @@ export class HuntActivity extends Activity {
     const { ctx } = this;
     const { hero, world } = ctx;
     await sayBank('hunt');
-    for (const target of this.b.letters) {
+    for (const target of this.targets) {
       if (!ctx.alive()) return;
       const prompt = () => play(findLine(target));
       void prompt();
@@ -423,7 +427,7 @@ export class LockActivity extends Activity {
   }
   trigger() { return { x: this.b.x - 3.2, z: this.cz, r: 3.2 }; }
   barrier(): number { return this.done ? Infinity : this.b.x - 1.3; }
-  view() { return { pos: new THREE.Vector3(this.b.x - 1.5, 7.6, this.cz + 12.5), look: new THREE.Vector3(this.b.x, 1.8, this.cz) }; }
+  view() { return { pos: new THREE.Vector3(this.b.x - 3.5, 7.2, this.cz + 12), look: new THREE.Vector3(this.b.x - 0.4, 1.8, this.cz) }; }
 
   private faceTex(label: string): THREE.CanvasTexture {
     const c = document.createElement('canvas');
@@ -445,23 +449,23 @@ export class LockActivity extends Activity {
     const { world } = this.ctx;
     const X = this.b.x, Z = this.cz;
     const g = new THREE.Group();
-    // hàng rào hoa 2 bên (bụi cây xanh có hoa) + cổng gỗ 2 cánh
+    // hàng rào hoa phía sau (phía trước để trống cho camera nhìn thấy ổ khoá) + 2 trụ trắng + cổng 2 cánh
     const hedge = new THREE.MeshStandardMaterial({ color: 0x5fbf5a, roughness: 1 });
+    const len = 9;
+    const h = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.25, len), hedge);
+    h.position.set(X, 0.62, Z - (1.9 + len / 2));
+    h.castShadow = true;
+    g.add(h);
+    for (let k = 0; k < 5; k++) {
+      const f = world.emojiSprite(k % 2 ? '🌸' : '🌼', 0.6);
+      f.position.set(X + 0.55, 1.0 + (k % 3) * 0.2, Z - (2.4 + k * 1.6));
+      g.add(f);
+    }
     for (const s of [-1, 1]) {
-      const len = s < 0 ? 9 : 3.5;
-      const h = new THREE.Mesh(new THREE.BoxGeometry(1.0, 1.25, len), hedge);
-      h.position.set(X, 0.9, Z + s * (1.9 + len / 2));
-      h.castShadow = true;
-      g.add(h);
-      for (let k = 0; k < (s < 0 ? 5 : 2); k++) {
-        const f = world.emojiSprite(k % 2 ? '🌸' : '🌼', 0.6);
-        f.position.set(X + 0.55, 1.0 + (k % 3) * 0.2, Z + s * (2.4 + k * 1.6));
-        g.add(f);
-      }
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 3.4, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }));
-      post.position.set(X, 1.7, Z + s * 1.9);
-      const cap = world.emojiSprite('⭐', 0.8);
-      cap.position.set(X, 3.7, Z + s * 1.9);
+      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, s < 0 ? 3.2 : 2.0, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }));
+      post.position.set(X, s < 0 ? 1.6 : 1.0, Z + s * 1.9);
+      const cap = world.emojiSprite('⭐', 0.7);
+      cap.position.set(X, s < 0 ? 3.5 : 2.3, Z + s * 1.9);
       g.add(post, cap);
     }
     const doorMat = new THREE.MeshStandardMaterial({ color: 0xb97cf0, roughness: 0.7 });

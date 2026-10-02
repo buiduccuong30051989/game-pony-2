@@ -2,7 +2,7 @@
 //   node scripts/optimize-models.mjs
 // Đọc bản gốc ở ../02-pony-three/public/models/<file> (game gốc, cùng thư mục kid-games), ghi đè public/models/<file>.
 // meshoptimizer simplify (giữ đường nối UV) rồi nếu chưa đủ thì simplifySloppy (bỏ qua đường nối) tới đúng số tam giác đích.
-import { NodeIO } from '@gltf-transform/core';
+import { NodeIO, PropertyType } from '@gltf-transform/core';
 import { ALL_EXTENSIONS } from '@gltf-transform/extensions';
 import { weld, simplify, prune, dedup } from '@gltf-transform/functions';
 import { MeshoptSimplifier } from 'meshoptimizer';
@@ -13,12 +13,12 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 /** file trong public/models → số tam giác đích */
 const TARGETS = {
-  'ponies/celestia.glb': 30000,
-  'ponies/nightmare.glb': 34000,
-  'ponies/spike.glb': 12000,
-  'ponies/rarity.glb': 26000,
-  'ponies/rainbow.glb': 24000,
-  'ponies/applejack.glb': 24000,
+  'ponies/celestia.glb': 24000,
+  'ponies/nightmare.glb': 26000,
+  'ponies/spike.glb': 8000,
+  'ponies/rarity.glb': 19000,
+  'ponies/rainbow.glb': 18000,
+  'ponies/applejack.glb': 18000,
   'friends/lod/sunburst.glb': 7000,
   'friends/lod/fluttershy.glb': 7000,
   'friends/lod/shining.glb': 6500,
@@ -60,7 +60,8 @@ for (const [file, goal] of Object.entries(TARGETS)) {
   await doc.transform(weld(), simplify({ simplifier: MeshoptSimplifier, ratio: Math.min(1, goal / before), error: 0.004, lockBorder: false }));
   let mid = count(doc);
   if (mid > goal * 1.08) sloppy(doc, goal / mid);
-  await doc.transform(prune(), dedup());
+  // không gộp vật liệu trùng: src/eyes.ts / bake-friends.mjs tìm nhãn cầu theo TÊN vật liệu
+  await doc.transform(prune(), dedup({ propertyTypes: [PropertyType.ACCESSOR, PropertyType.MESH, PropertyType.TEXTURE] }));
   await io.write(dst, doc);
   console.log(`${file}: ${before} → ${mid} → ${count(doc)} tam giác`);
 }

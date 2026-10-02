@@ -31,10 +31,17 @@ export function chapterPage(n: number): AlbumPage {
 
 async function fill(page: AlbumPage, big = false): Promise<void> {
   const root = $('#album-page');
-  root.classList.toggle('big', big);
+  root.classList.toggle('cover', big);
   $('#album-title').textContent = page.title;
   $('#album-caption').textContent = page.caption;
-  $('#album-stickers').textContent = page.stickers;
+  const st = $('#album-stickers');
+  st.innerHTML = '';
+  const seg = new Intl.Segmenter('vi', { granularity: 'grapheme' });
+  for (const { segment } of seg.segment(page.stickers)) {
+    const sp = document.createElement('span');
+    sp.textContent = segment;
+    st.appendChild(sp);
+  }
   const faces = $('#album-faces');
   faces.innerHTML = '';
   for (const f of page.faces) faces.appendChild(avatarEl(f, 'al-ava'));

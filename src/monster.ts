@@ -67,7 +67,7 @@ export class Monster {
   private wispT = 0;
   private hover: number;
 
-  private constructor(private world: World, readonly kind: MonsterKind, obj: THREE.Object3D, clips: THREE.AnimationClip[]) {
+  private constructor(private world: World, readonly kind: MonsterKind, obj: THREE.Object3D, clips: THREE.AnimationClip[], withAura: boolean) {
     const def = MONSTERS[kind];
     this.hover = def.hover ?? 0;
     this.root.add(this.pivot);
@@ -106,7 +106,7 @@ export class Monster {
     this.aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: glowTexture(), color: 0x7a3cff, transparent: true, depthWrite: false, opacity: 0.55 }));
     this.aura.scale.setScalar(def.h * 2.3);
     this.aura.position.set(0, def.h * 0.5, -0.3);
-    this.pivot.add(this.aura);
+    if (withAura) this.pivot.add(this.aura);
     this.mixer = new THREE.AnimationMixer(obj);
     for (const c of clips) {
       const short = c.name.split('|').pop()!;
@@ -117,9 +117,10 @@ export class Monster {
     this.mixer.update(Math.random() * 2);
   }
 
-  static async create(world: World, kind: MonsterKind, x: number, z: number): Promise<Monster> {
+  /** aura = false: bỏ quầng sáng (đám đông trận cuối, bớt draw call). */
+  static async create(world: World, kind: MonsterKind, x: number, z: number, aura = true): Promise<Monster> {
     const { obj, clips } = await world.instance(`models/monsters/${MONSTERS[kind].file}`);
-    const m = new Monster(world, kind, obj, clips);
+    const m = new Monster(world, kind, obj, clips, aura);
     m.place(x, z);
     return m;
   }

@@ -52,7 +52,8 @@ export interface CastDef {
   emoji: string;
   color: string;
   friend?: boolean;
-  /** model có nhãn cầu trắng trơn (rip từ Source) → vẽ mống mắt (src/eyes.ts) */
+  /** model có nhãn cầu trắng trơn (rip từ Source) → vẽ mống mắt lúc tải (src/eyes.ts). Bạn ngựa nhỏ đã vẽ sẵn
+   *  vào file bằng scripts/bake-friends.mjs nên không cần. */
   eyes?: { mat: string; iris: number };
 }
 
@@ -74,12 +75,12 @@ export const CAST: Record<CastId, CastDef> = {
   derpy: fr('derpy', 'Derpy', 1.3, '📮', '#9aa3b5'),
   minty: fr('minty', 'Minty', 1.25, '🍬', '#4cc79a'),
   babs: fr('babs', 'Babs Seed', 1.15, '🌱', '#d9663a'),
-  applemint: fr('applemint', 'Bạc Hà', 1.25, '🍏', '#6dbb3c', { mat: 'material_1', iris: 0xc4701c }),
-  bigmac: fr('bigmac', 'Big Mac', 1.6, '🍎', '#d4373f', { mat: 'material_3', iris: 0x3f9a3a }),
-  surprise: fr('surprise', 'Surprise', 1.35, '🎁', '#e0b52c', { mat: 'material_5', iris: 0x3b8fd9 }),
+  applemint: fr('applemint', 'Bạc Hà', 1.25, '🍏', '#6dbb3c'),
+  bigmac: fr('bigmac', 'Big Mac', 1.6, '🍎', '#d4373f'),
+  surprise: fr('surprise', 'Surprise', 1.35, '🎁', '#e0b52c'),
   cadance: fr('cadance', 'Cadance', 1.6, '💖', '#ff8fc8'),
-  shining: fr('shining', 'Shining Armor', 1.6, '🛡️', '#4a6fd1', { mat: 'material_2', iris: 0x2f6fd8 }),
-  sunburst: fr('sunburst', 'Sunburst', 1.4, '🔮', '#e86a2a', { mat: 'material_0', iris: 0x3fa38a }),
+  shining: fr('shining', 'Shining Armor', 1.6, '🛡️', '#4a6fd1'),
+  sunburst: fr('sunburst', 'Sunburst', 1.4, '🔮', '#e86a2a'),
   rainbowswirl: fr('rainbowswirl', 'Cầu Vồng', 1.3, '🌈', '#4fb3ff'),
 };
 

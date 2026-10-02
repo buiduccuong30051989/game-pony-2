@@ -6,7 +6,7 @@ import type { World } from './world';
 import type { Hero } from './hero';
 import { Actor } from './actors';
 import { Parade } from './parade';
-import { makeActivity, type Activity, type Ctx } from './activities';
+import { makeActivity, HuntActivity, type Activity, type Ctx } from './activities';
 import { RescueActivity } from './rescue';
 import { playChapterCine } from './cines';
 import { openBoard, runReview } from './board';
@@ -106,11 +106,10 @@ export class ChapterRun {
     for (const g of world.gems) {
       if (!g.taken && Math.hypot(g.x - hero.x, g.z - hero.z) < 1.2 && hero.y < 1.6) {
         g.taken = true;
-        g.mesh.visible = false;
         this.gems++;
         setGems(this.gems);
         sfx('sfx_pop', 0.45);
-        world.magic.burst(g.mesh.position, 26, 0x7fd8ff, 1.8, 0.24, 0.6, -1);
+        world.magic.burst(g.pos, 26, 0x7fd8ff, 1.8, 0.24, 0.6, -1);
       }
     }
   }
@@ -145,6 +144,10 @@ export class ChapterRun {
     // hoạt động
     const rescueWho = def.rescue;
     this.activities = def.beats.map((b) => (b.t === 'rescue' ? new RescueActivity(this.ctx, b, rescueWho) : makeActivity(this.ctx, b)));
+    // ôn cách quãng: chữ yếu nhất (đã nhặt, không thuộc chương này) quay lại làm mục tiêu cuối của lần săn sao đầu tiên
+    const weak = Object.entries(progress.weak).filter(([c]) => progress.letters.includes(c) && !def.letters.includes(c)).sort((a, b) => b[1] - a[1]);
+    const firstHunt = this.activities.find((a) => a instanceof HuntActivity) as HuntActivity | undefined;
+    if (weak.length && firstHunt) firstHunt.extra = weak[0][0];
     await Promise.all(this.activities.map((a) => a?.setup()));
     this.updateBarrier();
     setChapterTitle(`${def.n}. ${def.title}`);

@@ -9,7 +9,7 @@ import { PALETTE, type ChapterDef } from './data';
 import { Magic } from './magic';
 import { tween, updateTweens, easeInOutSine } from './tween';
 
-export interface Gem { x: number; z: number; mesh: THREE.Mesh; taken: boolean }
+export interface Gem { x: number; z: number; i: number; taken: boolean; pos: THREE.Vector3 }
 export interface ChapterScene {
   group: THREE.Group;
   gems: Gem[];
@@ -64,6 +64,9 @@ export class World {
   private sunDisc!: THREE.Sprite;
   private stars!: THREE.Points;
   private readonly cloudMat = new THREE.MeshStandardMaterial({ color: PALETTE.cloud, roughness: 1 });
+  private cloudMesh!: THREE.InstancedMesh;
+  private gemMesh: THREE.InstancedMesh | null = null;
+  private readonly tmpObj = new THREE.Object3D();
   /** 0 = ngày, 1 = đêm */
   night = 0;
   private swayers: Swayer[] = [];
@@ -167,31 +170,39 @@ export class World {
     this.scene.add(water);
 
     const rnd = mulberry32(7);
-    const hillGeos = [new THREE.SphereGeometry(1, 20, 10)];
-    for (let i = 0; i < 22; i++) {
-      const far = i % 2 === 0;
+    // đồi xa: 2 InstancedMesh (gần / xa) → 2 draw call thay vì 22
+    const hillGeo = new THREE.SphereGeometry(1, 20, 10);
+    for (const far of [false, true]) {
       const mat = new THREE.MeshStandardMaterial({ color: far ? PALETTE.hillFar : PALETTE.hill, roughness: 1 });
       this.hillMats.push({ mat, far });
-      const hill = new THREE.Mesh(hillGeos[0], mat);
-      const r = far ? 22 + rnd() * 12 : 12 + rnd() * 8;
-      hill.scale.set(r, r * 0.4, r);
-      hill.position.set(-120 + i * 12 + rnd() * 6, -4, far ? -110 - rnd() * 20 : -75 - rnd() * 12);
-      this.scene.add(hill);
+      const im = new THREE.InstancedMesh(hillGeo, mat, 11);
+      const m4 = new THREE.Matrix4();
+      for (let k = 0; k < 11; k++) {
+        const i = k * 2 + (far ? 0 : 1);
+        const r = far ? 22 + rnd() * 12 : 12 + rnd() * 8;
+        m4.compose(new THREE.Vector3(-120 + i * 12 + rnd() * 6, -4, far ? -110 - rnd() * 20 : -75 - rnd() * 12), new THREE.Quaternion(), new THREE.Vector3(r, r * 0.4, r));
+        im.setMatrixAt(k, m4);
+      }
+      im.frustumCulled = false;
+      this.scene.add(im);
     }
-    const puff = new THREE.SphereGeometry(1, 12, 8);
+    // mây: 1 InstancedMesh (12 cụm × 4 cục) trôi ngang → 1 draw call
+    this.cloudMesh = new THREE.InstancedMesh(new THREE.SphereGeometry(1, 12, 8), this.cloudMat, 48);
+    this.cloudMesh.frustumCulled = false;
     for (let i = 0; i < 12; i++) {
       const g = new THREE.Group();
       for (let k = 0; k < 4; k++) {
-        const s = new THREE.Mesh(puff, this.cloudMat);
+        const s = new THREE.Object3D();
         s.scale.setScalar(1.6 + rnd() * 1.4);
         s.position.set(k * 2 - 3, rnd() * 0.8, 0);
         g.add(s);
       }
       g.position.set(-90 + i * 16 + rnd() * 8, 16 + rnd() * 8, -50 - rnd() * 40);
       g.userData.speed = 0.3 + rnd() * 0.4;
-      this.scene.add(g);
       this.clouds.push(g);
     }
+    this.scene.add(this.cloudMesh);
+    this.updateClouds();
 
     this.moon = new THREE.Sprite(new THREE.SpriteMaterial({ map: this.glowTexture('#f4f2ff', 'rgba(200,205,255,0.55)', true), transparent: true, depthWrite: false }));
     this.moon.scale.setScalar(34);
@@ -466,23 +477,26 @@ export class World {
       scatter(['tree_cone', 'tree_pineRoundA'], 10, 1.6, 2.2, 2.5, 0.75, 1.0, 0, true);
       scatter(['statue_column'], 6, 1.2, 1.6, 2, 0.7, 0.3);
     }
-    // hoa + cỏ đung đưa (không gộp)
+    // hoa + cỏ đung đưa (không gộp); trận cuối: hoa tĩnh, gộp chung (bớt draw call)
     let placed = 0, tries = 0;
     const flowerCount = battle ? 30 : 70;
     while (placed < flowerCount && tries++ < 900) {
       const x = (rnd() * 2 - 1) * rx, z = (rnd() * 2 - 1) * rz;
       if (!inside(x, z, 1.5) || !free(x, z, -1.2)) continue;
       const isFlower = rnd() < th.flowers + 0.2;
-      const name = isFlower ? flowers[Math.floor(rnd() * flowers.length)] : rnd() < 0.5 ? 'grass' : 'grass_large';
-      place(name, x, z, 0.9 + rnd() * 0.6, isFlower ? 0.12 : 0.07);
+      // trận cuối: chỉ 2 loại hoa (ít vật liệu → ít draw call sau khi gộp)
+      const pool = battle ? ['flower_yellowA', 'flower_purpleA'] : flowers;
+      const name = isFlower ? pool[Math.floor(rnd() * pool.length)] : 'grass';
+      // chỉ 1/5 số hoa đung đưa (mỗi cây đung đưa = 1 draw call riêng), còn lại gộp tĩnh
+      place(name, x, z, 0.9 + rnd() * 0.6, battle || placed % 5 ? 0 : isFlower ? 0.12 : 0.07, false);
       placed++;
     }
     await Promise.all(jobs);
     this.mergeStatic(statics);
 
-    // bướm, chim
-    const flyEmoji = battle ? '✨' : '🦋';
-    for (let i = 0; i < 8; i++) {
+    // bướm, chim (trận cuối không có: bớt draw call)
+    const flyEmoji = '🦋';
+    for (let i = 0; i < (battle ? 0 : 8); i++) {
       let x = 0, z = 0, k = 0;
       do { x = (rnd() * 2 - 1) * rx * 0.8; z = (rnd() * 2 - 1) * rz * 0.8; } while (!inside(x, z, 3) && k++ < 20);
       const sp = this.emojiSprite(flyEmoji, 0.5);
@@ -491,7 +505,7 @@ export class World {
     }
     const birdMat = new THREE.MeshBasicMaterial({ color: 0x4a4a6a, side: THREE.DoubleSide });
     const wingGeo = new THREE.PlaneGeometry(0.7, 0.18).translate(0.35, 0, 0);
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < (battle ? 0 : 4); i++) {
       const g = new THREE.Group();
       const wings: THREE.Mesh[] = [];
       for (const s of [1, -1]) {
@@ -506,19 +520,20 @@ export class World {
     }
 
     // ngọc dọc đường (nhặt cho vui, không bắt buộc)
-    const gemGeo = new THREE.OctahedronGeometry(0.32, 0);
-    const gemMat = new THREE.MeshStandardMaterial({ color: 0x7fd8ff, emissive: 0x2a8fd8, emissiveIntensity: 0.6, roughness: 0.3 });
+    // ngọc: 1 InstancedMesh (nhặt rồi thì thu về 0)
     const gems: Gem[] = [];
     if (!battle) {
       for (let x = -rx + 7; x < rx - 6; x += 2.6 + rnd() * 2) {
         const z = pathZ(x) + (rnd() - 0.5) * 4;
         if (keep.slice(0, 12).some(([kx, kz, r]) => Math.hypot(x - kx, z - kz) < r * 0.8)) continue;
-        const mesh = new THREE.Mesh(gemGeo, gemMat);
-        mesh.position.set(x, 1.0, z);
-        group.add(mesh);
-        gems.push({ x, z, mesh, taken: false });
+        gems.push({ x, z, i: gems.length, taken: false, pos: new THREE.Vector3(x, 1, z) });
       }
     }
+    this.gemMesh = new THREE.InstancedMesh(new THREE.OctahedronGeometry(0.32, 0),
+      new THREE.MeshStandardMaterial({ color: 0x7fd8ff, emissive: 0x2a8fd8, emissiveIntensity: 0.6, roughness: 0.3 }), Math.max(1, gems.length));
+    this.gemMesh.count = gems.length;
+    this.gemMesh.frustumCulled = false;
+    group.add(this.gemMesh);
 
     this.chapter = { group, gems };
     this.setNight(th.night);
@@ -640,7 +655,10 @@ export class World {
       for (const k of Object.keys(geo.attributes)) if (!['position', 'normal', 'uv'].includes(k)) geo.deleteAttribute(k);
       if (!geo.attributes.normal) geo.computeVertexNormals();
       geo.applyMatrix4(m.matrixWorld);
-      const sig = `${m.material.uuid}|${Object.keys(geo.attributes).sort().join(',')}|${m.castShadow}`;
+      // gộp theo THUỘC TÍNH vật liệu (Kenney: mỗi file GLB có vật liệu riêng dù cùng màu) → ít nhóm hơn
+      const mm = m.material as THREE.MeshStandardMaterial;
+      const key = mm.map ? mm.uuid : `${mm.type}|${mm.color?.getHexString()}|${mm.emissive?.getHexString()}|${mm.transparent}|${mm.side}`;
+      const sig = `${key}|${Object.keys(geo.attributes).sort().join(',')}|${m.castShadow}`;
       let b = buckets.get(sig);
       if (!b) { b = { mat: m.material, geos: [], cast: m.castShadow }; buckets.set(sig, b); }
       b.geos.push(geo);
@@ -682,6 +700,18 @@ export class World {
     group.add(shine);
     return { group, mesh, holder };
   }
+
+  private updateClouds(): void {
+    let i = 0;
+    for (const g of this.clouds) {
+      g.updateMatrixWorld(true);
+      for (const s of g.children) this.cloudMesh.setMatrixAt(i++, s.matrixWorld);
+    }
+    this.cloudMesh.instanceMatrix.needsUpdate = true;
+  }
+
+  /** Bật / tắt bóng đổ thật (trận cuối tắt để giữ ngân sách draw call). */
+  setShadows(on: boolean): void { this.sun.castShadow = on; }
 
   // ---------- chạm ----------
   /** Toạ độ màn hình (px) → tia từ camera. */
@@ -757,11 +787,19 @@ export class World {
       c.position.x += c.userData.speed * dt;
       if (c.position.x > 110) c.position.x -= 220;
     }
+    this.updateClouds();
     if (!this.chapter) return;
-    for (const g of this.chapter.gems) {
-      if (g.taken) continue;
-      g.mesh.rotation.y += dt * 2;
-      g.mesh.position.y = 1.0 + Math.sin(t * 3 + g.x) * 0.12;
+    if (this.gemMesh && this.chapter.gems.length) {
+      const o = this.tmpObj;
+      for (const g of this.chapter.gems) {
+        g.pos.y = 1.0 + Math.sin(t * 3 + g.x) * 0.12;
+        o.position.copy(g.pos);
+        o.rotation.set(0, t * 2 + g.x, 0);
+        o.scale.setScalar(g.taken ? 0.0001 : 1);
+        o.updateMatrix();
+        this.gemMesh.setMatrixAt(g.i, o.matrix);
+      }
+      this.gemMesh.instanceMatrix.needsUpdate = true;
     }
     for (const s of this.swayers) {
       s.obj.rotation.z = Math.sin(t * 1.8 + s.phase) * s.amp;

@@ -174,22 +174,24 @@
 
     /* album */
     #album { z-index: 22; background: radial-gradient(ellipse at 50% 40%, rgba(255,240,250,.92), rgba(160,108,213,.85)); }
-    #album-page { position: relative; display: flex; gap: 30px; align-items: center; background: #fffdf6; border-radius: 34px; padding: 24px 34px; max-width: 94vw;
-      border: 14px solid transparent; background-clip: padding-box; box-shadow: 0 12px 0 rgba(60,30,110,.3); }
-    #album-page::before { content: ''; position: absolute; inset: -14px; border-radius: 44px; z-index: -1; background: linear-gradient(135deg, #ff4d5e, #ff9a2e, #ffe066, #5bd96b, #4fb3ff, #9b6bff); }
+    #album-page { position: relative; isolation: isolate; display: grid; grid-template-columns: auto minmax(260px, 430px); gap: 30px; align-items: center;
+      background: #fffdf6; border-radius: 34px; padding: 26px 36px; max-width: 94vw; box-shadow: 0 12px 0 rgba(60,30,110,.3); }
+    #album-page::before { content: ''; position: absolute; inset: -14px; border-radius: 46px; z-index: -1; background: linear-gradient(135deg, #ff4d5e, #ff9a2e, #ffe066, #5bd96b, #4fb3ff, #9b6bff); }
+    #album-page::after { content: ''; position: absolute; inset: 0; border-radius: 34px; z-index: -1; background: #fffdf6; }
     #album-page.flip { animation: pageIn .6s ease both; }
-    @keyframes pageIn { from { transform: perspective(900px) rotateY(-50deg) scale(.85); opacity: 0; } }
-    .al-photo-wrap { position: relative; flex: none; }
-    #album-photo { width: min(330px, 34vw); aspect-ratio: 3/4; object-fit: cover; border-radius: 18px; border: 10px solid #fff; box-shadow: 0 6px 18px rgba(80,40,140,.35); transform: rotate(-3deg); display: block; background: #f1e6ff; }
-    #album-stickers { position: absolute; inset: -30px; font-size: 44px; pointer-events: none; display: flex; justify-content: space-between; align-items: flex-start; letter-spacing: 120px; }
-    .al-text { display: flex; flex-direction: column; gap: 14px; max-width: 460px; }
-    #album-title { margin: 0; font-size: clamp(32px, 4vw, 50px); color: #a06cd5; line-height: 1.05; }
-    #album-caption { font-size: clamp(26px, 3vw, 36px); font-weight: 800; line-height: 1.2; }
+    @keyframes pageIn { from { transform: perspective(900px) rotateY(-40deg) scale(.88); opacity: 0; } }
+    .al-photo-wrap { position: relative; }
+    #album-photo { width: min(320px, 30vw); max-height: 70vh; aspect-ratio: 3/4; object-fit: cover; border-radius: 18px; border: 10px solid #fff; box-shadow: 0 6px 18px rgba(80,40,140,.35); transform: rotate(-3deg); display: block; background: #f1e6ff; }
+    #album-stickers { position: absolute; left: -22px; right: -22px; top: -26px; bottom: -26px; font-size: 42px; pointer-events: none; display: grid; grid-template-columns: 1fr 1fr; align-content: space-between; }
+    #album-stickers span:nth-child(2n) { justify-self: end; }
+    .al-text { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+    #album-title { margin: 0; font-size: clamp(30px, 3.6vw, 48px); color: #a06cd5; line-height: 1.05; }
+    #album-caption { font-size: clamp(24px, 2.8vw, 34px); font-weight: 800; line-height: 1.2; }
     #album-faces { display: flex; gap: 10px; flex-wrap: wrap; }
-    .al-ava { width: 82px; height: 82px; border-radius: 50%; border: 5px solid; background: #fff; display: grid; place-items: center; font-size: 48px; position: relative; animation: hop 1s ease-in-out infinite alternate; }
+    .al-ava { width: 80px; height: 80px; border-radius: 50%; border: 5px solid; background: #fff; display: grid; place-items: center; font-size: 46px; position: relative; animation: hop 1s ease-in-out infinite alternate; }
     .al-nav { display: flex; gap: 14px; }
-    #album-page.big #album-photo { width: min(380px, 38vw); }
-    #album-close { position: absolute; top: -40px; right: -36px; width: 76px; height: 76px; font-size: 36px; }
+    #album-page.cover #album-photo { width: min(360px, 33vw); }
+    #album-close { position: absolute; top: -34px; right: -30px; width: 76px; height: 76px; font-size: 36px; z-index: 2; }
 
     /* ảnh lớn kết */
     #bigphoto { z-index: 23; background: radial-gradient(ellipse at 50% 40%, #fffbe0 0%, #ffd6ee 50%, #9fd8ff 100%); }

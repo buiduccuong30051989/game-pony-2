@@ -30,15 +30,16 @@ import { tween, wait, easeOutQuad } from './tween';
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 const RAINBOW = [0xff4d5e, 0xff9a2e, 0xffe066, 0x5bd96b, 0x4fb3ff, 0x9b6bff];
-const HERO = V(0, 0, 3.2);
+const HERO = V(0, 0, 4.6);
 const BOSS = V(0, 0, -10);
 const BOSS_HOVER = 2.6;
 const BOSS_H = 4.0;
 /** camera nhìn 2 phe đối mặt (từ sau lưng phe Nhím, hơi cao) */
-const BATTLE_CAM = { pos: V(0, 9.5, 19), look: V(0, 1.6, -3), fov: 50 };
+const BATTLE_CAM = { pos: V(0, 10.5, 21.5), look: V(0, 1.8, -2.5), fov: 50 };
 
-/** Đội quân bóng tối: 15 con, ít mesh (draw call) — slime, yêu tinh, ma, rồng nhỏ. */
-const ARMY: MonsterKind[] = ['slime_jt', 'goblin', 'slime', 'ghost', 'slime_jt', 'goblin', 'slime', 'dragon_ev', 'slime_jt', 'goblin', 'ghost', 'slime', 'slime_jt', 'goblin', 'slime'];
+/** Đội quân bóng tối: 10 con (2 con / vòng), ít mesh (draw call) — slime, yêu tinh, ma, rồng nhỏ. */
+const ARMY: MonsterKind[] = ['slime_jt', 'goblin', 'slime', 'ghost', 'goblin', 'dragon_ev', 'slime_jt', 'slime', 'ghost', 'goblin'];
+const PER_ROUND = 2;
 
 export interface FinaleOpts {
   /** số vòng đã xong sẵn (debug ?round=N) */
@@ -77,6 +78,7 @@ export class Finale {
     const { world, hero } = this;
     const def = CHAPTERS[3];
     await world.buildChapter(def, [[0, 0, 13]]);
+    world.setShadows(false);
     world.scene.add(hero.root);
     hero.x = HERO.x; hero.z = HERO.z; hero.locked = true;
     hero.stop();
@@ -95,7 +97,7 @@ export class Finale {
     // phe Nhím: cả nhà hàng trước, mèo + Spike, bạn ngựa nhỏ hàng sau
     const famIds: CastId[] = ['ong-cuong', 'ba-cuong', 'me-yen', 'ba-tuyet', 'spike', 'mun', 'rom'];
     const SPOT: Record<string, [number, number]> = {
-      'ong-cuong': [-5.6, 4.6], 'ba-cuong': [-2.8, 5.8], 'me-yen': [2.8, 5.8], 'ba-tuyet': [5.8, 4.4], spike: [-1.2, 7.0], mun: [0.6, 7.3], rom: [1.7, 7.0],
+      'ong-cuong': [-5.8, 5.8], 'ba-cuong': [-3.0, 7.0], 'me-yen': [3.0, 7.0], 'ba-tuyet': [6.0, 5.6], spike: [-1.2, 8.3], mun: [0.6, 8.6], rom: [1.7, 8.3],
     };
     const friends: FriendId[] = this.progress.friends.length ? this.progress.friends.slice(-12) : ALL_FRIENDS.slice(0, 12);
     const [fam, fr, boss, luna] = await Promise.all([
@@ -108,11 +110,13 @@ export class Finale {
     fr.forEach((a, i) => {
       const row = Math.floor(i / 6), col = i % 6;
       const x = (col - 2.5) * 2.4 + (row % 2) * 1.2;
-      a.place(x, 8.8 + row * 1.7, Math.PI);
+      a.place(x, 10.0 + row * 1.7, Math.PI);
       a.idleOn = true;
       world.scene.add(a.root);
     });
     this.family = [...fam, ...fr];
+    // bớt draw call: bạn ngựa nhỏ hàng sau không cần bóng tròn
+    for (const a of fr) a.blobOn = false;
     this.boss = boss;
     boss.hover = BOSS_HOVER; boss.idleOn = false;
     boss.place(BOSS.x, BOSS.z, 0);
@@ -129,8 +133,8 @@ export class Finale {
     // đội quân: 3 hàng so le trước mặt Nữ hoàng
     this.army = await Promise.all(ARMY.map((k, i) => {
       const row = Math.floor(i / 5), col = i % 5;
-      const x = (col - 2) * 3.0 + (row % 2) * 1.4 - 0.7;
-      return Monster.create(world, k, x, -2.6 - row * 1.9);
+      const x = (col - 2) * 3.2 + (row % 2) * 1.5 - 0.75;
+      return Monster.create(world, k, x, -2.8 - row * 2.2, false);
     }));
     for (const m of this.army) { m.faceTo(m.x, 10); world.scene.add(m.root); }
     // 5 ngọc Hài Hoà quanh Twilight
@@ -197,13 +201,13 @@ export class Finale {
     this.world.magic.burst(m.position, 50, HARMONY[i].color, 2.2, 0.3, 0.8, -1);
   }
 
-  private group(r: number): Monster[] { return this.army.slice(r * 3, r * 3 + 3); }
+  private group(r: number): Monster[] { return this.army.slice(r * PER_ROUND, r * PER_ROUND + PER_ROUND); }
 
   /** Quái nhóm r đổi phe ngay (debug / nhảy cóc). */
   private convertNow(r: number): void {
     this.group(r).forEach((m, i) => {
       void m.purify(true);
-      const [x, z] = this.allySpot(r * 3 + i);
+      const [x, z] = this.allySpot(r * PER_ROUND + i);
       m.place(x, z);
       m.faceTo(m.x, -10);
     });
@@ -290,7 +294,7 @@ export class Finale {
     await Promise.all(grp.map((m, i) => wait(i * 150).then(() => m.purify())));
     confetti(40);
     // đổi phe: chạy về phía Nhím, đứng 2 cánh, quay mặt về Nữ hoàng
-    await Promise.all(grp.map((m, i) => { const [x, z] = this.allySpot(r * 3 + i); return m.travel(x, z, 1300, 0.8).then(() => m.faceTo(m.x, -10)); }));
+    await Promise.all(grp.map((m, i) => { const [x, z] = this.allySpot(r * PER_ROUND + i); return m.travel(x, z, 1300, 0.8).then(() => m.faceTo(m.x, -10)); }));
   }
 
   /** Vòng tìm chữ: 3 sao lơ lửng giữa sân, chạm đúng chữ. */
@@ -305,7 +309,7 @@ export class Finale {
       const labels = [target, ...pickDistractors(target, got, 2)].sort(() => Math.random() - 0.5);
       const opts = labels.map((l, i) => {
         const s = new LetterStar({ label: l, size: 1.0 });
-        s.setPos((i - 1) * 3.0, 2.3, 0.4);
+        s.setPos((i - 1) * 3.2, 2.0, 1.6);
         this.world.scene.add(s.root);
         this.world.updaters.add((dt) => s.update(dt, this.world.camera));
         void s.appear(i * 120);
@@ -362,7 +366,7 @@ export class Finale {
           await narrate(`f_round_${r + 1}`);
           if (h.kind === 'letters') await this.letterRound(r, h.count ?? 1);
           else {
-            const sa = new SpellActivity(this.ctx, [h.word!], 0, -0.6);
+            const sa = new SpellActivity(this.ctx, [h.word!], 0, 0.2);
             await sa.setup();
             sa.onWord = async (w) => { await play(`wa_${w === 'ba' ? 'ba' : w === 'mẹ' ? 'mej' : 'baf'}`); };
             await sa.spellWord(h.word!);
@@ -448,16 +452,16 @@ export class Finale {
       const p = V(hero.x, hero.y + 1.4, hero.z);
       halo.position.copy(p);
       this.glowWings!.position.copy(p).add(V(0, 0.4, -0.3));
-      photo.position.copy(p).add(V(0, 2.6, 0.6));
+      photo.position.copy(p).add(V(0, 2.3, 1.0));
       ring.position.copy(photo.position);
       photo.lookAt(world.camera.position); ring.lookAt(world.camera.position);
     };
     world.updaters.add(follow);
     await Cine.play(world, async (c) => {
-      c.camNow(V(0, 4.2, 12), V(0, 2.2, 3), 44);
+      c.camNow(V(0, 4.6, 15), V(0, 2.6, 4), 46);
       this.gemSpin = 3.5;
       await c.nar('cl_1');
-      void c.orbit(V(hero.x, 2.4, hero.z), 8.5, 3.6, 0.0, -1.1, 7000, 46);
+      void c.orbit(V(hero.x, 3.6, hero.z), 11, 4.8, 0.0, -0.6, 7000, 50);
       // sáng rực + bay lên + dang cánh
       void c.tween(3200, (k) => {
         hero.y = k * 2.6;
@@ -506,7 +510,7 @@ export class Finale {
     L.y = 3; L.root.visible = true; L.setFlap(1);
     world.setNight(0.7);
     await Cine.play(world, async (c) => {
-      c.camNow(V(0, 6.5, 16), V(0, 2.4, -2), 46);
+      c.camNow(V(0, 6.8, 18), V(0, 2.4, -1), 46);
       whiteOut(false, 1600);
       void world.tweenNight(0.0, 5000);
       world.tweenGround(0xb8e986, 0x8fd16a, 5000);
@@ -519,11 +523,12 @@ export class Finale {
       await c.say('bac-hanh', 'e_3');
       // cả nhà + bạn bè ùa tới ôm Nhím
       hero.faceTo(hero.x, hero.z + 5);
-      void c.cam(V(0, 5.5, 14.5), V(0, 1.6, 3.5), 2400, 44);
+      void c.cam(V(0, 4.8, 15.5), V(0, 1.6, 4.0), 2400, 44);
       const huggers = this.family.slice(0, 7);
       await Promise.all(huggers.map((a, i) => {
-        const ang = Math.PI * (0.15 + 0.7 * (i / Math.max(1, huggers.length - 1)));
-        return a.travel(hero.x + Math.cos(ang) * 2.4, hero.z + 0.6 + Math.sin(ang) * 1.6, 1400, 0.6).then(() => a.faceTo(hero.x, hero.z));
+        // ôm quanh Nhím ở PHÍA SAU + 2 bên (camera nhìn từ trước) → không che Nhím
+        const ang = Math.PI * (1.05 + 0.9 * (i / Math.max(1, huggers.length - 1)));
+        return a.travel(hero.x + Math.cos(ang) * 2.6, hero.z - 0.2 + Math.sin(ang) * 1.9, 1400, 0.6).then(() => a.faceTo(hero.x, hero.z));
       }));
       for (const a of this.family) a.hop(5);
       void hero.celebrate();
@@ -560,6 +565,7 @@ export class Finale {
     for (const g of this.gems) g.removeFromParent();
     this.world.clearChapter();
     this.world.setCamera(null);
+    this.world.setShadows(true);
     void MONSTERS;
   }
 }
