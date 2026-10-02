@@ -3,8 +3,5 @@ dist
 .DS_Store
 assets-raw/**/*.zip
 
-# ảnh thật của bé: không đưa lên git
-public/photos/*
-!public/photos/.gitkeep
 scripts/.venv
 scripts/.audio-tmp
