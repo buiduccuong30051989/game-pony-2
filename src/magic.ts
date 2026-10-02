@@ -48,6 +48,7 @@ export class Magic {
 
   /** Đêm: cộng màu cho rực; ngày: trộn thường để hạt vẫn rõ trên nền sáng. */
   setAdditive(on: boolean): void {
+    if (this.fixed) on = false;
     if (on === this.additive) return;
     this.additive = on;
     this.mat.blending = on ? THREE.AdditiveBlending : THREE.NormalBlending;
@@ -55,7 +56,8 @@ export class Magic {
     this.mat.needsUpdate = true;
   }
 
-  constructor(scene: THREE.Scene) {
+  /** fixed = true: luôn trộn thường (hạt bóng tối tím đậm không bị cộng màu thành vô hình). */
+  constructor(scene: THREE.Scene, private readonly fixed = false) {
     this.pos = new Float32Array(this.max * 3);
     this.col = new Float32Array(this.max * 3);
     this.size = new Float32Array(this.max);
@@ -74,6 +76,7 @@ export class Magic {
     this.points = new THREE.Points(this.geo, mat);
     this.points.frustumCulled = false;
     scene.add(this.points);
+    if (fixed) { this.additive = true; this.setAdditive(false); }
   }
 
   emit(p: Partial<Particle> & { x: number; y: number; z: number; color: number }): void {

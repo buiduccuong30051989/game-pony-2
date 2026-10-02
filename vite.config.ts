@@ -38,8 +38,37 @@ function familyPhotos(): Plugin {
   };
 }
 
+/**
+ * Ảnh thật của Nhím (GITIGNORE, ảnh trẻ em thật): quét public/photos/*.(jpg|jpeg|png|webp) → module ảo
+ * 'virtual:nhim-photos' = danh sách tên file. Thiếu ảnh thì game vẽ chân dung Twilight thay thế; thả ảnh mới vào là
+ * trang tự tải lại (dev) và ảnh lạ tự vào album.
+ */
+function nhimPhotos(): Plugin {
+  const VID = 'virtual:nhim-photos';
+  const RID = '\0' + VID;
+  const dir = fileURLToPath(new URL('./public/photos', import.meta.url));
+  const scan = (): string[] => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => /\.(jpe?g|png|webp)$/i.test(f)).sort() : []);
+  return {
+    name: 'nhim-photos',
+    resolveId(id) { return id === VID ? RID : undefined; },
+    load(id) { return id === RID ? `export default ${JSON.stringify(scan())};` : undefined; },
+    configureServer(server) {
+      server.watcher.add(dir);
+      const onChange = (file: string) => {
+        if (!file.startsWith(dir)) return;
+        const mod = server.moduleGraph.getModuleById(RID);
+        if (mod) server.moduleGraph.invalidateModule(mod);
+        server.ws.send({ type: 'full-reload' });
+      };
+      server.watcher.on('add', onChange);
+      server.watcher.on('unlink', onChange);
+    },
+  };
+}
+
 // three.js ~600 kB là bình thường cho game 3D chơi offline trong nhà.
 export default defineConfig({
-  plugins: [familyPhotos()],
+  plugins: [familyPhotos(), nhimPhotos()],
+  server: { port: 5185 },
   build: { chunkSizeWarningLimit: 1200 },
 });

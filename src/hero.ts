@@ -1,9 +1,11 @@
-// Nhân vật: ngựa Twilight (màn 1) hoặc Twilight người (màn 2). Đi 4 hướng trên đảo, nhảy, nhún-nhảy bằng code.
+// Nhân vật chính: Nhím = Twilight (ngựa có cánh, auto-rig 4 chân). Chạm đất → chạy tới đó (giữ kéo ngón tay thì
+// đi theo ngón); phím mũi tên trên Mac. Nhảy, nhún-nhảy, đứng chơi (thở, ngó quanh, phẩy đuôi).
 import * as THREE from 'three';
-import type { HeroKind } from './data';
 import type { World } from './world';
 import { tween, easeOutQuad } from './tween';
-import { autoRigQuadruped, makeHumanWalker, type Walker, type WalkerPose } from './rig';
+import { autoRigQuadruped, type Walker, type WalkerPose } from './rig';
+
+type HeroKind = 'pony';
 
 interface HeroConfig {
   path: string;
@@ -11,12 +13,10 @@ interface HeroConfig {
   hornForward: number;   // sừng cách tâm bao xa về phía trước
   hornUp: number;        // sừng cao bao nhiêu
   hop: number;
-  fixHuman?: boolean;    // hạ tay T-pose + giấu đầu thừa
 }
 
 const CONFIGS: Record<HeroKind, HeroConfig> = {
   pony: { path: 'models/twilight_static/scene.gltf', height: 1.75, hornForward: 0.55, hornUp: 1.62, hop: 0.07 },
-  human: { path: 'models/twilight/scene.gltf', height: 2.0, hornForward: 0.15, hornUp: 2.05, hop: 0.05, fixHuman: true },
 };
 
 const GRAVITY = 24;
@@ -46,6 +46,9 @@ export class Hero {
   private tailGoal = 0;
   private yawGoal: number | null = null;
   private readonly cfg: HeroConfig;
+  private goal: { x: number; z: number } | null = null;
+  /** model gốc (để làm sáng khi cao trào) */
+  model!: THREE.Object3D;
 
   private constructor(readonly kind: HeroKind, model: THREE.Object3D) {
     this.cfg = CONFIGS[kind];
@@ -53,41 +56,33 @@ export class Hero {
     this.root.add(this.pivot);
   }
 
-  static async load(world: World, kind: HeroKind): Promise<Hero> {
+  static async load(world: World, kind: HeroKind = 'pony'): Promise<Hero> {
     const cfg = CONFIGS[kind];
     const { obj } = await world.instance(cfg.path);
     world.fitHeight(obj, cfg.height);
-    if (cfg.fixHuman) Hero.fixHuman(obj, cfg.height);
     const hero = new Hero(kind, obj);
-    hero.walker = kind === 'pony' ? autoRigQuadruped(obj) : makeHumanWalker(obj, cfg.height);
+    hero.model = obj;
+    hero.walker = autoRigQuadruped(obj);
     if (!hero.walker) console.warn('[hero] không rig được, dùng nhún-nhảy');
     world.scene.add(hero.root);
     return hero;
   }
 
-  /** Model người: giấu mesh lệch tâm (đầu thừa), hạ hai tay T-pose bằng xương tìm theo vị trí. */
-  private static fixHuman(obj: THREE.Object3D, height: number): void {
-    obj.updateMatrixWorld(true);
-    const whole = new THREE.Box3().setFromObject(obj, true);
-    const center = whole.getCenter(new THREE.Vector3());
-    const width = whole.max.x - whole.min.x;
-    obj.traverse((o) => {
-      const m = o as THREE.Mesh;
-      if (!m.isMesh) return;
-      const b = new THREE.Box3().setFromObject(m, true);
-      const c = b.getCenter(new THREE.Vector3());
-      const size = b.getSize(new THREE.Vector3());
-      if (Math.abs(c.x - center.x) > width * 0.22 && size.x < width * 0.35 && c.y > whole.min.y + height * 0.6) m.visible = false;
-    });
-    obj.updateMatrixWorld(true);
-  }
-
   /** Vector di chuyển (-1..1 mỗi trục), z dương = về phía camera. */
   setMove(dx: number, dz: number): void {
+    this.goal = null;
     if (this.locked) { this.mx = this.mz = 0; return; }
     const len = Math.hypot(dx, dz);
     if (len > 1e-3) { this.mx = dx / len; this.mz = dz / len; } else { this.mx = this.mz = 0; }
   }
+
+  /** Chạy tới điểm (chạm đất). */
+  goTo(x: number, z: number): void {
+    if (this.locked) return;
+    this.goal = { x, z };
+  }
+  /** Dừng mọi di chuyển. */
+  stop(): void { this.goal = null; this.mx = this.mz = 0; }
 
   get moving(): boolean { return (this.mx !== 0 || this.mz !== 0) && !this.locked; }
 
@@ -142,10 +137,19 @@ export class Hero {
 
   update(dt: number, clamp: (x: number, z: number) => [number, number]): void {
     this.t += dt;
+    if (this.locked) this.goal = null;
+    if (this.goal) {
+      const dx = this.goal.x - this.x, dz = this.goal.z - this.z, d = Math.hypot(dx, dz);
+      if (d < 0.25) { this.goal = null; this.mx = this.mz = 0; }
+      else { this.mx = dx / d; this.mz = dz / d; }
+    }
     if (this.moving) {
+      const px = this.x;
       this.x += this.mx * SPEED * dt;
       this.z += this.mz * SPEED * dt;
       [this.x, this.z] = clamp(this.x, this.z);
+      // kẹt (mép đảo / hàng rào) → bỏ đích để không chạy tại chỗ mãi
+      if (this.goal && Math.abs(this.x - px) < SPEED * dt * 0.05 && Math.abs(this.mx) > 0.9) { this.goal = null; this.mx = this.mz = 0; }
       const target = Math.atan2(this.mx, this.mz);
       let d = target - this.yaw;
       d = Math.atan2(Math.sin(d), Math.cos(d));

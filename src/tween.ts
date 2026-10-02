@@ -29,3 +29,4 @@ export function updateTweens(dt: number): void {
 }
 
 export const wait = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+export const easeInQuad: Ease = (t) => t * t;

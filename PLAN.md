@@ -50,8 +50,8 @@ Mỗi chương 6–8 khoảnh khắc học. Cảnh 20–40 s, luôn có nút ⏩
 8. Cảnh cứu: Đại phép (chạm ✨) phá lồng → Mun + Rơm chạy ra. 9. Spike ôn. 10. Album.
 
 ### Chương 2 – Ponyville (quái: yêu tinh + rồng nhỏ)
-1. Cảnh mở: làng, ba mẹ trong bong bóng đen trên tháp đồng hồ. 2. Săn sao A: b, d, đ.
-3. Ghép phép: ca, đa. 4. Cảnh giữa. 5. Săn sao B: h, l, m, n. 6. Cổng khoá: c.
+1. Cảnh mở: làng, ba mẹ trong bong bóng đen trên tháp đồng hồ. 2. Săn sao A: c, d, đ.
+3. Ghép phép: ca, đa. 4. Cảnh giữa. 5. Săn sao B: h, l, m, n. 6. Cổng khoá: b (nhiễu d) — ngay trước khi ghép "ba".
 7. Ghép phép: ma, na, la. 8. Cảnh cứu: **ghép b + a = "ba"** → bong bóng vỡ, ba: "Ba đây!", mẹ: "Mẹ đây!". 9. Ôn. 10. Album.
 
 ### Chương 3 – Canterlot (quái: phù thuỷ + pháp sư, tay sai của Nữ hoàng)
