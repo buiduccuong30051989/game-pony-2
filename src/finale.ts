@@ -12,7 +12,7 @@ import { CHAPTERS, CAST, HARMONY, PALETTE, ALL_FRIENDS, type CastId, type Monste
 import type { World } from './world';
 import type { Hero } from './hero';
 import { Actor } from './actors';
-import { Monster, MONSTERS } from './monster';
+import { Monster } from './monster';
 import { Parade } from './parade';
 import { Cine } from './cine';
 import { SpellActivity, pickDistractors, type Ctx } from './activities';
@@ -473,12 +473,12 @@ export class Finale {
       await c.nar('cl_2');
       // ảnh thật của Nhím loé trong ánh sáng
       sfx('sfx_win', 0.7);
-      await c.tween(700, (k) => { (photo.material as THREE.MeshBasicMaterial).opacity = k; (ring.material as THREE.MeshBasicMaterial).opacity = k; photo.scale.setScalar(0.6 + k * 0.6); ring.scale.copy(photo.scale); });
-      await c.say('twilight', 'cl_3');
+      await c.tween(700, (k) => { (photo.material as THREE.MeshBasicMaterial).opacity = k; (ring.material as THREE.MeshBasicMaterial).opacity = k; photo.scale.setScalar(0.7 + k * 0.75); ring.scale.copy(photo.scale); });
+      await c.nar('cl_3'); // phụ đề đáy màn: không che ảnh của Nhím
       await c.tween(600, (k) => { (photo.material as THREE.MeshBasicMaterial).opacity = 1 - k; (ring.material as THREE.MeshBasicMaterial).opacity = 1 - k; });
       // tia cầu vồng
       await c.cam(V(7, 6, 10), V(0, 3, -5), 1200, 48);
-      void c.say('twilight', 'cl_4');
+      void c.nar('cl_4');
       const target = V(this.boss.x, this.boss.y + BOSS_H * 0.5, this.boss.z);
       const from = V(hero.x, hero.y + 1.8, hero.z);
       await Promise.all(RAINBOW.map((col, i) => c.wait(i * 80).then(() => world.magic.beam(from.clone().add(V((i - 2.5) * 0.15, 0, 0)), target, col, 0xffffff, 1.1))));
@@ -566,6 +566,5 @@ export class Finale {
     this.world.clearChapter();
     this.world.setCamera(null);
     this.world.setShadows(true);
-    void MONSTERS;
   }
 }

@@ -10,7 +10,7 @@ import { titleCard } from './ui';
 
 const V = (x: number, y: number, z: number) => new THREE.Vector3(x, y, z);
 /** Góc nhìn cận 1 điểm trên đường. */
-const near = (x: number, h = 7.5, back = 12) => ({ pos: V(x - 2, h, pathZ(x) + back), look: V(x, 1.6, pathZ(x)) });
+const near = (x: number, h = 8.5, back = 14) => ({ pos: V(x - 2, h, pathZ(x) + back), look: V(x, 1.6, pathZ(x)) });
 
 /** Bóng tối xoáy (Nữ hoàng Bóng Đêm thoáng qua) ở 1 điểm. */
 function darkSwirl(world: World, x: number, z: number, ms = 2200): void {
@@ -28,7 +28,7 @@ function darkSwirl(world: World, x: number, z: number, ms = 2200): void {
 
 export async function playChapterCine(world: World, hero: Hero, id: CineId): Promise<void> {
   const hx = hero.x, hz = hero.z;
-  const home = { pos: V(hx, 11.9, hz + 15.6), look: V(hx, 1, hz - 1.2) };
+  const home = { pos: V(hx + 3, 11.9, hz + 15.6), look: V(hx + 3, 1, hz - 1.2) };
   await Cine.play(world, async (c) => {
     switch (id) {
       case 'c1_intro': {
@@ -52,7 +52,7 @@ export async function playChapterCine(world: World, hero: Hero, id: CineId): Pro
         await c.cam(cage.pos, cage.look, 2200);
         await c.nar('c1m_1');
         await c.say('rom', 'c1m_2');
-        const ghost = near(-1, 7, 11);
+        const ghost = near(-1);
         darkSwirl(world, 0, pathZ(-1) - 3);
         await c.cam(ghost.pos, ghost.look, 1800);
         await c.say('nightmare', 'c1m_3');
@@ -78,7 +78,7 @@ export async function playChapterCine(world: World, hero: Hero, id: CineId): Pro
         break;
       }
       case 'c2_mid': {
-        const dr = near(0, 7.5, 12);
+        const dr = near(0);
         await c.cam(dr.pos, dr.look, 2200);
         darkSwirl(world, 0.5, pathZ(-1) - 3.6);
         await c.nar('c2m_1');
@@ -104,7 +104,7 @@ export async function playChapterCine(world: World, hero: Hero, id: CineId): Pro
         break;
       }
       case 'c3_mid': {
-        const w = near(0, 7.5, 12);
+        const w = near(0);
         await c.cam(w.pos, w.look, 2200);
         darkSwirl(world, 0.5, pathZ(-1) - 3.6);
         await c.nar('c3m_1');

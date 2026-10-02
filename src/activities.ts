@@ -19,7 +19,7 @@ import { WORDS } from './words';
 import { lockKey, spellKey, toneFindKey } from './lines';
 import { play, sfx, speakSequence, stopSpeech } from './audio';
 import { sayBank, findLine, bankLine } from './voice';
-import { say } from './talk';
+import { say, narrate } from './talk';
 import { addLetter, markWeak, markStrong, saveProgress, type Progress } from './progress';
 import { setAnswer } from './testhook';
 import { flyToBoard, setBoardCount, bumpBoard, confetti, showWord, hideWord, toast } from './ui';
@@ -134,6 +134,8 @@ export abstract class Activity {
   barrier(): number { return Infinity; }
   /** góc camera cố định khi làm bài (null = bám Twilight) */
   view(): { pos: THREE.Vector3; look: THREE.Vector3 } | null { return null; }
+  /** camera bám Twilight nhưng nghiêng về điểm này (săn sao) */
+  focus(): { x: number; z: number } | null { return null; }
 
   protected async addMonster(kind: MonsterKind | undefined, friend: FriendId | undefined, x: number, z: number): Promise<void> {
     if (!kind) return;
@@ -215,6 +217,7 @@ export class HuntActivity extends Activity {
     this.cx = b.x; this.cz = pathZ(b.x) + b.z;
   }
   trigger() { return { x: this.cx - 7.5, z: this.cz, r: 4 }; }
+  focus() { return { x: this.cx + 0.5, z: this.cz }; }
 
   private get targets(): string[] { return this.extra ? [...this.b.letters, this.extra] : this.b.letters; }
 
@@ -225,7 +228,7 @@ export class HuntActivity extends Activity {
     all.forEach((ch, i) => {
       const a = n === 1 ? 0 : -1 + (2 * i) / (n - 1);
       const s = this.track(new LetterStar({ label: ch, size: 1.05 }));
-      s.setPos(this.cx + 0.5 + a * 4.0, 1.35, this.cz + 1.6 - Math.abs(a) * 1.6 + (i % 2) * 0.9);
+      s.setPos(this.cx + 0.5 + a * 3.6, 1.35, this.cz + 1.6 - Math.abs(a) * 1.6 + (i % 2) * 0.9);
       s.root.userData.letter = ch;
     });
     await this.addMonster(this.b.monster, this.b.friend, this.cx + 1.5, this.cz - 3.6);
@@ -427,7 +430,7 @@ export class LockActivity extends Activity {
   }
   trigger() { return { x: this.b.x - 3.2, z: this.cz, r: 3.2 }; }
   barrier(): number { return this.done ? Infinity : this.b.x - 1.3; }
-  view() { return { pos: new THREE.Vector3(this.b.x - 3.5, 7.2, this.cz + 12), look: new THREE.Vector3(this.b.x - 0.4, 1.8, this.cz) }; }
+  view() { return { pos: new THREE.Vector3(this.b.x - 1.5, 6.6, this.cz + 12.5), look: new THREE.Vector3(this.b.x, 2.0, this.cz) }; }
 
   private faceTex(label: string): THREE.CanvasTexture {
     const c = document.createElement('canvas');
@@ -461,13 +464,11 @@ export class LockActivity extends Activity {
       f.position.set(X + 0.55, 1.0 + (k % 3) * 0.2, Z - (2.4 + k * 1.6));
       g.add(f);
     }
-    for (const s of [-1, 1]) {
-      const post = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, s < 0 ? 3.2 : 2.0, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }));
-      post.position.set(X, s < 0 ? 1.6 : 1.0, Z + s * 1.9);
-      const cap = world.emojiSprite('⭐', 0.7);
-      cap.position.set(X, s < 0 ? 3.5 : 2.3, Z + s * 1.9);
-      g.add(post, cap);
-    }
+    const post = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.26, 3.2, 12), new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.7 }));
+    post.position.set(X, 1.6, Z - 1.9);
+    const cap = world.emojiSprite('⭐', 0.7);
+    cap.position.set(X, 3.5, Z - 1.9);
+    g.add(post, cap);
     const doorMat = new THREE.MeshStandardMaterial({ color: 0xb97cf0, roughness: 0.7 });
     for (const s of [-1, 1]) {
       const hinge = new THREE.Group();
@@ -479,17 +480,15 @@ export class LockActivity extends Activity {
       g.add(hinge);
       this.doors.push(hinge);
     }
-    // ổ khoá vàng to ở giữa, mặt có chữ
-    const body = new THREE.Mesh(new THREE.BoxGeometry(0.45, 1.0, 1.1), new THREE.MeshStandardMaterial({ color: 0xffc928, roughness: 0.4, metalness: 0.2 }));
-    const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.36, 0.09, 10, 24, Math.PI), new THREE.MeshStandardMaterial({ color: 0xd9d9e6, roughness: 0.3, metalness: 0.5 }));
-    shackle.rotation.y = Math.PI / 2;
-    shackle.position.y = 0.5;
-    this.lockFace = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.9), new THREE.MeshBasicMaterial({ map: this.faceTex(this.b.letters[0]) }));
-    this.lockFace.position.set(0.24, 0, 0);
-    this.lockFace.rotation.y = Math.PI / 2;
+    // ổ khoá vàng TO treo trước cổng, mặt có chữ quay về phía camera (+z)
+    const body = new THREE.Mesh(new THREE.BoxGeometry(1.3, 1.15, 0.5), new THREE.MeshStandardMaterial({ color: 0xffc928, roughness: 0.4, metalness: 0.2, emissive: 0x6a4a00, emissiveIntensity: 0.25 }));
+    const shackle = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.1, 10, 24, Math.PI), new THREE.MeshStandardMaterial({ color: 0xd9d9e6, roughness: 0.3, metalness: 0.5 }));
+    shackle.position.y = 0.57;
+    this.lockFace = new THREE.Mesh(new THREE.PlaneGeometry(1.0, 1.0), new THREE.MeshBasicMaterial({ map: this.faceTex(this.b.letters[0]) }));
+    this.lockFace.position.set(0, -0.02, 0.26);
     this.lock.add(body, shackle, this.lockFace);
-    this.lock.position.set(X - 0.2, 1.5, Z);
-    this.lock.rotation.y = -0.5; // hơi quay về camera
+    this.lock.position.set(X - 0.4, 2.0, Z + 2.4);
+    this.lock.rotation.y = -0.12;
     g.add(this.lock);
     world.chapterGroup?.add(g);
     await this.addMonster(this.b.monster, this.b.friend, X - 3.2, Z - 4.4);
@@ -527,7 +526,7 @@ export class LockActivity extends Activity {
       await Promise.all([collect(ctx, target, from, correct.color), play(objKey(target))]);
     }
     // khoá bật, cổng mở
-    await tween(500, (k) => { this.lock.position.y = 1.5 - k * 1.5; this.lock.rotation.x = k * 1.2; });
+    await tween(500, (k) => { this.lock.position.y = 2.0 - k * 2.0; this.lock.rotation.x = k * 1.2; });
     this.lock.visible = false;
     void play('lock_done');
     await this.openDoors(900);
@@ -542,8 +541,8 @@ export class LockActivity extends Activity {
       if (s.gone || s.frozen) return;
       // vòng quay trong mặt phẳng màn hình (camera nhìn từ +z) → 3 sao không che nhau
       const a = this.orbitT + (i / this.orbit.length) * Math.PI * 2;
-      s.root.position.set(c.x - 0.6 + Math.cos(a) * 2.5, 0, c.z + 1.6);
-      s.baseY = c.y + 0.5 + Math.sin(a) * 1.2;
+      s.root.position.set(c.x + Math.cos(a) * 2.7, 0, c.z + 0.9);
+      s.baseY = c.y + 0.2 + Math.sin(a) * 1.3;
     });
   }
 
@@ -692,7 +691,7 @@ export class SpellActivity extends Activity {
     const def = WORDS[word];
     if (def?.emoji) popObject(world, mid.clone().add(new THREE.Vector3(2.0, -0.6, 0.6)), def.emoji, 2.0, 2600);
     if (this.onWord) await this.onWord(word);
-    else if (def) await play(def.after[0]);
+    else if (def) await narrate(def.after[0], def.after[1]);
     hideWord();
     await plate.vanish();
   }

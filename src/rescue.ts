@@ -172,7 +172,10 @@ export class RescueActivity extends Activity {
     confetti(90);
     if (this.b.word === 'ba') void narrate('c2r_3');
     // người nhà bay xuống đứng cạnh Nhím
-    const spots = this.trapped.map((_, i) => new THREE.Vector3(hero.x + 1.6 + i * 1.6, 0, hero.z + 1.4));
+    // đáp xuống giữa khung hình (trước tháp), cạnh Nhím
+    hero.locked = false;
+    hero.goTo(this.cx - 2.6, this.cz + 1.6);
+    const spots = this.trapped.map((_, i) => new THREE.Vector3(this.cx - 0.6 + i * 1.9, 0, this.cz + 2.2 - i * 0.3));
     for (const a of this.trapped) {
       const wp = a.root.getWorldPosition(new THREE.Vector3());
       world.scene.add(a.root);

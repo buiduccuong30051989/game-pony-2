@@ -53,7 +53,8 @@ hồng phát sáng, khói bóng tối; khi thanh tẩy: về màu thật (ma đ�
 
 ## Khác
 
-- Kenney Nature Kit (cây, cỏ, hoa, đá, nấm, khúc gỗ, bí ngô, lều, cột): CC0. Kenney UI/Impact audio (`sfx_*.ogg`): CC0.
+- Kenney Nature Kit (cây, cỏ, hoa, đá, nấm, khúc gỗ, bí ngô, lều, cột): CC0.
+- Âm hiệu ứng (chạm, bong bóng, chuông): tổng hợp bằng WebAudio trong `src/audio.ts`, không dùng file.
 - Emoji: font hệ thống (Apple Color Emoji).
 - Giọng đọc: Microsoft Edge TTS, giọng **Hoài My** (`vi-VN-HoaiMyNeural`) và **Nam Minh** (`vi-VN-NamMinhNeural`) qua gói
   `edge-tts`, sinh 1 lần, dùng cá nhân trong nhà.

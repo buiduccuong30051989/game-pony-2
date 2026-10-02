@@ -76,6 +76,8 @@ export class World {
   private camOverride: { pos: THREE.Vector3; look: THREE.Vector3 } | null = null;
   private readonly camLook = new THREE.Vector3();
   private fovGoal = 38;
+  /** điểm camera nghiêng về (săn sao), null = bám Twilight */
+  focus: { x: number; z: number } | null = null;
   /** hàng rào vô hình: Twilight + hàng bạn không đi quá x này (cầu gãy, cổng khoá) */
   barrierX = Infinity;
   /** mọi thứ cập nhật thêm mỗi khung (sao chữ, quái...) */
@@ -381,6 +383,7 @@ export class World {
     this.chapter = null;
     this.camOverride = null;
     this.barrierX = Infinity;
+    this.focus = null;
     this.updaters.clear();
   }
 
@@ -578,9 +581,9 @@ export class World {
     const blue = new THREE.MeshStandardMaterial({ color: 0x7fa8ff, roughness: 0.6 });
     let placed = 0, tries = 0;
     while (placed < 10 && tries++ < 400) {
-      const x = (rnd() * 2 - 1) * 34, z = -(5.5 + rnd() * 7);
-      if (!inside(x, z, 3) || !free(x, z, 1.6)) continue;
-      const h = 4 + rnd() * 4, r = 0.9 + rnd() * 0.5;
+      const x = (rnd() * 2 - 1) * 34, z = -(8 + rnd() * 5);
+      if (!inside(x, z, 2.5) || !free(x, z, 1.6)) continue;
+      const h = 3.5 + rnd() * 3, r = 0.9 + rnd() * 0.5;
       const t = new THREE.Mesh(new THREE.CylinderGeometry(r, r * 1.1, h, 16), wall); t.position.set(x, h / 2, z);
       const c = new THREE.Mesh(new THREE.ConeGeometry(r * 1.35, r * 2.6, 16), placed % 3 === 0 ? blue : gold); c.position.set(x, h + r * 1.3, z);
       t.castShadow = c.castShadow = true;
@@ -766,6 +769,8 @@ export class World {
 
   /** Camera bám nhân vật, mây trôi, ngọc xoay, bướm/chim/cỏ/đom đóm. */
   follow(dt: number, hx: number, hz: number, t: number): void {
+    // đang săn sao: camera nhìn giữa Twilight và chỗ các sao → thấy đủ sao
+    if (this.focus) { hx = hx * 0.45 + this.focus.x * 0.55; hz = hz * 0.6 + this.focus.z * 0.4; }
     this.camTarget.x += (hx - this.camTarget.x) * Math.min(1, dt * 3.5);
     this.camTarget.z += (hz - this.camTarget.z) * Math.min(1, dt * 3.5);
     if (this.camOverride) {

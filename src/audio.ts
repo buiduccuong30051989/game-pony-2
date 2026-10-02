@@ -1,4 +1,5 @@
-// Audio: WebAudio, mở khoá bằng click/touchend (iPad Safari), clip m4a sinh sẵn + sfx ogg.
+// Audio: WebAudio, mở khoá bằng click/touchend (iPad Safari), giọng m4a sinh sẵn (Hoài My) + hiệu ứng tổng hợp bằng
+// oscillator (không cần file: Safari iPad đời cũ không giải mã được Ogg).
 
 const clips = new Map<string, AudioBuffer>();
 /** ?mute=1 (debug): không phát tiếng, mỗi câu coi như dài 150 ms → chạy kịch bản nhanh khi chụp màn hình. */
@@ -48,7 +49,34 @@ async function load(key: string, ext: string): Promise<AudioBuffer | null> {
 
 export function preload(keys: string[]): Promise<unknown> {
   if (MUTE) return Promise.resolve();
-  return Promise.all(keys.map((k) => load(k, k.startsWith('sfx_') ? 'ogg' : 'm4a')));
+  return Promise.all(keys.filter((k) => !k.startsWith('sfx_')).map((k) => load(k, 'm4a')));
+}
+
+/** Hiệu ứng ngắn tổng hợp: chạm, bong bóng, chuông thắng, "bụp" nhẹ khi sai. */
+const SFX: Record<string, [type: OscillatorType, notes: [f0: number, f1: number, at: number, dur: number][]]> = {
+  sfx_tap: ['sine', [[880, 520, 0, 0.07]]],
+  sfx_pop: ['sine', [[520, 1250, 0, 0.09]]],
+  sfx_win: ['triangle', [[1047, 1047, 0, 0.16], [1319, 1319, 0.09, 0.16], [1568, 1568, 0.18, 0.28]]],
+  sfx_soft: ['sine', [[330, 220, 0, 0.18]]],
+};
+function synth(key: string, volume: number): void {
+  const def = SFX[key];
+  if (!def) return;
+  const c = getCtx();
+  const t0 = c.currentTime + 0.01;
+  for (const [f0, f1, at, dur] of def[1]) {
+    const o = c.createOscillator();
+    const g = c.createGain();
+    o.type = def[0];
+    o.frequency.setValueAtTime(f0, t0 + at);
+    o.frequency.exponentialRampToValueAtTime(f1, t0 + at + dur);
+    g.gain.setValueAtTime(0.0001, t0 + at);
+    g.gain.exponentialRampToValueAtTime(0.35 * volume, t0 + at + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t0 + at + dur);
+    o.connect(g).connect(c.destination);
+    o.start(t0 + at);
+    o.stop(t0 + at + dur + 0.02);
+  }
 }
 
 let current: AudioBufferSourceNode | null = null;
@@ -57,8 +85,8 @@ let seqToken = 0;
 /** Phát 1 clip, resolve khi phát xong. Clip mới cắt clip giọng đang phát. */
 export function play(key: string, opts: { volume?: number; cut?: boolean } = {}): Promise<void> {
   if (MUTE) return new Promise((r) => setTimeout(r, key.startsWith('sfx_') ? 0 : 150));
-  const ext = key.startsWith('sfx_') ? 'ogg' : 'm4a';
-  return load(key, ext).then((buf) => {
+  if (key.startsWith('sfx_')) { synth(key, opts.volume ?? 0.6); return Promise.resolve(); }
+  return load(key, 'm4a').then((buf) => {
     if (!buf) return;
     const c = getCtx();
     if (opts.cut !== false && !key.startsWith('sfx_') && current) {

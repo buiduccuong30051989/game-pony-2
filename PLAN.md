@@ -154,5 +154,33 @@ blue_demon_quaternius, animated_wizard_quaternius, witch_quaternius. Render từ
   `?auto=1&mute=1`, `?album=1..4|all`, `?board=1`, `?review=1`, `?perf=1`. `window.__game.answer(true|false)` để test tự động.
 - Cổng dev **5185**. Commit nhỏ, tiếng Anh, Conventional, không trailer. Không push.
 
-## 11. Quyết định sau khi làm (cập nhật dần)
-- (điền sau khi render quái, đo hiệu năng, nghe thử)
+## 11. Quyết định sau khi làm (02/10/2026)
+
+**Quái** (đã render từng con trong viewer và nhìn):
+- Chương 1 rừng: `slime_enemy_j_toastie` (slime tròn dễ thương nhất), `slime_quaternius`, `slime_enemy_quaternius` (có sừng, nhảy
+  Dance), `ghost_quaternius` (màu thật tím đen + móng → khi thanh tẩy đổi sang ma trắng tím nhạt cho hiền).
+- Chương 2 làng: `goblin_quaternius` (khối vuông ngộ nghĩnh), `dragon_quaternius` (nâu đỏ tối → thanh tẩy đổi xanh bạc hà),
+  `dragon_evolved_quaternius`.
+- Chương 3 lâu đài: `animated_wizard_quaternius`, `witch_quaternius` (tay sai của Nữ hoàng).
+- Trận cuối: 10 con trộn slime / yêu tinh / ma / rồng nhỏ (2 con mỗi vòng; bỏ phù thuỷ vì 13 mesh = 13 draw call).
+- Loại thêm `blue_demon_quaternius`: cầm gậy, trông hung.
+
+**Đổi so với plan**: chương 2 săn sao A là c, d, đ và cổng khoá là **b** (nhiễu d) ngay trước khi ghép "ba" (để "ca" ở bài ghép
+đầu dùng chữ c vừa học). Trận cuối 10 quái (đủ 10–16). Hàng đi theo lấy bạn mới nhất khi đầy 12.
+Giọng ba Cường, ông Cương, bạn rồng nhỏ dùng Nam Minh (nam) — đổi 1 dòng `VOICES` nếu ba muốn Hoài My hết.
+Hiệu ứng âm thanh tổng hợp bằng WebAudio (bỏ file .ogg cũ: Safari iPad cũ không giải mã Ogg).
+Câu thần chú cao trào hiện phụ đề đáy màn (thẻ lời nói che mất ảnh Nhím).
+
+**Hiệu năng đo headless** (Chrome trên Mac, 1180×820, `renderer.info`, tắt bóng đổ ở trận cuối):
+
+| Cảnh | Tam giác | Draw call |
+|---|---|---|
+| Trận cuối, vòng ghép chữ (đủ 12 bạn + 7 người nhà/mèo/rồng + 10 quái + Nữ hoàng) | ~281k (tối đa 283k) | ~200 (tối đa ~230 khi có 3 sao chữ) |
+| Chương 1 (săn sao) | ~160k | ~100 |
+| Chương 3 cảnh cứu ông bà (hàng 12 + ông bà + 2 phù thuỷ) | ~266k | ~205 |
+
+Tam giác đạt ngân sách 300k (game cũ 680k). Draw call trận cuối **chưa xuống 150**: phần lớn còn lại là 4 model rip có xương
+(Nightmare Moon 26, Derpy 20, Celestia 18 draw call) — gộp được thì phải làm atlas texture, để sau nếu iPad thật bị giật.
+Đã làm: giảm lưới Celestia 98k→25k, Nightmare Moon 143k→29k, Rarity/Rainbow/Applejack ~18k, Spike 8k; mây + đồi nền thành
+InstancedMesh; ngọc InstancedMesh; props tĩnh gộp theo màu vật liệu; vẽ sẵn mắt + bảng màu cho 5 bạn rip Source
+(`scripts/bake-friends.mjs`, 8–15 → 5–8 draw call/bạn); bạn ngựa nhỏ không có bóng tròn ở trận cuối; texture ≤ 1024 px.

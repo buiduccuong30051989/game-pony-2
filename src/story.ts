@@ -221,10 +221,12 @@ export class ChapterRun {
         } else {
           showPlay(true);
           this.parade.huddleAt = null;
+          world.focus = a.focus();
         }
         await a.run();
         if (!this.alive) return false;
         hero.locked = false;
+        world.focus = null;
         world.setCamera(null);
         this.parade.huddleAt = null;
         this.updateBarrier();

@@ -3,6 +3,7 @@
 import photos from 'virtual:family-photos';
 import { CAST, type CastId } from './data';
 import { LINES, BANK_TEXT } from './lines';
+import { WORDS } from './words';
 import { play, sfx } from './audio';
 import { wait } from './tween';
 
@@ -65,7 +66,8 @@ export function lineText(key: string): string {
   if (LINES[key]) return LINES[key][1];
   const m = /^b_([a-z_]+)_(\d+)$/.exec(key);
   if (m && BANK_TEXT[m[1]]) return BANK_TEXT[m[1]][1][Number(m[2])] ?? '';
-  return '';
+  const w = Object.values(WORDS).find((x) => x.after[0] === key);
+  return w ? w.after[1] : '';
 }
 
 let box: HTMLElement | null = null;
