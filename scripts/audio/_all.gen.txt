@@ -1,0 +1,627 @@
+# TỰ SINH bởi scripts/audio-lines.mjs – ĐỪNG SỬA TAY. Sửa câu trong src/lines.ts / letters.ts / words.ts rồi `pnpm audio`.
+#voice my|vi-VN-HoaiMyNeural|-10%|+0Hz
+#voice nar|vi-VN-HoaiMyNeural|-18%|-2Hz
+#voice twi|vi-VN-HoaiMyNeural|-8%|+14Hz
+#voice spike|vi-VN-NamMinhNeural|-4%|+28Hz
+#voice nmm|vi-VN-HoaiMyNeural|-14%|-18Hz
+#voice ba|vi-VN-NamMinhNeural|-6%|+0Hz
+#voice me|vi-VN-HoaiMyNeural|-10%|+3Hz
+#voice ong|vi-VN-NamMinhNeural|-16%|-10Hz
+#voice batuyet|vi-VN-HoaiMyNeural|-16%|-7Hz
+#voice bachanh|vi-VN-HoaiMyNeural|-12%|-4Hz
+#voice friend|vi-VN-HoaiMyNeural|-4%|+9Hz
+#voice cat|vi-VN-HoaiMyNeural|+0%|+24Hz
+al_1|nar|Nhím và hai bạn mèo lại ở bên nhau rồi!
+al_2|nar|Nhím và ba mẹ lại ở bên nhau rồi!
+al_3|nar|Nhím và ông bà lại ở bên nhau rồi!
+al_4|nar|Nhím và bác Hanh, cả nhà sum vầy!
+al_cover|nar|Cuốn sách phiêu lưu của Nhím.
+al_extra|nar|Thêm một kỷ niệm thật đẹp của Nhím.
+b_collect_0|my|Bay vào bảng chữ cái nào!
+b_collect_1|my|Thêm một chữ nữa rồi!
+b_collect_2|my|Bảng chữ cái sáng thêm rồi!
+b_collect_3|my|Sao chữ về nhà rồi!
+b_collect_4|my|Phép của Nhím mạnh hơn rồi!
+b_collect_5|my|Lại có chữ mới!
+b_collect_6|my|Vèo! Vào bảng chữ rồi!
+b_collect_7|my|Nhím có thêm chữ mới!
+b_hunt_0|spike|Có ngôi sao chữ ở đây nè!
+b_hunt_1|spike|Ồ, sao chữ sáng lấp lánh kìa!
+b_hunt_2|spike|Nhìn kìa, nhiều ngôi sao chữ quá!
+b_hunt_3|spike|Sao chữ đây rồi!
+b_hunt_4|spike|Bạn ấy đang giữ ngôi sao chữ đó!
+b_hunt_5|spike|Mình nhặt sao chữ nào!
+b_hunt_6|spike|Sao chữ trốn ở đây nè!
+b_hunt_7|spike|Tìm thấy sao chữ rồi!
+b_idle_0|spike|Nhím ơi, chạm xuống đất để đi nhé!
+b_idle_1|spike|Ngôi sao chữ đang chờ Nhím đó!
+b_idle_2|spike|Đi theo đường sao lấp lánh nào!
+b_idle_3|spike|Mình đi tiếp nhé Nhím!
+b_idle_4|spike|Chạm vào chỗ muốn tới, Nhím sẽ chạy tới đó!
+b_idle_5|spike|Còn ngôi sao chữ nữa kìa!
+b_idle_6|spike|Nhím ơi, đi tiếp thôi!
+b_idle_7|spike|Cả nhà đang chờ Nhím đó!
+b_idle_8|spike|Thử nhảy lên xem nào! Nút tím đó!
+b_idle_9|spike|Mình ở đây nè, đi cùng nhau nhé!
+b_laugh_0|nmm|Hô hô hô! Chưa đúng rồi!
+b_laugh_1|nmm|Hi hi! Thử lại đi nào!
+b_laugh_2|nmm|Ha ha! Bóng tối tiến lên!
+b_laugh_3|nmm|Hừm hừm, sai rồi nhé!
+b_laugh_4|nmm|Hô hô! Ta vẫn còn mạnh lắm!
+b_laugh_5|nmm|Hí hí! Chữ đó không phải đâu!
+b_laugh_6|nmm|Ha ha ha! Nhìn kỹ lại xem!
+b_laugh_7|nmm|Hô hô, chưa được đâu!
+b_no_0|my|Chưa đúng rồi, mình thử lại nha.
+b_no_1|my|Ồ, không phải chữ này.
+b_no_2|my|Gần đúng rồi! Thử chữ khác nhé.
+b_no_3|my|Hì, chữ này khác cơ.
+b_no_4|my|Không sao, tìm lại nào!
+b_no_5|my|Ừm, chưa phải rồi.
+b_no_6|my|Thử lại nhé Nhím!
+b_no_7|my|Ô, chữ này chưa đúng.
+b_no_8|my|Nhìn kỹ lại nhé!
+b_no_9|my|Từ từ thôi, mình tìm tiếp.
+b_ok_0|my|Đúng rồi!
+b_ok_1|my|Giỏi quá!
+b_ok_10|my|Xuất sắc!
+b_ok_11|my|Đúng rồi, giỏi lắm!
+b_ok_2|my|Hay lắm Nhím ơi!
+b_ok_3|my|Tuyệt vời!
+b_ok_4|my|Chính xác!
+b_ok_5|my|Nhím giỏi ghê!
+b_ok_6|my|Đúng chữ đó rồi!
+b_ok_7|my|Ôi, Nhím tìm ra rồi!
+b_ok_8|my|Phép màu mạnh thêm rồi!
+b_ok_9|my|Hoan hô Nhím!
+b_purify_0|my|Bóng tối tan rồi! Bạn ấy vui lại rồi!
+b_purify_1|my|Nhìn kìa, bạn ấy hết buồn rồi!
+b_purify_2|my|Phép của Nhím làm bạn ấy sáng bừng!
+b_purify_3|my|Bạn ấy về phe mình rồi!
+b_purify_4|my|Ôi, bạn ấy dễ thương quá!
+b_purify_5|my|Bạn ấy đang nhảy múa kìa!
+b_purify_6|my|Hết bị bóng tối nhập rồi!
+b_purify_7|my|Có thêm một người bạn mới!
+b_purify_8|my|Bạn ấy vẫy tay chào Nhím kìa!
+b_purify_9|my|Hoan hô! Bóng tối chạy mất rồi!
+b_rv_ok_0|spike|Đúng rồi! Nhím nhớ giỏi ghê!
+b_rv_ok_1|spike|Chuẩn luôn!
+b_rv_ok_2|spike|Đúng chữ đó!
+b_rv_ok_3|spike|Hay quá Nhím ơi!
+b_rv_ok_4|spike|Nhím nhớ hết luôn!
+b_rv_ok_5|spike|Giỏi quá đi!
+b_rv_ok_6|spike|Đúng rồi nè!
+b_rv_ok_7|spike|Tuyệt vời Nhím ơi!
+b_tap_0|spike|Chạm vào ngôi sao đúng chữ nha!
+b_tap_1|spike|Nhím chạm vào ngôi sao nhé!
+b_tap_2|spike|Ngôi sao nào đây ta?
+b_tap_3|spike|Chạm nhẹ vào ngôi sao nào!
+b_tap_4|spike|Nhím chọn ngôi sao nào?
+b_tap_5|spike|Chạm vào chữ đúng nhé!
+b_tap_6|spike|Ngôi sao đang chờ Nhím chạm đó!
+b_tap_7|spike|Thử chạm một ngôi sao xem!
+b_thanks_0|friend|Cảm ơn Nhím nhé!
+b_thanks_1|friend|Mình được tự do rồi! Cảm ơn Nhím!
+b_thanks_2|friend|Cho mình đi cùng Nhím nha!
+b_thanks_3|friend|Nhím giỏi quá, cảm ơn nha!
+b_thanks_4|friend|A ha! Mình ra được rồi!
+b_thanks_5|friend|Cảm ơn bạn nhiều lắm!
+b_thanks_6|friend|Mình sẽ giúp Nhím cứu cả nhà!
+b_thanks_7|friend|Nhím là bạn tốt nhất!
+b_thanks_8|friend|Hoan hô, cảm ơn Nhím!
+b_thanks_9|friend|Mình đi theo Nhím nhé!
+big_spell|spike|Chạm vào ngôi sao phép thuật to nào!
+board_empty|my|Chữ này Nhím chưa tìm thấy. Mình đi tìm nhé!
+board_open|my|Bảng chữ cái của Nhím đây!
+bridge_1|spike|Cây cầu bị gãy rồi! Mình tìm tấm ván có chữ nhé.
+bridge_2|spike|Ôi, cầu thiếu ván! Chạm vào tấm ván đúng chữ nha.
+bridge_done|my|Cầu lành rồi! Đi qua thôi!
+c_b|my|bờ
+c_c|my|cờ
+c_dd|my|đờ
+c_l|my|lờ
+c_m|my|mờ
+c_n|my|nờ
+c_t|my|tờ
+c_v|my|vờ
+c1i_1|nar|Chương một. Khu rừng bí ẩn.
+c1i_2|nar|Nhím và bạn rồng nhỏ đi vào khu rừng. Cây cao vút, lá rì rào.
+c1i_3|cat|Meo meo! Meo meo!
+c1i_4|spike|Nghe kìa! Là tiếng của Mun và Rơm!
+c1i_5|nmm|Hi hi hi! Muốn cứu hai con mèo à? Phải tìm được chữ cái đã!
+c1i_6|spike|Nhím chạm xuống đất là chạy tới đó. Mình đi tìm ngôi sao chữ nào!
+c1m_1|nar|Ở cuối khu rừng, Mun và Rơm bị nhốt trong một chiếc lồng bóng tối.
+c1m_2|cat|Meo meo meo! Nhím ơi!
+c1m_3|nmm|Các bạn ma của ta, giữ chặt chữ cái cho ta!
+c1m_4|spike|Đừng sợ! Phép của Nhím sẽ làm các bạn ấy hết buồn đó.
+c1r_1|nar|Nhím đã tìm đủ chữ trong khu rừng rồi!
+c1r_2|spike|Chạm vào ngôi sao phép thuật to để phá lồng nào!
+c1r_3|nar|Chiếc lồng vỡ tan thành ngàn ánh sao!
+c1r_4|cat|Meo meo! Cảm ơn Nhím!
+c1r_5|nar|Mun và Rơm được cứu rồi! Hai bạn mèo sẽ đi cùng Nhím.
+c2i_1|nar|Chương hai. Làng ngựa nhỏ.
+c2i_2|nar|Nhím tới một ngôi làng có những ngôi nhà nhỏ xinh.
+c2i_3|nar|Trên tháp đồng hồ, ba Cường và mẹ Yến bị nhốt trong bong bóng bóng đêm!
+c2i_4|me|Nhím ơi! Ba mẹ ở trên này!
+c2i_5|ba|Nhím cố lên! Ba tin con!
+c2i_6|nmm|Bong bóng của ta chỉ vỡ khi có người đọc được chữ… ba! Ha ha!
+c2i_7|spike|Mình phải tìm chữ bờ và chữ a. Đi thôi Nhím!
+c2m_1|nar|Một chú rồng nhỏ bị bóng tối nhập, cắp mất mấy ngôi sao chữ bay đi.
+c2m_2|spike|Chú rồng ấy đang buồn đó. Phép của Nhím sẽ giúp chú vui lại.
+c2m_3|nmm|Hừm! Nhím biết đọc chữ rồi à? Còn lâu mới cứu được!
+c2r_1|nar|Nhím tới chân tháp đồng hồ. Bong bóng có khắc một chữ: ba.
+c2r_2|spike|Ghép chữ bờ với chữ a nào!
+c2r_3|nar|Bong bóng vỡ tung!
+c2r_4|ba|Nhím giỏi quá! Cả nhà mình đi cứu ông bà nào!
+c2r_me|me|Mẹ đây! Mẹ thương Nhím nhất!
+c3i_1|nar|Chương ba. Thành phố lâu đài.
+c3i_2|nar|Thành phố trắng tinh, mái vàng lấp lánh. Nhưng bây giờ, bóng đêm phủ khắp nơi.
+c3i_3|batuyet|Nhím ơi, ông bà ở trên tháp cao này!
+c3i_4|ong|Cháu ông dũng cảm lắm! Ông chờ cháu!
+c3i_5|nmm|Các phù thuỷ của ta sẽ giữ chặt những chữ cái cuối cùng!
+c3i_6|spike|Ở đây có cả dấu thanh nữa đó Nhím. Dấu huyền, dấu sắc… Mình học nhé!
+c3m_1|nar|Các phù thuỷ nhỏ bị bóng tối nhập, vẫy gậy phép lung tung.
+c3m_2|spike|Mỗi lần Nhím đọc đúng, bóng tối lại tan bớt!
+c3m_3|me|Cố lên Nhím ơi, cả nhà ở đây với con!
+c3r_1|nar|Bong bóng trên tháp có khắc một chữ: bà.
+c3r_2|spike|Ghép chữ bờ, chữ a, rồi thêm dấu huyền nào!
+c3r_3|batuyet|Bà sẽ kéo mặt trời lên cho cả nhà!
+c3r_4|nar|Mặt trời mọc rồi! Nhưng Nữ hoàng Bóng Đêm vẫn còn ở lâu đài…
+c3r_ong|ong|Ông đây! Cháu ông giỏi quá!
+cage_hint|spike|Lồng ở đằng kia! Đi tới đó nhé.
+chapter_pick|my|Nhím muốn chơi chương nào?
+cl_1|nar|Năm viên ngọc Hài Hoà bay vòng quanh Nhím.
+cl_2|nar|Nhím phát sáng, bay lên thật cao, và dang rộng đôi cánh!
+cl_3|twi|Bằng phép màu của tình bạn và gia đình…
+cl_4|twi|Bóng tối ơi, tan đi!
+e_1|nar|Ánh sáng dịu dần. Nữ hoàng Bóng Đêm biến mất…
+e_2|nar|và bác Hanh trở lại!
+e_3|bachanh|Ôi, bác được cứu rồi! Cảm ơn Nhím nhiều lắm!
+e_4|batuyet|Mặt trời mọc rồi! Cả nhà mình lại ở bên nhau.
+e_5|nar|Nhím đã cứu cả nhà!
+e_6|me|Mẹ thương Nhím nhất trên đời!
+e_7|ba|Con gái ba giỏi nhất!
+e_8|ong|Cháu ông tuyệt vời!
+e_9|nar|Và đây là cuốn sách phiêu lưu của Nhím.
+f_1|nar|Trận chiến cuối cùng.
+f_2|nar|Bầu trời tối sầm lại. Nữ hoàng Bóng Đêm bay xuống cùng đội quân bóng tối.
+f_3|nmm|Ha ha ha! Các ngươi không thắng được ta đâu!
+f_4|nar|Nhưng Nhím không một mình. Cả nhà, hai bạn mèo và các bạn ngựa nhỏ đều ở đây!
+f_5|ba|Cả nhà mình cùng nhau nào!
+f_6|spike|Mỗi lần Nhím đọc đúng, một viên ngọc Hài Hoà sẽ sáng lên!
+f_move_ba|ba|Ba bay nhanh như tia chớp cầu vồng!
+f_move_batuyet|batuyet|Ánh nắng của bà đây!
+f_move_friends|nar|Các bạn ngựa nhỏ và hai bạn mèo cùng xông lên!
+f_move_me|me|Ngọc của mẹ lấp lánh nè!
+f_move_ong|ong|Ông đá một cái, bóng tối bay mất!
+f_round_1|nar|Viên ngọc thứ nhất!
+f_round_2|nar|Viên ngọc thứ hai!
+f_round_3|nar|Viên ngọc thứ ba!
+f_round_4|nar|Viên ngọc thứ tư!
+f_round_5|nar|Viên ngọc cuối cùng!
+f_taunt_1|nmm|Hừm! Mới một viên ngọc thôi mà!
+f_taunt_2|nmm|Ối! Phép gì mà sáng thế!
+f_taunt_3|nmm|Bóng tối của ta… mỏng dần rồi!
+f_taunt_4|nmm|Không thể nào! Còn một viên nữa thôi sao?
+find_a_0|my|Nhím ơi, tìm chữ a nào!
+find_a_1|my|Chữ a đâu nhỉ?
+find_a_2|my|Nhím tìm giúp chữ a nhé!
+find_a_3|my|Ngôi sao chữ a ở đâu ta?
+find_a_4|my|Đi tìm chữ a nào!
+find_a_5|my|Chữ a đang trốn ở đâu nhỉ?
+find_a_6|my|Nhím ơi, chữ a ở đâu?
+find_a_7|my|Mình cần chữ a. Nhím tìm nhé!
+find_aa_0|my|Nhím ơi, tìm chữ ớ nào!
+find_aa_1|my|Chữ ớ đâu nhỉ?
+find_aa_2|my|Nhím tìm giúp chữ ớ nhé!
+find_aa_3|my|Ngôi sao chữ ớ ở đâu ta?
+find_aa_4|my|Đi tìm chữ ớ nào!
+find_aa_5|my|Chữ ớ đang trốn ở đâu nhỉ?
+find_aa_6|my|Nhím ơi, chữ ớ ở đâu?
+find_aa_7|my|Mình cần chữ ớ. Nhím tìm nhé!
+find_aw_0|my|Nhím ơi, tìm chữ á nào!
+find_aw_1|my|Chữ á đâu nhỉ?
+find_aw_2|my|Nhím tìm giúp chữ á nhé!
+find_aw_3|my|Ngôi sao chữ á ở đâu ta?
+find_aw_4|my|Đi tìm chữ á nào!
+find_aw_5|my|Chữ á đang trốn ở đâu nhỉ?
+find_aw_6|my|Nhím ơi, chữ á ở đâu?
+find_aw_7|my|Mình cần chữ á. Nhím tìm nhé!
+find_b_0|my|Nhím ơi, tìm chữ bờ nào!
+find_b_1|my|Chữ bờ đâu nhỉ?
+find_b_2|my|Nhím tìm giúp chữ bờ nhé!
+find_b_3|my|Ngôi sao chữ bờ ở đâu ta?
+find_b_4|my|Đi tìm chữ bờ nào!
+find_b_5|my|Chữ bờ đang trốn ở đâu nhỉ?
+find_b_6|my|Nhím ơi, chữ bờ ở đâu?
+find_b_7|my|Mình cần chữ bờ. Nhím tìm nhé!
+find_c_0|my|Nhím ơi, tìm chữ cờ nào!
+find_c_1|my|Chữ cờ đâu nhỉ?
+find_c_2|my|Nhím tìm giúp chữ cờ nhé!
+find_c_3|my|Ngôi sao chữ cờ ở đâu ta?
+find_c_4|my|Đi tìm chữ cờ nào!
+find_c_5|my|Chữ cờ đang trốn ở đâu nhỉ?
+find_c_6|my|Nhím ơi, chữ cờ ở đâu?
+find_c_7|my|Mình cần chữ cờ. Nhím tìm nhé!
+find_d_0|my|Nhím ơi, tìm chữ dờ nào!
+find_d_1|my|Chữ dờ đâu nhỉ?
+find_d_2|my|Nhím tìm giúp chữ dờ nhé!
+find_d_3|my|Ngôi sao chữ dờ ở đâu ta?
+find_d_4|my|Đi tìm chữ dờ nào!
+find_d_5|my|Chữ dờ đang trốn ở đâu nhỉ?
+find_d_6|my|Nhím ơi, chữ dờ ở đâu?
+find_d_7|my|Mình cần chữ dờ. Nhím tìm nhé!
+find_dd_0|my|Nhím ơi, tìm chữ đờ nào!
+find_dd_1|my|Chữ đờ đâu nhỉ?
+find_dd_2|my|Nhím tìm giúp chữ đờ nhé!
+find_dd_3|my|Ngôi sao chữ đờ ở đâu ta?
+find_dd_4|my|Đi tìm chữ đờ nào!
+find_dd_5|my|Chữ đờ đang trốn ở đâu nhỉ?
+find_dd_6|my|Nhím ơi, chữ đờ ở đâu?
+find_dd_7|my|Mình cần chữ đờ. Nhím tìm nhé!
+find_e_0|my|Nhím ơi, tìm chữ e nào!
+find_e_1|my|Chữ e đâu nhỉ?
+find_e_2|my|Nhím tìm giúp chữ e nhé!
+find_e_3|my|Ngôi sao chữ e ở đâu ta?
+find_e_4|my|Đi tìm chữ e nào!
+find_e_5|my|Chữ e đang trốn ở đâu nhỉ?
+find_e_6|my|Nhím ơi, chữ e ở đâu?
+find_e_7|my|Mình cần chữ e. Nhím tìm nhé!
+find_ee_0|my|Nhím ơi, tìm chữ ê nào!
+find_ee_1|my|Chữ ê đâu nhỉ?
+find_ee_2|my|Nhím tìm giúp chữ ê nhé!
+find_ee_3|my|Ngôi sao chữ ê ở đâu ta?
+find_ee_4|my|Đi tìm chữ ê nào!
+find_ee_5|my|Chữ ê đang trốn ở đâu nhỉ?
+find_ee_6|my|Nhím ơi, chữ ê ở đâu?
+find_ee_7|my|Mình cần chữ ê. Nhím tìm nhé!
+find_g_0|my|Nhím ơi, tìm chữ gờ nào!
+find_g_1|my|Chữ gờ đâu nhỉ?
+find_g_2|my|Nhím tìm giúp chữ gờ nhé!
+find_g_3|my|Ngôi sao chữ gờ ở đâu ta?
+find_g_4|my|Đi tìm chữ gờ nào!
+find_g_5|my|Chữ gờ đang trốn ở đâu nhỉ?
+find_g_6|my|Nhím ơi, chữ gờ ở đâu?
+find_g_7|my|Mình cần chữ gờ. Nhím tìm nhé!
+find_h_0|my|Nhím ơi, tìm chữ hờ nào!
+find_h_1|my|Chữ hờ đâu nhỉ?
+find_h_2|my|Nhím tìm giúp chữ hờ nhé!
+find_h_3|my|Ngôi sao chữ hờ ở đâu ta?
+find_h_4|my|Đi tìm chữ hờ nào!
+find_h_5|my|Chữ hờ đang trốn ở đâu nhỉ?
+find_h_6|my|Nhím ơi, chữ hờ ở đâu?
+find_h_7|my|Mình cần chữ hờ. Nhím tìm nhé!
+find_i_0|my|Nhím ơi, tìm chữ i ngắn nào!
+find_i_1|my|Chữ i ngắn đâu nhỉ?
+find_i_2|my|Nhím tìm giúp chữ i ngắn nhé!
+find_i_3|my|Ngôi sao chữ i ngắn ở đâu ta?
+find_i_4|my|Đi tìm chữ i ngắn nào!
+find_i_5|my|Chữ i ngắn đang trốn ở đâu nhỉ?
+find_i_6|my|Nhím ơi, chữ i ngắn ở đâu?
+find_i_7|my|Mình cần chữ i ngắn. Nhím tìm nhé!
+find_k_0|my|Nhím ơi, tìm chữ ca nào!
+find_k_1|my|Chữ ca đâu nhỉ?
+find_k_2|my|Nhím tìm giúp chữ ca nhé!
+find_k_3|my|Ngôi sao chữ ca ở đâu ta?
+find_k_4|my|Đi tìm chữ ca nào!
+find_k_5|my|Chữ ca đang trốn ở đâu nhỉ?
+find_k_6|my|Nhím ơi, chữ ca ở đâu?
+find_k_7|my|Mình cần chữ ca. Nhím tìm nhé!
+find_l_0|my|Nhím ơi, tìm chữ lờ nào!
+find_l_1|my|Chữ lờ đâu nhỉ?
+find_l_2|my|Nhím tìm giúp chữ lờ nhé!
+find_l_3|my|Ngôi sao chữ lờ ở đâu ta?
+find_l_4|my|Đi tìm chữ lờ nào!
+find_l_5|my|Chữ lờ đang trốn ở đâu nhỉ?
+find_l_6|my|Nhím ơi, chữ lờ ở đâu?
+find_l_7|my|Mình cần chữ lờ. Nhím tìm nhé!
+find_m_0|my|Nhím ơi, tìm chữ mờ nào!
+find_m_1|my|Chữ mờ đâu nhỉ?
+find_m_2|my|Nhím tìm giúp chữ mờ nhé!
+find_m_3|my|Ngôi sao chữ mờ ở đâu ta?
+find_m_4|my|Đi tìm chữ mờ nào!
+find_m_5|my|Chữ mờ đang trốn ở đâu nhỉ?
+find_m_6|my|Nhím ơi, chữ mờ ở đâu?
+find_m_7|my|Mình cần chữ mờ. Nhím tìm nhé!
+find_n_0|my|Nhím ơi, tìm chữ nờ nào!
+find_n_1|my|Chữ nờ đâu nhỉ?
+find_n_2|my|Nhím tìm giúp chữ nờ nhé!
+find_n_3|my|Ngôi sao chữ nờ ở đâu ta?
+find_n_4|my|Đi tìm chữ nờ nào!
+find_n_5|my|Chữ nờ đang trốn ở đâu nhỉ?
+find_n_6|my|Nhím ơi, chữ nờ ở đâu?
+find_n_7|my|Mình cần chữ nờ. Nhím tìm nhé!
+find_o_0|my|Nhím ơi, tìm chữ o nào!
+find_o_1|my|Chữ o đâu nhỉ?
+find_o_2|my|Nhím tìm giúp chữ o nhé!
+find_o_3|my|Ngôi sao chữ o ở đâu ta?
+find_o_4|my|Đi tìm chữ o nào!
+find_o_5|my|Chữ o đang trốn ở đâu nhỉ?
+find_o_6|my|Nhím ơi, chữ o ở đâu?
+find_o_7|my|Mình cần chữ o. Nhím tìm nhé!
+find_oo_0|my|Nhím ơi, tìm chữ ô nào!
+find_oo_1|my|Chữ ô đâu nhỉ?
+find_oo_2|my|Nhím tìm giúp chữ ô nhé!
+find_oo_3|my|Ngôi sao chữ ô ở đâu ta?
+find_oo_4|my|Đi tìm chữ ô nào!
+find_oo_5|my|Chữ ô đang trốn ở đâu nhỉ?
+find_oo_6|my|Nhím ơi, chữ ô ở đâu?
+find_oo_7|my|Mình cần chữ ô. Nhím tìm nhé!
+find_ow_0|my|Nhím ơi, tìm chữ ơ nào!
+find_ow_1|my|Chữ ơ đâu nhỉ?
+find_ow_2|my|Nhím tìm giúp chữ ơ nhé!
+find_ow_3|my|Ngôi sao chữ ơ ở đâu ta?
+find_ow_4|my|Đi tìm chữ ơ nào!
+find_ow_5|my|Chữ ơ đang trốn ở đâu nhỉ?
+find_ow_6|my|Nhím ơi, chữ ơ ở đâu?
+find_ow_7|my|Mình cần chữ ơ. Nhím tìm nhé!
+find_p_0|my|Nhím ơi, tìm chữ pờ nào!
+find_p_1|my|Chữ pờ đâu nhỉ?
+find_p_2|my|Nhím tìm giúp chữ pờ nhé!
+find_p_3|my|Ngôi sao chữ pờ ở đâu ta?
+find_p_4|my|Đi tìm chữ pờ nào!
+find_p_5|my|Chữ pờ đang trốn ở đâu nhỉ?
+find_p_6|my|Nhím ơi, chữ pờ ở đâu?
+find_p_7|my|Mình cần chữ pờ. Nhím tìm nhé!
+find_q_0|my|Nhím ơi, tìm chữ quờ nào!
+find_q_1|my|Chữ quờ đâu nhỉ?
+find_q_2|my|Nhím tìm giúp chữ quờ nhé!
+find_q_3|my|Ngôi sao chữ quờ ở đâu ta?
+find_q_4|my|Đi tìm chữ quờ nào!
+find_q_5|my|Chữ quờ đang trốn ở đâu nhỉ?
+find_q_6|my|Nhím ơi, chữ quờ ở đâu?
+find_q_7|my|Mình cần chữ quờ. Nhím tìm nhé!
+find_r_0|my|Nhím ơi, tìm chữ rờ nào!
+find_r_1|my|Chữ rờ đâu nhỉ?
+find_r_2|my|Nhím tìm giúp chữ rờ nhé!
+find_r_3|my|Ngôi sao chữ rờ ở đâu ta?
+find_r_4|my|Đi tìm chữ rờ nào!
+find_r_5|my|Chữ rờ đang trốn ở đâu nhỉ?
+find_r_6|my|Nhím ơi, chữ rờ ở đâu?
+find_r_7|my|Mình cần chữ rờ. Nhím tìm nhé!
+find_s_0|my|Nhím ơi, tìm chữ sờ nào!
+find_s_1|my|Chữ sờ đâu nhỉ?
+find_s_2|my|Nhím tìm giúp chữ sờ nhé!
+find_s_3|my|Ngôi sao chữ sờ ở đâu ta?
+find_s_4|my|Đi tìm chữ sờ nào!
+find_s_5|my|Chữ sờ đang trốn ở đâu nhỉ?
+find_s_6|my|Nhím ơi, chữ sờ ở đâu?
+find_s_7|my|Mình cần chữ sờ. Nhím tìm nhé!
+find_t_0|my|Nhím ơi, tìm chữ tờ nào!
+find_t_1|my|Chữ tờ đâu nhỉ?
+find_t_2|my|Nhím tìm giúp chữ tờ nhé!
+find_t_3|my|Ngôi sao chữ tờ ở đâu ta?
+find_t_4|my|Đi tìm chữ tờ nào!
+find_t_5|my|Chữ tờ đang trốn ở đâu nhỉ?
+find_t_6|my|Nhím ơi, chữ tờ ở đâu?
+find_t_7|my|Mình cần chữ tờ. Nhím tìm nhé!
+find_u_0|my|Nhím ơi, tìm chữ u nào!
+find_u_1|my|Chữ u đâu nhỉ?
+find_u_2|my|Nhím tìm giúp chữ u nhé!
+find_u_3|my|Ngôi sao chữ u ở đâu ta?
+find_u_4|my|Đi tìm chữ u nào!
+find_u_5|my|Chữ u đang trốn ở đâu nhỉ?
+find_u_6|my|Nhím ơi, chữ u ở đâu?
+find_u_7|my|Mình cần chữ u. Nhím tìm nhé!
+find_uw_0|my|Nhím ơi, tìm chữ ư nào!
+find_uw_1|my|Chữ ư đâu nhỉ?
+find_uw_2|my|Nhím tìm giúp chữ ư nhé!
+find_uw_3|my|Ngôi sao chữ ư ở đâu ta?
+find_uw_4|my|Đi tìm chữ ư nào!
+find_uw_5|my|Chữ ư đang trốn ở đâu nhỉ?
+find_uw_6|my|Nhím ơi, chữ ư ở đâu?
+find_uw_7|my|Mình cần chữ ư. Nhím tìm nhé!
+find_v_0|my|Nhím ơi, tìm chữ vờ nào!
+find_v_1|my|Chữ vờ đâu nhỉ?
+find_v_2|my|Nhím tìm giúp chữ vờ nhé!
+find_v_3|my|Ngôi sao chữ vờ ở đâu ta?
+find_v_4|my|Đi tìm chữ vờ nào!
+find_v_5|my|Chữ vờ đang trốn ở đâu nhỉ?
+find_v_6|my|Nhím ơi, chữ vờ ở đâu?
+find_v_7|my|Mình cần chữ vờ. Nhím tìm nhé!
+find_x_0|my|Nhím ơi, tìm chữ xờ nào!
+find_x_1|my|Chữ xờ đâu nhỉ?
+find_x_2|my|Nhím tìm giúp chữ xờ nhé!
+find_x_3|my|Ngôi sao chữ xờ ở đâu ta?
+find_x_4|my|Đi tìm chữ xờ nào!
+find_x_5|my|Chữ xờ đang trốn ở đâu nhỉ?
+find_x_6|my|Nhím ơi, chữ xờ ở đâu?
+find_x_7|my|Mình cần chữ xờ. Nhím tìm nhé!
+find_y_0|my|Nhím ơi, tìm chữ i dài nào!
+find_y_1|my|Chữ i dài đâu nhỉ?
+find_y_2|my|Nhím tìm giúp chữ i dài nhé!
+find_y_3|my|Ngôi sao chữ i dài ở đâu ta?
+find_y_4|my|Đi tìm chữ i dài nào!
+find_y_5|my|Chữ i dài đang trốn ở đâu nhỉ?
+find_y_6|my|Nhím ơi, chữ i dài ở đâu?
+find_y_7|my|Mình cần chữ i dài. Nhím tìm nhé!
+lk_a|spike|Ổ khoá có chữ a! Chạm vào ngôi sao chữ a nhé.
+lk_aa|spike|Ổ khoá có chữ ớ! Chạm vào ngôi sao chữ ớ nhé.
+lk_aw|spike|Ổ khoá có chữ á! Chạm vào ngôi sao chữ á nhé.
+lk_b|spike|Ổ khoá có chữ bờ! Chạm vào ngôi sao chữ bờ nhé.
+lk_c|spike|Ổ khoá có chữ cờ! Chạm vào ngôi sao chữ cờ nhé.
+lk_d|spike|Ổ khoá có chữ dờ! Chạm vào ngôi sao chữ dờ nhé.
+lk_dd|spike|Ổ khoá có chữ đờ! Chạm vào ngôi sao chữ đờ nhé.
+lk_e|spike|Ổ khoá có chữ e! Chạm vào ngôi sao chữ e nhé.
+lk_ee|spike|Ổ khoá có chữ ê! Chạm vào ngôi sao chữ ê nhé.
+lk_g|spike|Ổ khoá có chữ gờ! Chạm vào ngôi sao chữ gờ nhé.
+lk_h|spike|Ổ khoá có chữ hờ! Chạm vào ngôi sao chữ hờ nhé.
+lk_i|spike|Ổ khoá có chữ i ngắn! Chạm vào ngôi sao chữ i ngắn nhé.
+lk_k|spike|Ổ khoá có chữ ca! Chạm vào ngôi sao chữ ca nhé.
+lk_l|spike|Ổ khoá có chữ lờ! Chạm vào ngôi sao chữ lờ nhé.
+lk_m|spike|Ổ khoá có chữ mờ! Chạm vào ngôi sao chữ mờ nhé.
+lk_n|spike|Ổ khoá có chữ nờ! Chạm vào ngôi sao chữ nờ nhé.
+lk_o|spike|Ổ khoá có chữ o! Chạm vào ngôi sao chữ o nhé.
+lk_oo|spike|Ổ khoá có chữ ô! Chạm vào ngôi sao chữ ô nhé.
+lk_ow|spike|Ổ khoá có chữ ơ! Chạm vào ngôi sao chữ ơ nhé.
+lk_p|spike|Ổ khoá có chữ pờ! Chạm vào ngôi sao chữ pờ nhé.
+lk_q|spike|Ổ khoá có chữ quờ! Chạm vào ngôi sao chữ quờ nhé.
+lk_r|spike|Ổ khoá có chữ rờ! Chạm vào ngôi sao chữ rờ nhé.
+lk_s|spike|Ổ khoá có chữ sờ! Chạm vào ngôi sao chữ sờ nhé.
+lk_t|spike|Ổ khoá có chữ tờ! Chạm vào ngôi sao chữ tờ nhé.
+lk_u|spike|Ổ khoá có chữ u! Chạm vào ngôi sao chữ u nhé.
+lk_uw|spike|Ổ khoá có chữ ư! Chạm vào ngôi sao chữ ư nhé.
+lk_v|spike|Ổ khoá có chữ vờ! Chạm vào ngôi sao chữ vờ nhé.
+lk_x|spike|Ổ khoá có chữ xờ! Chạm vào ngôi sao chữ xờ nhé.
+lk_y|spike|Ổ khoá có chữ i dài! Chạm vào ngôi sao chữ i dài nhé.
+ln_a|my|a
+ln_aa|my|ớ
+ln_aw|my|á
+ln_b|my|bờ
+ln_c|my|cờ
+ln_d|my|dờ
+ln_dd|my|đờ
+ln_e|my|e
+ln_ee|my|ê
+ln_g|my|gờ
+ln_h|my|hờ
+ln_i|my|i ngắn
+ln_k|my|ca
+ln_l|my|lờ
+ln_m|my|mờ
+ln_n|my|nờ
+ln_o|my|o
+ln_oo|my|ô
+ln_ow|my|ơ
+ln_p|my|pờ
+ln_q|my|quờ
+ln_r|my|rờ
+ln_s|my|sờ
+ln_t|my|tờ
+ln_u|my|u
+ln_uw|my|ư
+ln_v|my|vờ
+ln_x|my|xờ
+ln_y|my|i dài
+lo_a|my|a… áo
+lo_aa|my|ớ… ấm
+lo_aw|my|á… trăng
+lo_b|my|bờ… bò
+lo_c|my|cờ… cá
+lo_d|my|dờ… dê
+lo_dd|my|đờ… đèn
+lo_e|my|e… kem
+lo_ee|my|ê… ếch
+lo_g|my|gờ… gà
+lo_h|my|hờ… hoa
+lo_i|my|i ngắn… mì
+lo_k|my|ca… kẹo
+lo_l|my|lờ… lá
+lo_m|my|mờ… mèo
+lo_n|my|nờ… nơ
+lo_o|my|o… ong
+lo_oo|my|ô… cái ô
+lo_ow|my|ơ… ớt
+lo_p|my|pờ… pin
+lo_q|my|quờ… quà
+lo_r|my|rờ… rùa
+lo_s|my|sờ… sao
+lo_t|my|tờ… táo
+lo_u|my|u… ủng
+lo_uw|my|ư… sư tử
+lo_v|my|vờ… vịt
+lo_x|my|xờ… xe
+lo_y|my|i dài… y tá
+lock_done|my|Cạch! Cổng mở rồi!
+lock_intro|spike|Cổng bị khoá rồi! Nhìn ổ khoá xem có chữ gì nào.
+meow|cat|Meo meo!
+p_1|nar|Ngày xửa ngày xưa, ở xứ sở ngựa thần, có một cô bé tên là Nhím.
+p_10|nar|Không có chữ cái, phép thuật của Nhím yếu lắm. Mỗi ngôi sao chữ nhặt được sẽ làm phép mạnh thêm.
+p_2|batuyet|Nhím ơi, lại đây bà dạy đọc chữ nào. Đây là chữ a, còn đây là chữ bờ.
+p_3|nar|Bỗng nhiên, phép màu lấp lánh bay ra từ những trang sách…
+p_4|nar|và Nhím biến thành một bạn ngựa kỳ lân màu tím thật xinh!
+p_5|twi|Ôi! Mình có sừng phép thuật nè!
+p_6|nmm|Ha ha ha! Ta là Nữ hoàng Bóng Đêm! Ta sẽ thổi bay hết chữ cái!
+p_7|nar|Gió bóng đêm thổi hai mươi chín chữ cái thành những ngôi sao, bay đi khắp nơi.
+p_8|nmm|Cả nhà của Nhím, ta bắt đi hết! Ha ha ha!
+p_9|spike|Nhím ơi, đừng lo! Có mình đây. Mình đi nhặt lại chữ cái rồi cứu cả nhà nhé!
+review_done|spike|Nhím nhớ hết rồi! Giỏi quá đi!
+review_intro|spike|Bạn rồng nhỏ hỏi bài nè! Nhím nhớ chữ nào rồi?
+rotate|my|Nhím ơi, xoay ngang máy nhé!
+rv_a|spike|Nhím ơi, chữ a đâu?
+rv_aa|spike|Nhím ơi, chữ ớ đâu?
+rv_aw|spike|Nhím ơi, chữ á đâu?
+rv_b|spike|Nhím ơi, chữ bờ đâu?
+rv_c|spike|Nhím ơi, chữ cờ đâu?
+rv_d|spike|Nhím ơi, chữ dờ đâu?
+rv_dd|spike|Nhím ơi, chữ đờ đâu?
+rv_e|spike|Nhím ơi, chữ e đâu?
+rv_ee|spike|Nhím ơi, chữ ê đâu?
+rv_g|spike|Nhím ơi, chữ gờ đâu?
+rv_h|spike|Nhím ơi, chữ hờ đâu?
+rv_i|spike|Nhím ơi, chữ i ngắn đâu?
+rv_k|spike|Nhím ơi, chữ ca đâu?
+rv_l|spike|Nhím ơi, chữ lờ đâu?
+rv_m|spike|Nhím ơi, chữ mờ đâu?
+rv_n|spike|Nhím ơi, chữ nờ đâu?
+rv_o|spike|Nhím ơi, chữ o đâu?
+rv_oo|spike|Nhím ơi, chữ ô đâu?
+rv_ow|spike|Nhím ơi, chữ ơ đâu?
+rv_p|spike|Nhím ơi, chữ pờ đâu?
+rv_q|spike|Nhím ơi, chữ quờ đâu?
+rv_r|spike|Nhím ơi, chữ rờ đâu?
+rv_s|spike|Nhím ơi, chữ sờ đâu?
+rv_t|spike|Nhím ơi, chữ tờ đâu?
+rv_u|spike|Nhím ơi, chữ u đâu?
+rv_uw|spike|Nhím ơi, chữ ư đâu?
+rv_v|spike|Nhím ơi, chữ vờ đâu?
+rv_x|spike|Nhím ơi, chữ xờ đâu?
+rv_y|spike|Nhím ơi, chữ i dài đâu?
+s_ba|my|ba
+s_bo|my|bo
+s_ca|my|ca
+s_dda|my|đa
+s_la|my|la
+s_ma|my|ma
+s_me|my|me
+s_na|my|na
+s_too|my|tô
+s_ve|my|ve
+sp_ba|spike|Mình ghép chữ ba nhé!
+sp_baf|spike|Mình ghép chữ bà nhé!
+sp_bof|spike|Mình ghép chữ bò nhé!
+sp_ca|spike|Mình ghép chữ ca nhé!
+sp_cas|spike|Mình ghép chữ cá nhé!
+sp_dda|spike|Mình ghép chữ đa nhé!
+sp_la|spike|Mình ghép chữ la nhé!
+sp_ma|spike|Mình ghép chữ ma nhé!
+sp_mej|spike|Mình ghép chữ mẹ nhé!
+sp_na|spike|Mình ghép chữ na nhé!
+sp_too|spike|Mình ghép chữ tô nhé!
+sp_vex|spike|Mình ghép chữ vẽ nhé!
+spell_intro|spike|Mình dùng phép ghép chữ nhé! Chạm vào ngôi sao đúng chữ nha.
+sun_rise|nar|Bà Tuyết kéo mặt trời lên. Trời sáng rồi!
+t_huyen|my|huyền
+t_nang|my|nặng
+t_nga|my|ngã
+t_sac|my|sắc
+tf_hoi|my|Dấu hỏi đâu nhỉ?
+tf_huyen|my|Dấu huyền đâu nhỉ?
+tf_nang|my|Dấu nặng đâu nhỉ?
+tf_nga|my|Dấu ngã đâu nhỉ?
+tf_sac|my|Dấu sắc đâu nhỉ?
+tl_hoi|my|dấu hỏi
+tl_huyen|my|dấu huyền
+tl_nang|my|dấu nặng
+tl_nga|my|dấu ngã
+tl_sac|my|dấu sắc
+v_a|my|a
+v_e|my|e
+v_o|my|o
+v_oo|my|ô
+w_baf|my|bà
+w_bof|my|bò
+w_cas|my|cá
+w_mej|my|mẹ
+w_vex|my|vẽ
+wa_ba|ba|Ba đây! Ba đây!
+wa_baf|batuyet|Bà đây! Bà đây!
+wa_bof|my|Con bò kêu ò ò!
+wa_ca|my|Cái ca uống nước!
+wa_cas|my|Con cá bơi tung tăng!
+wa_dda|my|Cây đa thật to!
+wa_la|my|Nốt la, la la la!
+wa_ma|my|Bạn ma nhỏ, hiền khô à!
+wa_mej|me|Mẹ đây! Mẹ thương Nhím!
+wa_na|my|Quả na ngọt lịm!
+wa_too|my|Cái tô đựng canh!
+wa_vex|my|Nhím thích vẽ tranh!
