@@ -117,4 +117,4 @@ Cần `pnpm dev` đang chạy (cổng 5185) + playwright-core + chrome-headless-
 node scripts/test/play-human.mjs 1        # chương 1 chơi như người thật (click chuột, có tiếng, bay, chọn sai rồi đúng thật nhanh)
 node scripts/test/play-human.mjs 2 0 0 60 # chương 2, không bay, không vội, đi lệch xuống dưới
 ```
-Đứng yên một chỗ quá 25 s = đơ → báo lỗi + lưu ảnh `play-human-STUCK-ch<N>.png`.
+Đứng yên một chỗ quá 25 s = đơ → báo lỗi + lưu ảnh `play-human-STUCK-ch<N>.png` vào thư mục tạm của máy.

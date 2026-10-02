@@ -6,6 +6,8 @@
 //   node scripts/test/play-human.mjs [chương=1] [bay=1] [vội=1] [lệchY=0]
 //   PW=/path/to/node_modules/playwright-core CHROME=/path/to/chrome-headless-shell node scripts/test/play-human.mjs 2
 import { pathToFileURL } from 'node:url';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 const PW = process.env.PW ?? '/private/tmp/pw/node_modules/playwright-core';
 const CHROME = process.env.CHROME ?? `${process.env.HOME}/Library/Caches/ms-playwright/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell`;
 const { chromium } = await import(pathToFileURL(`${PW}/index.mjs`).href);
@@ -37,13 +39,14 @@ while (Date.now() - t0 < 420000) {
     const hunt = act?.stars && g.waiting?.startsWith('hunt') ? act.stars.filter((s) => !s.gone).map((s) => ({ label: s.label, ...scr(s.worldCenter()) })) : [];
     const tg = run?.playing && act ? act.trigger() : null;
     return { phase: g.phase, beat: g.beat, w: g.waiting, skip: v('skip'), big: v('bigspell'), album: v('album'), board: v('board'), review: v('review'), map: v('map'),
-      playing: !!run?.playing, ex: v('example'), targets, hunt, tgs: tg ? scr(new g.hero.root.position.constructor(tg.x, 0, tg.z)) : null };
+      playing: !!run?.playing, ex: v('example'), sub: v('subtitle') ? document.getElementById('subtitle').textContent : '', targets, hunt, tgs: tg ? scr(new g.hero.root.position.constructor(tg.x, 0, tg.z)) : null };
   });
   if (!st) { await sleep(300); continue; }
-  const key = `${st.phase}|${st.beat}|${st.w}|${st.playing}|${st.ex}`;
+  // tiến triển = đổi nhịp / bài / câu đang nói (cảnh cứu dài > 25 s nhưng câu thoại vẫn đổi)
+  const key = `${st.phase}|${st.beat}|${st.w}|${st.playing}|${st.ex}|${st.sub}`;
   if (key !== lastKey) { lastKey = key; lastChange = Date.now(); if (st.w) gates.add(st.w.split(':')[0]); }
   if (Date.now() - lastChange > 25000) {
-    await page.screenshot({ path: `play-human-STUCK-ch${ch}.png` });
+    await page.screenshot({ path: join(tmpdir(), `play-human-STUCK-ch${ch}.png`) });
     console.error(`✗ ĐƠ ở chương ${ch}: ${key}`);
     break;
   }
