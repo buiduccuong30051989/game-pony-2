@@ -207,3 +207,15 @@ InstancedMesh; ngọc InstancedMesh; props tĩnh gộp theo màu vật liệu; v
 6. Sửa: album bìa không còn lặp tiêu đề; huy hiệu HUD cắt quanh mặt (`FACE` trong `src/photos.ts`); trận cuối bỏ Cadance (model
    đứng chồm 2 chân) và Derpy (rip có xương, đứng đơ) khỏi đám đông; Surprise bỏ bake mắt (1 mắt đen), vẽ mắt lúc tải như cũ.
 7. Đo lại trận cuối sau bản 2 (1180×820, headless trên Mac): ~274k tam giác (tối đa 276k), ~183 draw call (tối đa 213), 119 fps.
+
+## 13. Sửa lỗi đơ (ba chơi thật, 02/10/2026)
+
+**Nguyên nhân**: ở bài săn sao (ngay cạnh cây cầu chương 1), bé bấm sao SAI → game khoá ~3 s để đọc "chưa đúng rồi…"; trong lúc đó
+bé bấm sao ĐÚNG, Twilight chạy tới đứng lên sao đúng nhưng lần chạm bị "tiêu" vì đang khoá. Đứng yên trên sao thì không chạm lại,
+bấm sao lần nữa cũng không chạy (đã đứng đúng chỗ) → kẹt vĩnh viễn. Chạy tự động không lộ vì `answer()` không đi qua va chạm.
+
+**Sửa + lưới an toàn**: đang khoá thì không tiêu lần chạm (nhả khoá là nhận); bấm vào sao đang đứng cạnh thì nhận ngay; mọi khoá
+nhả trong `finally`; mọi câu đọc chờ có hạn giờ (`withTimeout`, play(): tải/giải mã treo > 6 s bỏ qua, phát > thời lượng + 1.5 s
+bỏ qua); watchdog mỗi bài: khoá kẹt > 8 s hoặc 15 s không có gì xảy ra → nhả khoá, nạp lại sao/ván, nhắc lại câu hỏi.
+Vùng bắt đầu bài săn sao rộng hơn (5.5). Kiểm hồi quy: `node scripts/test/play-human.mjs <chương> <bay> <vội> <lệchY>` chơi như người
+thật (không ?auto, có tiếng, click chuột, bay/nhảy, chọn sai rồi đúng thật nhanh, click lúc đang đọc từ ví dụ).

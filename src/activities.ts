@@ -88,32 +88,53 @@ function popObject(world: World, at: THREE.Vector3, emoji: string, size = 1.6, m
 async function chooseTap(ctx: Ctx, opts: Pickable[], correct: Pickable, prompt: () => Promise<void>, sayName: () => Promise<void>, label: string): Promise<number> {
   for (const o of opts) ctx.pickables.add(o);
   let wrong = 0;
-  let busy = false;
+  let busy = false, busyAt = 0;
   void prompt();
-  await new Promise<void>((resolve) => {
-    const pick = (p: Pickable) => {
-      if (busy || p.gone) return;
-      ctx.poke();
-      if (p === correct) {
-        busy = true;
-        resolve();
-        return;
-      }
-      wrong++;
-      busy = true;
-      sfx('sfx_soft', 0.4);
-      void p.wobble();
-      void (async () => { stopSpeech(); await (ctx.onWrong ? ctx.onWrong() : sayBank('no')); await sayName(); busy = false; })();
-    };
-    ctx.onPick = pick;
-    ctx.setIdle(() => void prompt());
-    setAnswer(label, (ok) => pick(ok ? correct : opts.find((o) => o !== correct && !o.gone) ?? correct));
-  });
-  ctx.onPick = null;
-  ctx.setIdle(null);
-  setAnswer(null, null);
-  for (const o of opts) ctx.pickables.delete(o);
+  let watchdog = 0;
+  try {
+    await new Promise<void>((resolve) => {
+      const pick = (p: Pickable) => {
+        if (busy || p.gone) return;
+        ctx.poke();
+        if (p === correct) {
+          busy = true;
+          resolve();
+          return;
+        }
+        wrong++;
+        busy = true; busyAt = performance.now();
+        sfx('sfx_soft', 0.4);
+        void p.wobble();
+        void (async () => {
+          try { stopSpeech(); await withTimeout(ctx.onWrong ? ctx.onWrong() : sayBank('no'), 6000); await withTimeout(sayName(), 4000); }
+          finally { busy = false; }
+        })();
+      };
+      ctx.onPick = pick;
+      ctx.setIdle(() => void prompt());
+      // watchdog: khoá kẹt > 8 s → nhả + nhắc lại (không bao giờ đơ)
+      let quietAt = performance.now();
+      watchdog = window.setInterval(() => {
+        const now = performance.now();
+        if ((busy && now - busyAt > 8000) || (!busy && now - quietAt > 15000)) { busy = false; quietAt = now; for (const o of opts) if (!o.gone) ctx.pickables.add(o); void prompt(); }
+      }, 1000);
+      const pick0 = pick;
+      ctx.onPick = (p) => { quietAt = performance.now(); pick0(p); };
+      setAnswer(label, (ok) => pick(ok ? correct : opts.find((o) => o !== correct && !o.gone) ?? correct));
+    });
+  } finally {
+    clearInterval(watchdog);
+    ctx.onPick = null;
+    ctx.setIdle(null);
+    setAnswer(null, null);
+    for (const o of opts) ctx.pickables.delete(o);
+  }
   return wrong;
+}
+
+/** Chờ p nhưng không quá ms (audio treo / không giải mã được thì game vẫn chạy tiếp). */
+export function withTimeout<T>(p: Promise<T>, ms: number): Promise<T | void> {
+  return Promise.race([p, new Promise<void>((r) => setTimeout(r, ms))]);
 }
 
 // ------------------------------------------------------------------ nền chung
@@ -219,7 +240,7 @@ export class HuntActivity extends Activity {
     super(ctx);
     this.cx = b.x; this.cz = pathZ(b.x) + b.z;
   }
-  trigger() { return { x: this.cx - 7.5, z: this.cz, r: 4 }; }
+  trigger() { return { x: this.cx - 7.5, z: this.cz, r: 5.5 }; }
   focus() { return { x: this.cx + 0.5, z: this.cz }; }
 
   private get targets(): string[] { return this.extra ? [...this.b.letters, this.extra] : this.b.letters; }
@@ -247,37 +268,67 @@ export class HuntActivity extends Activity {
       void prompt();
       let wrong = 0;
       const armed = new Set<LetterStar>(this.stars.filter((s) => !s.gone));
+      let watchdog = 0;
+      let restorePoke = () => {};
       const star = await new Promise<LetterStar>((resolve) => {
-        let lock = false;
+        // lock = đang đọc câu "chưa đúng" (không nhận chạm). LUÔN được nhả: finally + hạn giờ + watchdog.
+        let lock = false, lockAt = 0;
         const onTouch = (s: LetterStar) => {
           if (lock) return;
+          ctx.poke();
           if (s.label === target) { lock = true; world.updaters.delete(watch); resolve(s); return; }
           wrong++;
           if (wrong === 1) markWeak(ctx.progress, target);
           sfx('sfx_soft', 0.4);
           void s.wobble();
           void this.monster?.giggle();
-          lock = true;
-          void (async () => { stopSpeech(); await sayBank('no'); await play(nameKey(target)); lock = false; })();
+          lock = true; lockAt = performance.now();
+          void (async () => {
+            try { stopSpeech(); await withTimeout(sayBank('no'), 5000); await withTimeout(play(nameKey(target)), 4000); }
+            finally { lock = false; }
+          })();
         };
         const watch = () => {
           for (const s of this.stars) {
             if (s.gone) continue;
             const d = Math.hypot(s.root.position.x - hero.x, s.root.position.z - hero.z);
-            if (d < 1.15 && armed.has(s)) { armed.delete(s); onTouch(s); }
+            // BUG cũ (đơ): chạm sao lúc đang khoá (vừa chọn sai) thì "tiêu" mất lần chạm → Twilight đứng ngay trên sao đúng
+            // mà không bao giờ nhận. Giờ: đang khoá thì KHÔNG tiêu lần chạm, nhả khoá xong sẽ nhận.
+            if (d < 1.15 && armed.has(s) && !lock) { armed.delete(s); onTouch(s); }
             else if (d > 1.9) armed.add(s);
           }
         };
         world.updaters.add(watch);
-        // chạm vào sao → Twilight chạy tới đó
-        ctx.onPick = (p) => { if (p instanceof LetterStar && !p.gone) { hero.goTo(p.root.position.x, p.root.position.z + 0.2); ctx.poke(); } };
+        // chạm vào sao → Twilight chạy tới đó; đang đứng sát sao đó rồi thì nhận luôn
+        ctx.onPick = (p) => {
+          if (!(p instanceof LetterStar) || p.gone) return;
+          ctx.poke();
+          if (Math.hypot(p.root.position.x - hero.x, p.root.position.z - hero.z) < 1.3) { armed.delete(p); onTouch(p); }
+          else hero.goTo(p.root.position.x, p.root.position.z + 0.2);
+        };
         for (const s of this.stars) if (!s.gone) ctx.pickables.add(s);
         ctx.setIdle(() => void prompt());
+        // watchdog: khoá kẹt > 8 s (audio treo) → nhả, nạp lại mọi sao, nhắc lại
+        // + 15 s không có gì xảy ra → nạp lại mọi sao (Twilight đang đứng sẵn trên sao đúng thì nhận ngay) + nhắc lại
+        let quietAt = performance.now();
+        const poke0 = ctx.poke;
+        ctx.poke = () => { quietAt = performance.now(); poke0(); };
+        watchdog = window.setInterval(() => {
+          const now = performance.now();
+          if ((lock && now - lockAt > 8000) || (!lock && now - quietAt > 15000)) {
+            lock = false; quietAt = now;
+            for (const s of this.stars) if (!s.gone) armed.add(s);
+            void prompt();
+          }
+        }, 1000);
+        restorePoke = () => { ctx.poke = poke0; };
         setAnswer(`hunt:${target}`, (ok) => {
           const s = ok ? this.stars.find((x) => x.label === target && !x.gone) : this.stars.find((x) => x.label !== target && !x.gone);
           if (s) onTouch(s);
         });
       });
+      clearInterval(watchdog);
+      restorePoke();
       setAnswer(null, null);
       ctx.setIdle(null);
       ctx.onPick = null;

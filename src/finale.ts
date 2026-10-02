@@ -15,7 +15,7 @@ import { Actor } from './actors';
 import { Monster } from './monster';
 import { Parade } from './parade';
 import { Cine } from './cine';
-import { SpellActivity, pickDistractors, type Ctx } from './activities';
+import { SpellActivity, pickDistractors, withTimeout, type Ctx } from './activities';
 import { LetterStar, glowTexture, type Pickable } from './letterstar';
 import { nameKey } from './letters';
 import { spellExample } from './example';
@@ -331,7 +331,7 @@ export class Finale {
           wrong++; busy = true;
           sfx('sfx_soft', 0.4);
           void p.wobble();
-          void (async () => { stopSpeech(); await this.laugh(); await play(nameKey(target)); busy = false; })();
+          void (async () => { try { stopSpeech(); await withTimeout(this.laugh(), 6000); await withTimeout(play(nameKey(target)), 4000); } finally { busy = false; } })();
         };
         this.onPick = pick;
         setAnswer(`finale:${target}`, (ok) => pick(ok ? correct : opts.find((o) => o !== correct)!));

@@ -86,7 +86,9 @@ let seqToken = 0;
 export function play(key: string, opts: { volume?: number; cut?: boolean } = {}): Promise<void> {
   if (MUTE) return new Promise((r) => setTimeout(r, key.startsWith('sfx_') ? 0 : 150));
   if (key.startsWith('sfx_')) { synth(key, opts.volume ?? 0.6); return Promise.resolve(); }
-  return load(key, 'm4a').then((buf) => {
+  // lưới an toàn: tải / giải mã treo quá 6 s → coi như không có clip (game không bao giờ đứng chờ mãi)
+  const loaded = Promise.race([load(key, 'm4a'), new Promise<null>((r) => setTimeout(() => r(null), 6000))]);
+  return loaded.then((buf) => {
     if (!buf) return;
     const c = getCtx();
     if (opts.cut !== false && !key.startsWith('sfx_') && current) {
@@ -101,7 +103,7 @@ export function play(key: string, opts: { volume?: number; cut?: boolean } = {})
     if (!key.startsWith('sfx_')) current = src;
     return new Promise<void>((resolve) => {
       // phòng hờ: AudioContext bị treo (iPad chưa mở khoá) thì onended không bao giờ tới → không để game kẹt
-      const guard = setTimeout(resolve, buf.duration * 1000 + 600);
+      const guard = setTimeout(resolve, buf.duration * 1000 + 1500);
       src.onended = () => {
         if (current === src) current = null;
         clearTimeout(guard);
