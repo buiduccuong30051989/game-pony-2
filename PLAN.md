@@ -206,3 +206,4 @@ InstancedMesh; ngọc InstancedMesh; props tĩnh gộp theo màu vật liệu; v
    thì tự hạ cánh rồi mới bắt đầu bài; khi làm bài Twilight bị khoá nên không bay. Bay vẫn chạm được sao chữ (vẫn phải đúng chữ).
 6. Sửa: album bìa không còn lặp tiêu đề; huy hiệu HUD cắt quanh mặt (`FACE` trong `src/photos.ts`); trận cuối bỏ Cadance (model
    đứng chồm 2 chân) và Derpy (rip có xương, đứng đơ) khỏi đám đông; Surprise bỏ bake mắt (1 mắt đen), vẽ mắt lúc tải như cũ.
+7. Đo lại trận cuối sau bản 2 (1180×820, headless trên Mac): ~274k tam giác (tối đa 276k), ~183 draw call (tối đa 213), 119 fps.

@@ -102,7 +102,7 @@ scripts/           check-spelling.mjs (bảng vàng), audio-lines.mjs + gen-audi
 ## Hiệu năng (iPad)
 
 Ngân sách trận cuối ≤ 300k tam giác, ≤ 150 draw call. Đo headless (Chrome trên Mac, 1180×820, `renderer.info`):
-trận cuối ~281k tam giác, ~200 draw call (tam giác đạt, draw call còn vượt — chi tiết PLAN.md §11); chương 1 ~160k / ~100.
+trận cuối ~274k tam giác, ~183 draw call (tối đa 213; tam giác đạt, draw call còn vượt — chi tiết PLAN.md §11); chương 1 ~160k / ~100.
 Cách giữ ngân sách: Celestia / Nightmare Moon / Spike / gia đình giảm lưới bằng meshoptimizer (`scripts/optimize-models.mjs`),
 bạn ngựa nhỏ dùng bản `lod/`, quái Quaternius 1–7k tam giác, props tĩnh gộp theo vật liệu (vài draw call cho cả rừng),
 chỉ Twilight + props đổ bóng thật (người đi theo có bóng tròn mờ), shadow map 1024, pixel ratio ≤ 1.5, texture ≤ 1024 px.
