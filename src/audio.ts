@@ -20,7 +20,8 @@ function getCtx(): AudioContext {
 /** Gọi ĐỒNG BỘ trong handler click/touchend đầu tiên. */
 export function unlockAudio(): void {
   const c = getCtx();
-  if (c.state === 'suspended') void c.resume();
+  // iOS còn trạng thái 'interrupted' (khoá màn hình, chuyển app, có cuộc gọi): mọi trạng thái khác 'running' đều phải resume
+  if (c.state !== 'running') void c.resume();
   if (!unlocked) {
     // phát 1 buffer câm để iOS chịu mở loa
     const buf = c.createBuffer(1, 1, 22050);
@@ -29,6 +30,8 @@ export function unlockAudio(): void {
     src.connect(c.destination);
     src.start(0);
     unlocked = true;
+    // quay lại tab / mở lại iPad: chạm kế tiếp sẽ resume, nhưng thử luôn khi trang hiện lại
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && c.state !== 'running') void c.resume(); });
   }
 }
 
